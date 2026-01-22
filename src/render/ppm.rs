@@ -9,10 +9,10 @@ pub struct PPMRenderer {
 }
 
 impl PPMRenderer {
-    pub fn new(height: i32, width: i32, path: String) -> Option<Self> {
+    pub fn new(width: i32, height: i32, path: String) -> Option<Self> {
         Some(Self {
-            height: height, 
             width: width, 
+            height: height, 
             path: path,
         }) 
     }

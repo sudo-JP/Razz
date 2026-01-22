@@ -4,6 +4,6 @@ use razz::{PPMRenderer, Renderer};
 
 fn main() {
     let cli = Cli::parse();
-    let renderer = PPMRenderer::new(256, 256, cli.output).unwrap();
+    let renderer = PPMRenderer::new(cli.width, cli.height, cli.output).unwrap();
     renderer.render().unwrap();
 }
