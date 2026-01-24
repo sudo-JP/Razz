@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use crate::{Camera, Ray, Vec3, Viewport};
+use crate::{Camera, Ray, Sample, Vec3, Viewport};
 
 type Point3 = Vec3;
 
@@ -25,16 +24,19 @@ impl Image {
     pub fn generate_image_seq(&mut self) {
         let height = 2.0;
         let width = height * self.ratio;
-        let viewport = Arc::new(Viewport::new(width, height, 1.0));
-        let camera = Camera::new(Point3::new(0., 0., 0.), Arc::clone(&viewport));
+        let vp = Viewport::new(width, height, 1.0);
+        let cam = Camera::new(Point3::new(0., 0., 0.));
+        
+        let camera_pos = cam.get_pos();
+        let sample = Sample::new(cam, vp, self.width, self.height);
 
         for pixel_index in 0..(self.width * self.height) {
             let i = (pixel_index / self.width) as f64; // row
             let j = (pixel_index % self.width) as f64; // column
 
-            let pixel_center = viewport.p00(&camera.get_pos()) + (viewport.delta_u() * j) + (viewport.delta_v() * i);
-            let ray_dir = pixel_center - camera.get_pos();
-            let r = Ray::new(camera.get_pos(), ray_dir);
+            let pixel_center = sample.get_sample_pxl(i, j);
+            let ray_dir = pixel_center - camera_pos;
+            let r = Ray::new(camera_pos, ray_dir);
             
             let v = r.ray_color();
 
