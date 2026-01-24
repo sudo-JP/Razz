@@ -1,6 +1,5 @@
-use crate::math::Vec3;
+use crate::math::Point3;
 
-type Point3 = Vec3; 
 
 pub struct Camera {
     pos: Point3,

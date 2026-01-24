@@ -1,6 +1,8 @@
 use std::ops::{Add, Mul, Sub, Div};
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
 
+pub type Point3 = Vec3;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
     pub v: [f64; 3]
@@ -28,6 +30,12 @@ impl Vec3 {
         let mag = (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt();
         self / mag
     }
+}
+
+pub fn dot(v1: Vec3, v2: Vec3) -> f64 {
+    let mut total: f64 = 0.; 
+    total += v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
+    total
 }
 
 // ----------------- Vec3 + Vec3 -----------------

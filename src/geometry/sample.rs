@@ -1,6 +1,4 @@
-use crate::{Camera, Vec3, Viewport};
-
-type Point3 = Vec3;
+use crate::{Vec3, Point3, Viewport};
 
 pub struct Sample {
     p00: Point3,
@@ -9,10 +7,11 @@ pub struct Sample {
 }
 
 impl Sample {
-    pub fn new(cam: Camera, vp: Viewport, width: i32, height: i32) -> Self {
-        let mut p00 = cam.get_pos() - Vec3::new(0., 0., vp.focal) - vp.u() / 2. - vp.v() / 2.;
+    pub fn new(cam_pos: Point3, vp: Viewport, width: i32, height: i32) -> Self {
+        let mut p00 = cam_pos - Vec3::new(0., 0., vp.focal);
 
         // Find the top left corner of the viewport 
+        p00 -= (vp.u() + vp.v()) / 2.;
 
         // Find the center of the (0, 0) sample
         let delta_u = vp.u() / width as f64;
@@ -24,7 +23,7 @@ impl Sample {
     }
 
     pub fn get_sample_pxl(&self, i: f64, j: f64) -> Point3 {
-        self.p00 + (self.delta_u * j) + (self.delta_v * i)
+        self.p00 + (self.delta_v * i) + (self.delta_u * j)
     }
 
 }
