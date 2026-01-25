@@ -1,4 +1,5 @@
 use crate::{math::Vec3, Sphere};
+use crate::sphere::IntersectSphere;
 
 type Point3 = Vec3;
 
@@ -23,17 +24,23 @@ impl Ray {
     pub fn origin(&self) -> Point3 { self.origin.clone() }
     pub fn direction(&self) -> Vec3 { self.direction.clone() }
 
-    pub fn at(self, t: f64) -> Point3 {
+    pub fn at(&self, t: f64) -> Point3 {
         self.origin + self.direction * t
     }
 
     pub fn ray_color(&self, sph: &Sphere) -> Vec3 {
-        if sph.hit_sphere(&self) {
-            return Vec3::new(1., 0., 0.);
+        match sph.hit_sphere(&self) {
+            IntersectSphere::One(root) => {
+                let n = (self.at(root) - Vec3::new(0., 0., -1.)).unit_vector() + 1.;
+                n * 0.5
+            }
+            IntersectSphere::None => {
+                let unit = self.direction.unit_vector();
+                let a = 0.5 * (unit.y() + 1.); 
+                Vec3::new(1., 1., 1.) * (1. - a) + Vec3::new(0.5, 0.7, 1.) * a
+            }
         }
-        let unit = self.direction.unit_vector();
-        let a = 0.5 * (unit.y() + 1.); 
-        Vec3::new(1., 1., 1.) * (1. - a) + Vec3::new(0.5, 0.7, 1.) * a
+
     }
 }
 
