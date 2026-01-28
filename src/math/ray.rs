@@ -1,3 +1,4 @@
+use crate::Hittable;
 use crate::{math::Vec3, Sphere};
 use crate::sphere::IntersectSphere;
 
@@ -28,13 +29,12 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn ray_color(&self, sph: &Sphere) -> Vec3 {
-        match sph.hit_sphere(&self) {
-            IntersectSphere::One(root) => {
-                let n = (self.at(root) - Vec3::new(0., 0., -1.)).unit_vector() + 1.;
-                n * 0.5
+    pub fn ray_color(&self, world: &dyn Hittable) -> Vec3 {
+        match world.hit(&self, 0., std::f64::INFINITY) {
+            Some(rec) => {
+                (rec.normal + Vec3::new(1., 1., 1.)) * 0.5
             }
-            IntersectSphere::None => {
+            None => {
                 let unit = self.direction.unit_vector();
                 let a = 0.5 * (unit.y() + 1.); 
                 Vec3::new(1., 1., 1.) * (1. - a) + Vec3::new(0.5, 0.7, 1.) * a

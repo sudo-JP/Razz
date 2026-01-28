@@ -1,4 +1,4 @@
-use crate::{Camera, Point3, Ray, Sample, Sphere, Viewport};
+use crate::{Camera, Point3, Ray, Sample, Sphere, Viewport, World};
 
 
 pub struct Image {
@@ -23,14 +23,23 @@ impl Image {
     }
 
     pub fn generate_image_seq(&mut self) {
+        // Viewport setup
         let height = 2.0;
         let width = height * self.ratio;
         let vp = Viewport::new(width, height, 1.0);
         
+        // Camera setup 
         let camera_pos = self.cam.get_pos();
         let sample = Sample::new(self.cam.get_pos(), vp, self.width, self.height);
 
-        let sph = Sphere::new(Point3::new(0., 0., -1.), 0.5);
+        // World setup 
+        let mut world = World::new();
+        let sph1 = Sphere::new(Point3::new(0., 0., -1.), 0.5);
+        let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100.);
+
+        world.push(Box::new(sph1));
+        world.push(Box::new(sph2));
+
         for pixel_index in 0..(self.width * self.height) {
             let i = (pixel_index / self.width) as f64; // row
             let j = (pixel_index % self.width) as f64; // column
@@ -39,7 +48,7 @@ impl Image {
             let ray_dir = pixel_center - camera_pos;
             let r = Ray::new(camera_pos, ray_dir);
             
-            let v = r.ray_color(&sph);
+            let v = r.ray_color(&world);
 
             let start_index = (pixel_index * self.n) as usize;
 
@@ -50,20 +59,6 @@ impl Image {
             self.matrix[start_index] = ir;
             self.matrix[start_index + 1] = ig;
             self.matrix[start_index + 2] = ib;
-
-            //let r = (i as f32) / (self.width - 1) as f32;
-            /*let r = 0.0;
-            let g = 1.0;
-            let b = (j as f32) / (self.height - 1) as f32;
-
-            let ir = (r * 255.999) as i32;
-            let ig = (g * 255.999) as i32;
-            let ib = (b * 255.999) as i32;
-
-            let start_index = (pixel_index * self.n) as usize;
-            self.matrix[start_index] = ir;
-            self.matrix[start_index + 1] = ig;
-            self.matrix[start_index + 2] = ib;*/
         }
     }
 
