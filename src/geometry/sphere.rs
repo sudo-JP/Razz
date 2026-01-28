@@ -1,4 +1,6 @@
+use crate::hittable::HitSide;
 use crate::{vec3::dot, Ray, Vec3};
+use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub type Point3 = Vec3;
 
@@ -18,10 +20,13 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new(center: Point3, r: f64) -> Self {
-        Self { center: center, radius: r }
+        Self { center: center, radius: r.max(0.) }
     }
+}
 
-    pub fn hit_sphere(&self, ray: &Ray) -> IntersectSphere {
+
+impl Hittable for Sphere {
+    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
         let oc = self.center - ray.origin();
 
         // Quadratic formula here
@@ -31,11 +36,35 @@ impl Sphere {
         let c = dot(oc, oc) - self.radius * self.radius;
 
         let discriminant = h * h - a * c;
-        if discriminant >= 0. {
-            IntersectSphere::One((h - discriminant.sqrt()) / a)
-        } 
-        else {
-            IntersectSphere::None
+        let sqrtd = discriminant.sqrt();
+
+        // Check the two point, starting from closest to further 
+        // to be within tmin < root < tmax
+        let r1 = (h - sqrtd) / a;
+        let r2 = (h + sqrtd) / a; 
+
+        let make_hit = |t| {
+            let point = ray.at(t);
+            let outward_norm = (point - self.center) / self.radius;
+            let mut rec = HitRecord {
+                point,
+                // Place holders 
+                normal: Vec3::zeros(),
+                side: HitSide::Outside,
+                t,
+            };
+
+            // set side will modify normal and side 
+            rec.set_side(ray, outward_norm);
+            rec
+        };
+
+        if tmin < r1 && r1 < tmax {
+            Some(make_hit(r1))
+        } else if tmin < r2 && r2 < tmax {
+            Some(make_hit(r2))
+        } else {
+            None
         }
     }
 }

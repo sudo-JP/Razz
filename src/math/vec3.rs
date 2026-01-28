@@ -15,6 +15,12 @@ impl Vec3 {
         }
     }
 
+    pub fn zeros() -> Self {
+        Self {
+            v: [0., 0., 0.],
+        }
+    }
+
     pub fn x(&self) -> f64 {
         self.v[0]
     }
