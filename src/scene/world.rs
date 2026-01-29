@@ -1,4 +1,4 @@
-use crate::{Ray};
+use crate::{Interval, Ray};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub struct World {
@@ -6,14 +6,14 @@ pub struct World {
 }
 
 impl Hittable for World {
-    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> {
         let mut hit_any = None; 
-        let mut closest_so_far = tmax;
+        let mut closest_so_far = ray_t.max;
 
         self.objects
             .iter()
             .for_each(|object| {
-                match object.hit(ray, tmin, closest_so_far) {
+                match object.hit(ray, &Interval::new_with_val(ray_t.min, closest_so_far)) {
                     Some(rec) => {
                         closest_so_far = rec.t;
                         hit_any = Some(rec);

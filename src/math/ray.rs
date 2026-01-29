@@ -1,6 +1,5 @@
-use crate::Hittable;
-use crate::{math::Vec3, Sphere};
-use crate::sphere::IntersectSphere;
+use crate::{Hittable, Interval};
+use crate::{math::Vec3};
 
 type Point3 = Vec3;
 
@@ -30,7 +29,7 @@ impl Ray {
     }
 
     pub fn ray_color(&self, world: &dyn Hittable) -> Vec3 {
-        match world.hit(&self, 0., std::f64::INFINITY) {
+        match world.hit(&self, &Interval::new_with_val(0., std::f64::INFINITY)) {
             Some(rec) => {
                 (rec.normal + Vec3::new(1., 1., 1.)) * 0.5
             }

@@ -1,5 +1,5 @@
 use crate::vec3::dot;
-use crate::{Ray};
+use crate::{Interval, Ray};
 use crate::math::{Point3, Vec3};
 
 pub enum HitSide {
@@ -31,5 +31,5 @@ impl HitRecord {
 
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord>;
 }

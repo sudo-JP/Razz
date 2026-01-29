@@ -1,4 +1,5 @@
 use crate::hittable::HitSide;
+use crate::Interval;
 use crate::{vec3::dot, Ray, Vec3};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
@@ -26,7 +27,7 @@ impl Sphere {
 
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord> {
         let oc = self.center - ray.origin();
 
         // Quadratic formula here
@@ -59,9 +60,9 @@ impl Hittable for Sphere {
             rec
         };
 
-        if tmin < r1 && r1 < tmax {
+        if ray_t.surrounds(r1) {
             Some(make_hit(r1))
-        } else if tmin < r2 && r2 < tmax {
+        } else if ray_t.surrounds(r2) {
             Some(make_hit(r2))
         } else {
             None
