@@ -7,7 +7,7 @@ pub struct Sample {
 }
 
 impl Sample {
-    pub fn new(cam_pos: Point3, vp: Viewport, width: i32, height: i32) -> Self {
+    pub fn new(cam_pos: Point3, vp: &Viewport, width: i32, height: i32) -> Self {
         let mut p00 = cam_pos - Vec3::new(0., 0., vp.focal);
 
         // Find the top left corner of the viewport 

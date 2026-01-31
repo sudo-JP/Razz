@@ -3,9 +3,11 @@ pub mod render;
 pub mod math;
 pub mod geometry;
 pub mod scene;
+pub mod output;
 
 pub use cli::Cli;
-pub use render::{PPMRenderer, Renderer};
+pub use render::{Renderer};
 pub use math::*;
 pub use geometry::*;
 pub use scene::*;
+pub use output::ppm::*;
