@@ -18,7 +18,7 @@ fn main() {
     let vp = Viewport::new(vp_width, vp_height, 1.0);
 
     // Camera
-    let cam = Camera::new(Point3::new(cli.cx, cli.cy, cli.cz), vp, &img);
+    let cam = Camera::new(Point3::new(cli.cx, cli.cy, cli.cz));
 
     // World
     let mut world = World::new();
@@ -29,8 +29,8 @@ fn main() {
     world.push(Box::new(sph2));
 
     // Render the image, store result in img
-    let renderer = Renderer;
-    renderer.render(&mut img, &cam, &world);
+    let renderer = Renderer::new(10);
+    renderer.render(&mut img, &vp, &cam, &world);
 
     let output = PPMOutput::new(cli.output);
     output.write(&img).unwrap();
