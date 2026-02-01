@@ -1,6 +1,8 @@
 use std::ops::{Add, Mul, Sub, Div};
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
 
+use crate::{random_f64, random_range};
+
 pub type Point3 = Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -32,9 +34,55 @@ impl Vec3 {
         self.v[2]
     }
 
+    pub fn length_squared(&self) -> f64 {
+        self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
+
     pub fn unit_vector(self) -> Self {
-        let mag = (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt();
+        let mag = self.length_squared().sqrt();
         self / mag
+    }
+
+    // A random vector between [0, 1)
+    pub fn random() -> Self {
+        Self {
+            v: [random_f64(), random_f64(), random_f64()],
+        }
+    }
+
+    // A random vector between [min, max)
+    pub fn random_range(min: f64, max: f64) -> Self {
+        Self {
+            v: [
+                random_range(min, max),
+                random_range(min, max),
+                random_range(min, max)
+            ]
+        }
+    }
+
+    /*
+     * Find the random unit vector after randomly sample points
+     * Also 1e-160 == 10^-160
+     * */
+    pub fn random_unit_vec() -> Self {
+        loop {
+            let p = Vec3::random_range(-1., 1.);
+            let lenqs = p.length_squared();
+            if 1e-160 < lenqs && lenqs <= 1. {
+                return p / lenqs.sqrt();
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere(normal: Vec3) -> Self {
+        let on_unit_sphere = Vec3::random_unit_vec();
+        if dot(on_unit_sphere, normal) > 0. {
+            on_unit_sphere
+        }
+        else {
+            on_unit_sphere * -1.
+        }
     }
 }
 

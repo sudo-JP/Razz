@@ -31,7 +31,10 @@ impl Ray {
     pub fn ray_color(&self, world: &dyn Hittable) -> Vec3 {
         match world.hit(&self, &Interval::new_with_val(0., std::f64::INFINITY)) {
             Some(rec) => {
-                (rec.normal + Vec3::new(1., 1., 1.)) * 0.5
+                //(rec.normal + Vec3::new(1., 1., 1.)) * 0.5
+                let dir = Vec3::random_on_hemisphere(rec.normal);
+                let r = Ray::new(rec.point, dir);
+                r.ray_color(world) * 0.5
             }
             None => {
                 let unit = self.direction.unit_vector();
