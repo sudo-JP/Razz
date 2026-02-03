@@ -1,5 +1,7 @@
 use crate::{render::Image, Camera, Interval, Sample, Vec3, Viewport, World};
 
+const MAX_DEPTH: i32 = 50;
+
 pub struct Renderer {
     samples_per_pxl: i32,
 }
@@ -20,7 +22,7 @@ impl Renderer {
 
             for _ in 0..self.samples_per_pxl {
                 let r = cam.ray_aa(i, j, &sam);
-                color = r.ray_color(world) + color;
+                color = r.ray_color(world, MAX_DEPTH) + color;
             }
 
             //let r = cam.ray(i, j, &sam);
