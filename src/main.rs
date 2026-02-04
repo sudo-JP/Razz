@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use clap::Parser;
 use razz::cli::Cli;
 use razz::output::ImageOutput;
 use razz::render::Image;
-use razz::{Camera, PPMOutput, Renderer, Sphere, Vec3, Viewport, World};
+use razz::{Camera, Lambertian, PPMOutput, Renderer, Sphere, Vec3, Viewport, World};
 
 type Point3 = Vec3;
 
@@ -22,8 +24,8 @@ fn main() {
 
     // World
     let mut world = World::new();
-    let sph1 = Sphere::new(Point3::new(0., 0., -1.), 0.5);
-    let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100.);
+    let sph1 = Sphere::new(Point3::new(0., 0., -1.), 0.5, Arc::new(Lambertian::new(Vec3::new(255., 1., 0.))));
+    let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100., Arc::new(Lambertian::new(Vec3::new(255., 1., 0.))));
 
     world.push(Box::new(sph1));
     world.push(Box::new(sph2));
