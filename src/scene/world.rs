@@ -2,7 +2,7 @@ use crate::{Interval, Ray};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub struct World {
-    pub objects: Vec<Box<dyn Hittable>>
+    pub objects: Vec<Box<dyn Hittable>>,
 }
 
 impl Hittable for World {

@@ -7,10 +7,10 @@ pub struct Cli {
     pub output: String,
 
     #[arg(short, long)]
-    pub width: i32, 
+    pub width: usize, 
 
     #[arg(long)]
-    pub height: i32,
+    pub height: usize,
 
     //#[arg(short, long, default_value = "ppm")]
     //pub render: String,

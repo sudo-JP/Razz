@@ -1,13 +1,13 @@
 pub struct Image {
-    pub width: i32, 
-    pub height: i32, 
-    pub n: i32, // R^n
+    pub width: usize, 
+    pub height: usize, 
+    pub n: usize, // R^n
     pub ratio: f64,
     pub matrix: Vec<u8>,
 }
 
 impl Image {
-    pub fn new(width: i32, height: i32, n: i32) -> Self {
+    pub fn new(width: usize, height: usize, n: usize) -> Self {
         Self {
             width: width, 
             height: height, 

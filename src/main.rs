@@ -9,7 +9,7 @@ type Point3 = Vec3;
 fn main() {
     // Image
     let cli = Cli::parse();
-    const DIMENSION: i32 = 3; 
+    const DIMENSION: usize = 3; 
     let mut img = Image::new(cli.width, cli.height, DIMENSION);
 
     // Viewport

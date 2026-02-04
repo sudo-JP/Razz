@@ -1,5 +1,7 @@
+use std::sync::Arc;
+
 use crate::vec3::dot;
-use crate::{Interval, Ray};
+use crate::{Interval, Material, Ray};
 use crate::math::{Point3, Vec3};
 
 pub enum HitSide {
@@ -13,6 +15,7 @@ pub struct HitRecord {
     pub normal: Vec3, 
     pub t: f64,
     pub side: HitSide,
+    pub material: Arc<dyn Material + Sync + Send>,
 }
 
 impl HitRecord {
@@ -30,6 +33,6 @@ impl HitRecord {
 }
 
 
-pub trait Hittable {
+pub trait Hittable : Sync {
     fn hit(&self, ray: &Ray, ray_t: &Interval) -> Option<HitRecord>;
 }

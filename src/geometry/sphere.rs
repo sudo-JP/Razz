@@ -1,5 +1,7 @@
+use std::sync::Arc;
+
 use crate::hittable::HitSide;
-use crate::Interval;
+use crate::{Interval, Material};
 use crate::{vec3::dot, Ray, Vec3};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
@@ -17,11 +19,12 @@ pub enum IntersectSphere {
 pub struct Sphere {
     center: Point3,
     radius: f64, 
+    mat: Arc<dyn Material + Send + Sync>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, r: f64) -> Self {
-        Self { center: center, radius: r.max(0.) }
+    pub fn new(center: Point3, r: f64, mat: Arc<dyn Material + Send + Sync>) -> Self {
+        Self { center: center, radius: r.max(0.), mat: mat }
     }
 }
 
@@ -44,7 +47,8 @@ impl Hittable for Sphere {
         let r1 = (h - sqrtd) / a;
         let r2 = (h + sqrtd) / a; 
 
-        let make_hit = |t| {
+        let mat = Arc::clone(&self.mat);
+        let make_hit = move |t| {
             let point = ray.at(t);
             let outward_norm = (point - self.center) / self.radius;
             let mut rec = HitRecord {
@@ -52,7 +56,8 @@ impl Hittable for Sphere {
                 // Place holders 
                 normal: Vec3::zeros(),
                 side: HitSide::Outside,
-                t,
+                t: t,
+                material: Arc::clone(&mat),
             };
 
             // set side will modify normal and side 
