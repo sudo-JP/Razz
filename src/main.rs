@@ -4,7 +4,8 @@ use clap::Parser;
 use razz::cli::Cli;
 use razz::output::ImageOutput;
 use razz::render::Image;
-use razz::{Camera, Lambertian, PPMOutput, Renderer, Sphere, Vec3, Viewport, World};
+use razz::vec3::Color3;
+use razz::{Camera, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, Vec3, Viewport, World};
 
 type Point3 = Vec3;
 
@@ -24,11 +25,20 @@ fn main() {
 
     // World
     let mut world = World::new();
-    let sph1 = Sphere::new(Point3::new(0., 0., -1.), 0.5, Arc::new(Lambertian::new(Vec3::new(255., 1., 0.))));
-    let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100., Arc::new(Lambertian::new(Vec3::new(255., 1., 0.))));
+    let material_ground: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.8, 0.8, 0.)));
+    let material_center: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.1, 0.2, 0.5)));
+    let material_left: Arc<dyn Material + Sync + Send> = Arc::new(Metal::new(Color3::new(0.8, 0.8, 0.8)));
+    let material_right: Arc<dyn Material + Sync + Send> = Arc::new(Metal::new(Color3::new(0.8, 0.6, 0.2)));
+
+    let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100., Arc::clone(&material_ground));
+    let sph1 = Sphere::new(Point3::new(0., 0., -1.2), 0.5, Arc::clone(&material_center));
+    let sph3 = Sphere::new(Point3::new(-1., 0., -1.), 0.5, material_left);
+    let sph4 = Sphere::new(Point3::new(1., 0., -1.), 0.5, material_right);
 
     world.push(Box::new(sph1));
     world.push(Box::new(sph2));
+    world.push(Box::new(sph3));
+    world.push(Box::new(sph4));
 
     // Render the image, store result in img
     let renderer = Renderer::new(10);
@@ -36,9 +46,4 @@ fn main() {
 
     let output = PPMOutput::new(cli.output);
     output.write(&img).unwrap();
-    /*let cam = Camera::new(Point3::new(cli.cx, cli.cy, cli.cz));
-    let mut img = Image::new(cli.width, cli.height, 3, cam);
-    img.generate_image_seq();
-    let renderer = PPMRenderer::new(img, cli.output).unwrap();
-    renderer.render().unwrap();*/
 }
