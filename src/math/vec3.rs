@@ -4,6 +4,7 @@ use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
 use crate::{random_f64, random_range};
 
 pub type Point3 = Vec3;
+pub type Color3 = Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -88,6 +89,10 @@ impl Vec3 {
     pub fn near_zero(&self) -> bool {
         let s = 1e-8;
         self.x().abs() < s && self.y().abs() < s && self.z().abs() < s
+    }
+
+    pub fn reflect(self, normal: Vec3) -> Self {
+        self - normal * dot(self, normal) * 2. 
     }
 }
 

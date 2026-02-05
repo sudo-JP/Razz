@@ -1,3 +1,5 @@
+use crate::material::material::ScatterResult;
+use crate::vec3::Color3;
 use crate::{Hittable, Interval};
 use crate::{math::Vec3};
 
@@ -34,10 +36,12 @@ impl Ray {
 
         match world.hit(&self, &Interval::new_with_val(0.001, std::f64::INFINITY)) {
             Some(rec) => {
-                //(rec.normal + Vec3::new(1., 1., 1.)) * 0.5
-                let dir = rec.normal +Vec3::random_unit_vec();
-                let r = Ray::new(rec.point, dir);
-                r.ray_color(world, depth - 1) * 0.5
+                match rec.material.scatter(&self, &rec) {
+                    ScatterResult::Scattered { attenuation, scattered } => {
+                        return attenuation * scattered.ray_color(world, depth - 1);
+                    }
+                    ScatterResult::Absorbed => { return Color3::new(0., 0., 0.); }
+                }
             }
             None => {
                 let unit = self.direction.unit_vector();

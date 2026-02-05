@@ -1,11 +1,11 @@
-use crate::{material::material::ScatterResult, HitRecord, Material, Ray, Vec3};
+use crate::{material::material::ScatterResult, vec3::Color3, HitRecord, Material, Ray, Vec3};
 
 pub struct Lambertian {
-    albedo: Vec3,
+    albedo: Color3,
 }
 
 impl Lambertian {
-    pub fn new(color: Vec3) -> Self {
+    pub fn new(color: Color3) -> Self {
         Self { albedo: color }
     }
 }
