@@ -4,6 +4,9 @@ use crate::vec3::dot;
 use crate::{Interval, Material, Ray};
 use crate::math::{Point3, Vec3};
 
+// From the book
+// Inside == True
+// Outside == False
 pub enum HitSide {
     Inside, 
     Outside, 

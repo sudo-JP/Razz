@@ -94,6 +94,14 @@ impl Vec3 {
     pub fn reflect(self, normal: Vec3) -> Self {
         self - normal * dot(self, normal) * 2. 
     }
+
+}
+
+pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = dot(uv * -1., n).min(1.);
+    let r_out_prep = (uv + n * cos_theta) * etai_over_etat;
+    let r_out_parallel = n * -(1. - r_out_prep.length_squared()).abs().sqrt();
+    r_out_prep + r_out_parallel
 }
 
 pub fn dot(v1: Vec3, v2: Vec3) -> f64 {
