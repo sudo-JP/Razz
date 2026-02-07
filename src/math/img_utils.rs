@@ -53,3 +53,8 @@ pub fn dot_vec(matrix: &[f64], v1: usize, v2: usize, n: usize) -> f64 {
 pub fn unit_vector(matrix: &[f64], v: usize, n: usize) -> Vec<f64> {
     (0..n).map(|i| matrix[i + v] / n as f64).collect()
 }
+
+pub fn linear_to_gamma(linear_component: f64) -> f64 {
+    if linear_component > 0. { linear_component.sqrt() }
+    else { 0. }
+}

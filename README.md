@@ -9,5 +9,5 @@ After that, I plan to learn physics, and make a physics simulation. To top every
 ## Run 
 To run, do 
 ```bash
-cargo run -- --output test.ppm --width 1000 --height 1000
+cargo run --release -- --output test.ppm --width 1000 --height 1000
 ```
