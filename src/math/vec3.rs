@@ -39,6 +39,10 @@ impl Vec3 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
     }
 
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
+
     pub fn unit_vector(self) -> Self {
         let mag = self.length_squared().sqrt();
         self / mag
@@ -108,6 +112,13 @@ pub fn dot(v1: Vec3, v2: Vec3) -> f64 {
     let mut total: f64 = 0.; 
     total += v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
     total
+}
+
+pub fn cross(a: &Vec3, b: &Vec3) -> Vec3 {
+    let v_1 = a.y() * b.z() - a.z() * b.y(); 
+    let v_2 = a.z() * b.x() - a.x() * b.z();
+    let v_3 = a.x() * b.y() - a.y() * b.x();
+    Vec3::new(v_1, v_2, v_3)
 }
 
 // ----------------- Vec3 + Vec3 -----------------

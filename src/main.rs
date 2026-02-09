@@ -15,23 +15,26 @@ fn main() {
     const DIMENSION: usize = 3; 
     let mut img = Image::new(cli.width, cli.height, DIMENSION);
 
-    let vfov: f64 = 90.;
+    let vfov: f64 = 20.;
+
+    //let lookfrom = Point3::new(cli.cx, cli.cy, cli.cz);
+    let lookfrom = Point3::new(-2., 2., 1.);
+    let lookat = Point3::new(0., 0., -1.);
+    let vup = Vec3::new(0., 1., 0.);
 
     // Camera
     let cam = Camera::new(
-        Point3::new(cli.cx, cli.cy, cli.cz),
+        lookfrom,
+        lookat,
         vfov,
+        vup,
         &img
     );
-
-    let r = (std::f64::consts::PI / 4.).cos();
-    let material_left: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0., 0., 1.)));
-    let material_right: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(1., 0., 0.)));
 
 
     // World
     let mut world = World::new();
-    /*let material_ground: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.8, 0.8, 0.)));
+    let material_ground: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.8, 0.8, 0.)));
     let material_center: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.1, 0.2, 0.5)));
     let material_left: Arc<dyn Material + Sync + Send> = Arc::new(Dielectric::new(1.5));
     let material_bubble: Arc<dyn Material + Sync + Send> = Arc::new(Dielectric::new(1. / 1.5));
@@ -47,13 +50,8 @@ fn main() {
     world.push(Box::new(sph2));
     world.push(Box::new(sph3));
     world.push(Box::new(sph4));
-    world.push(Box::new(sph5));*/
+    world.push(Box::new(sph5));
 
-    let sph1 = Sphere::new(Point3::new(-r, 0., -1.), r, Arc::clone(&material_left));
-    let sph2 = Sphere::new(Point3::new(r, 0., -1.), r, Arc::clone(&material_right));
-
-    world.push(Box::new(sph1));
-    world.push(Box::new(sph2));
 
     // Render the image, store result in img
     let renderer = Renderer::new(10);
