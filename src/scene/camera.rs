@@ -1,31 +1,74 @@
-use crate::{math::Point3, Sample};
+use crate::render::Image;
+use crate::{math::Point3};
 use crate::{random_f64, Ray, Vec3};
 
 
 pub struct Camera {
     pos: Point3,
+    pixel00: Point3, 
+    delta_u: Vec3, 
+    delta_v: Vec3,
 }
 
 impl Camera {
-    pub fn new(point: Point3) -> Self {
-        Self { pos: point, }
+    pub fn new(
+        point: Point3, 
+        vfov: f64, 
+        img: &Image
+    ) -> Self {
+        // Viewport from fov 
+        let theta = vfov.to_radians();
+        let h = (theta * 0.5).tan();
+
+        let focal_len = 1.;
+
+        let vp_height = 2. * h * focal_len; 
+        let vp_width = 
+            vp_height * img.width as f64 / img.height as f64;
+
+        // Camera axes
+        let vp_u = Vec3::new(vp_width, 0., 0.);
+        let vp_v = Vec3::new(0., -vp_height, 0.);
+
+        let delta_u = vp_u / img.width as f64;
+        let delta_v = vp_v / img.height as f64; 
+
+        // Upper left corner
+        let mut p00 = point
+            - Vec3::new(0., 0., focal_len);
+
+        p00 -= (vp_u + vp_v) / 2.;
+        p00 += (delta_u + delta_v) * 0.5;
+
+
+        Self { 
+            pos: point,
+            pixel00: p00, 
+            delta_u: delta_u, 
+            delta_v: delta_v,
+        }
     }
 
-    pub fn ray(&self, i: f64, j: f64, sample: &Sample) -> Ray {
-        let pixel_center = sample.get_sample_pxl(i, j);
+    pub fn ray(&self, i: usize, j: usize) -> Ray {
+        let pixel_center = 
+            self.pixel00
+            + self.delta_u * j as f64
+            + self.delta_v * i as f64;
+
         let ray_dir = pixel_center - self.pos;
         Ray::new(self.pos, ray_dir)
     }
 
-    pub fn ray_aa(&self, i: f64, j: f64, sample: &Sample) -> Ray {
-        let pixel_center = sample.get_sample_pxl_offset(i, j, self.sample_square());
-        let ray_dir = pixel_center - self.pos;
+    pub fn ray_aa(&self, i: usize, j: usize) -> Ray {
+        let offset_x = random_f64() - 0.5; 
+        let offset_y = random_f64() - 0.5; 
+
+        let pixel = 
+            self.pixel00 
+            + self.delta_u * (j as f64 + offset_x)
+            + self.delta_v * (i as f64 + offset_y);
+        let ray_dir = pixel - self.pos;
         Ray::new(self.pos, ray_dir)
     }
 
-    fn sample_square(&self) -> Vec3 {
-        Vec3::new(random_f64() - 0.5, random_f64() - 0.5, 0.)
-    }
-
-    pub fn get_pos(&self) -> Point3 { self.pos }
 }

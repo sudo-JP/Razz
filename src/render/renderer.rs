@@ -1,6 +1,6 @@
 use rayon::{iter::{IndexedParallelIterator, ParallelIterator}, slice::ParallelSliceMut};
 
-use crate::{linear_to_gamma, render::Image, Camera, Interval, Sample, Vec3, Viewport, World};
+use crate::{linear_to_gamma, render::Image, Camera, Interval, Vec3, World};
 
 const MAX_DEPTH: i32 = 50;
 
@@ -14,11 +14,7 @@ impl Renderer {
         Self { samples_per_pxl: samples_per_pxl }
     }
 
-    pub fn cpu_render(&self, img: &mut Image, vp: &Viewport, cam: &Camera, world: &World) {
-        let sam = Sample::new(cam.get_pos(), vp, img, self.samples_per_pxl);
-
-        //for pixel_index in 0..(img.width * img.height) {
-
+    pub fn cpu_render(&self, img: &mut Image, cam: &Camera, world: &World) {
         let width = img.width;
         img.matrix
             .par_chunks_mut(3)
@@ -28,19 +24,16 @@ impl Renderer {
             let row = pixel_index / width;
             let col = pixel_index % width;
 
-            let i = row as f64;
-            let j = col as f64; 
-
             let mut color = Vec3::zeros();
 
             // Sampling pixel
             for _ in 0..self.samples_per_pxl {
-                let r = cam.ray_aa(i, j, &sam);
+                let r = cam.ray_aa(row, col);
                 color = r.ray_color(world, MAX_DEPTH) + color;
             }
 
             // Color vector
-            let v = color * sam.get_pixel_sample_scale();
+            let v = color * 1. / (self.samples_per_pxl as f64);
 
             // Apply gamma
             let intensity = Interval::new_with_val(0., 0.999);
