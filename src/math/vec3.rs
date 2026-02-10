@@ -99,6 +99,18 @@ impl Vec3 {
         self - normal * dot(self, normal) * 2. 
     }
 
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(
+                random_range(-1., 1.),
+                random_range(-1., 1.),
+                0.
+            );
+            if p.length_squared() < 1. {
+                return p;
+            }
+        }
+    }
 }
 
 pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {

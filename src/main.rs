@@ -5,7 +5,7 @@ use razz::cli::Cli;
 use razz::output::ImageOutput;
 use razz::render::Image;
 use razz::vec3::Color3;
-use razz::{Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, Vec3, World};
+use razz::{random_f64, random_range, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, Vec3, World};
 
 type Point3 = Vec3;
 
@@ -18,9 +18,11 @@ fn main() {
     let vfov: f64 = 20.;
 
     //let lookfrom = Point3::new(cli.cx, cli.cy, cli.cz);
-    let lookfrom = Point3::new(-2., 2., 1.);
-    let lookat = Point3::new(0., 0., -1.);
+    let lookfrom = Point3::new(13., 2., 3.);
+    let lookat = Point3::new(0., 0., 0.);
     let vup = Vec3::new(0., 1., 0.);
+    let defocus_angle: f64 = 0.6;
+    let focus_dist: f64 = 10.;
 
     // Camera
     let cam = Camera::new(
@@ -28,31 +30,67 @@ fn main() {
         lookat,
         vfov,
         vup,
+        focus_dist, 
+        defocus_angle,
         &img
     );
 
+    // Material
+    let ground_mat: Arc<dyn Material + Send + Sync> = Arc::new(Lambertian::new(Color3::new(0.5, 0.5, 0.5)));
 
     // World
     let mut world = World::new();
-    let material_ground: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.8, 0.8, 0.)));
-    let material_center: Arc<dyn Material + Sync + Send> = Arc::new(Lambertian::new(Color3::new(0.1, 0.2, 0.5)));
-    let material_left: Arc<dyn Material + Sync + Send> = Arc::new(Dielectric::new(1.5));
-    let material_bubble: Arc<dyn Material + Sync + Send> = Arc::new(Dielectric::new(1. / 1.5));
-    let material_right: Arc<dyn Material + Sync + Send> = Arc::new(Metal::new(Color3::new(0.8, 0.6, 0.2), 1.));
-
-    let sph2 = Sphere::new(Point3::new(0., -100.5, -1.), 100., Arc::clone(&material_ground));
-    let sph1 = Sphere::new(Point3::new(0., 0., -1.2), 0.5, Arc::clone(&material_center));
-    let sph3 = Sphere::new(Point3::new(-1., 0., -1.), 0.5, Arc::clone(&material_left));
-    let sph4 = Sphere::new(Point3::new(1., 0., -1.), 0.5, Arc::clone(&material_right));
-    let sph5 = Sphere::new(Point3::new(-1., 0., -1.), 0.4, Arc::clone(&material_bubble));
-
+    let sph1 = Sphere::new(Point3::new(0., -1000., 0.), 1000., Arc::clone(&ground_mat));
     world.push(Box::new(sph1));
-    world.push(Box::new(sph2));
-    world.push(Box::new(sph3));
-    world.push(Box::new(sph4));
-    world.push(Box::new(sph5));
 
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random_f64(); 
+            let center = Point3::new(
+                a as f64 + 0.9 * random_f64(),
+                0.2, 
+                b as f64 + 0.9 * random_f64()
+            );
 
+            if (center - Point3::new(4., 0.2, 0.)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    let albedo: Arc<dyn Material + Sync + Send> = 
+                        Arc::new(Lambertian::new(Color3::random() * Color3::random()));
+                    let sph = Sphere::new(center, 0.2, Arc::clone(&albedo));
+                    world.push(Box::new(sph));
+                }
+            }
+            else if choose_mat < 0.95 {
+                let albedo = Color3::random_range(0.5, 1.);
+                let fuzz = random_range(0., 0.5);
+                let metal: Arc<dyn Material + Send + Sync> = 
+                    Arc::new(Metal::new(albedo, fuzz));
+                let sph = Sphere::new(center, 0.2, Arc::clone(&metal));
+                world.push(Box::new(sph));
+            }
+            else {
+                let diel: Arc<dyn Material + Send + Sync> = 
+                    Arc::new(Dielectric::new(1.5));
+                let sph = Sphere::new(center, 0.2, Arc::clone(&diel));
+                world.push(Box::new(sph));
+            }
+        }
+    };
+
+    let diel: Arc<dyn Material + Send + Sync> = 
+        Arc::new(Dielectric::new(1.5));
+    let sph = Sphere::new(Point3::new(0., 1., 0.), 1., Arc::clone(&diel));
+    world.push(Box::new(sph));
+    
+    let lamb: Arc<dyn Material + Send + Sync> = 
+        Arc::new(Lambertian::new(Color3::new(0.4, 0.2, 0.1)));
+    let sph = Sphere::new(Point3::new(-4., 1., 0.), 1., Arc::clone(&lamb));
+    world.push(Box::new(sph));
+
+    let metal: Arc<dyn Material + Send + Sync> = 
+        Arc::new(Metal::new(Color3::new(0.7, 0.6, 0.5), 0.));
+    let sph = Sphere::new(Point3::new(4., 1., 0.), 1., Arc::clone(&metal));
+    world.push(Box::new(sph));
     // Render the image, store result in img
     let renderer = Renderer::new(10);
     renderer.cpu_render(&mut img, &cam, &world);
