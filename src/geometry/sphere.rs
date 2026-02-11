@@ -7,14 +7,6 @@ use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub type Point3 = Vec3;
 
-/*
- * The root solution to hit_sphere
- * One holds the closest (-) solution
- * */
-pub enum IntersectSphere {
-    One(f64),  
-    None
-}
 
 pub struct Sphere {
     center: Point3,

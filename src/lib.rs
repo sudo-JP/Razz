@@ -11,5 +11,5 @@ pub use render::{Renderer};
 pub use math::*;
 pub use geometry::*;
 pub use scene::*;
-pub use output::ppm::*;
+pub use output::{ArduinoOutput, PPMOutput};
 pub use material::*;

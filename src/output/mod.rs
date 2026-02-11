@@ -1,6 +1,9 @@
 use crate::render::Image;
 pub mod ppm;
+pub mod arduino;
 
+pub use ppm::PPMOutput;
+pub use arduino::ArduinoOutput;
 
 #[derive(Debug)]
 pub enum OutputError {
