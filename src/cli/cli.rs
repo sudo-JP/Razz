@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::output::ImageOutput;
+use crate::output::{ImageOutput, OutputError};
 use crate::render::Image;
 use crate::vec3::Color3;
 use crate::{random_f64, random_range, ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Point3, Renderer, Sphere, Vec3, World};
@@ -140,11 +140,17 @@ impl Cli {
 
     fn ppm(&self, img: Image) {
         let output = PPMOutput::new(self.output.clone());
-        output.write(&img).unwrap()
+        match output.write(&img) {
+            Ok(_) => {}
+            Err(e) => match e {
+                OutputError::InvalidOutput => eprintln!("Can't create file"),
+                OutputError::OutputError => eprintln!("Can't write to file"),
+            }
+        }
     }
 
     fn arduino(&self, img: Image) {
-        //let output = ArduinoOutput::
-
+        let output = ArduinoOutput::new(self.output.clone());
+        output.stream(&img);
     }
 }
