@@ -7,7 +7,7 @@ pub struct ArduinoOutput {
     path: String,
 }
 
-const MAGIC_BYTES: u16 = 0xFEED;
+const MAGIC_BYTES: u16 = 0xBABE;
 const CRC16: Crc<u16> = Crc::<u16>::new(&CRC_16_XMODEM);
 
 struct ArduinoFrameHeader {
@@ -94,7 +94,7 @@ impl ArduinoOutput {
         .collect()
     }
 
-    fn generate_data_bytes(&self, img: &Image, payload: Vec<u8>) -> Vec<u8> {
+    fn encode(&self, img: &Image, payload: Vec<u8>) -> Vec<u8> {
         let frame = ArduinoFrame::new(
             img.width as u16, 
             img.height as u16, 
@@ -120,7 +120,7 @@ impl ArduinoOutput {
         let payload = self.compress_img(img);
 
         // Generate data bytes
-        let bytes = self.generate_data_bytes(img, payload);
+        let bytes = self.encode(img, payload);
 
         // Stream data
         if let Err(e) = self.stream_to_port(bytes) {
