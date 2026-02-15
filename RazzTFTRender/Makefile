@@ -3,7 +3,9 @@ SKETCH := ../$(PROJECT_NAME)
 BOARD = arduino:avr:uno
 PORT = /dev/ttyUSB0
 BUILD_DIR = build
+BAUD_RATE = 115200
 
+.IGNORE: clean build upload work_name
 
 all: clean build upload work_name
 
@@ -27,5 +29,8 @@ upload:
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+screen: 	
+	screen $(PORT) $(BAUD_RATE)
 
 .PHONY: all build upload clean

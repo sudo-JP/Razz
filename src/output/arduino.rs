@@ -8,6 +8,7 @@ pub struct ArduinoOutput {
 }
 
 const MAGIC_BYTES: u16 = 0xBABE;
+const SERIAL_BAUD_RATE: u32 = 115_200;
 const CRC16: Crc<u16> = Crc::<u16>::new(&CRC_16_XMODEM);
 
 struct ArduinoFrameHeader {
@@ -73,7 +74,7 @@ impl ArduinoFrame {
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(
-            8 + self.payload.len() * 2
+            size_of::<ArduinoFrameHeader>() + self.payload.len() + 2
         );
         bytes.extend_from_slice(&self.header.to_bytes());
         bytes.extend_from_slice(&self.payload);
@@ -104,7 +105,7 @@ impl ArduinoOutput {
     }
 
     fn stream_to_port(&self, bytes: Vec<u8>) -> anyhow::Result<()> {
-        let mut port = serialport::new(self.path.clone(), 115_200)
+        let mut port = serialport::new(self.path.clone(), SERIAL_BAUD_RATE)
             .timeout(time::Duration::from_millis(1000))
             .open()?;
 
