@@ -124,7 +124,7 @@ fn ray_trace(cli: &Cli) -> Image {
     let sph = Sphere::new(Point3::new(4., 1., 0.), 1., Arc::clone(&metal));
     world.push(Box::new(sph));
     // Render the image, store result in img
-    let renderer = Renderer::new(10);
+    let renderer = Renderer::new(100);
     renderer.cpu_render(&mut img, &cam, &world);
 
     img

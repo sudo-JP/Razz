@@ -25,9 +25,9 @@ struct ArduinoFrame {
 }
 
 fn rgb888_to_rgb565(r: u8, g: u8, b: u8) -> u16 {
-    let red = (r as u16 >> 3) << 11;
+    let red = (b as u16 >> 3) << 11;
     let green = (g as u16 >> 2) << 5;
-    let blue = b as u16 >> 3;
+    let blue = r as u16 >> 3;
     red | green | blue
 }
 
@@ -111,7 +111,7 @@ impl ArduinoOutput {
             .open()?;
 
         // Waiting for connection before sending data 
-        std::thread::sleep(std::time::Duration::from_millis(2000));
+        std::thread::sleep(std::time::Duration::from_millis(7000));
         
         for chunk in bytes.chunks(32) {
             port.write_all(chunk)?;

@@ -4,7 +4,7 @@
 
 #include "../render/renderer.hpp"
 #define MAGIC_BYTES 0xBABE
-#define BUFFER_SIZE 128 
+#define BUFFER_SIZE 512 
 #define R_MASK 0x1F
 #define G_MASK 0x3F
 #define B_MASK 0x1F
