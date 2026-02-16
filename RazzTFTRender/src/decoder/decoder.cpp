@@ -1,11 +1,5 @@
 #include "decoder.hpp"
 
-void Decoder::rgb565_to_rgb888(uint16_t rgb565, RGB &rgb888) {
-    rgb888.r = ((rgb565 >> 11) & R_MASK) << 3;
-    rgb888.g = ((rgb565 >> 5) & G_MASK) << 2;
-    rgb888.b = (rgb565 & B_MASK) << 3;
-}
-
 void Decoder::feed(uint8_t byte) {
     switch (state) {
         case DecodeState::FIND_SYNC: handle_sync(byte); break;
@@ -33,11 +27,6 @@ void Decoder::handle_sync(uint8_t byte) {
     return;
 }
 
-// Exclude magic, we have 
-// 2 bytes for width -> up to 1
-// 2 bytes for height -> up to 3
-// 2 bytes checksum -> up to 5
-// Logic
 void Decoder::handle_header(uint8_t byte) {
     // WIDTH
     if (bytes_read == 0) {
@@ -132,14 +121,13 @@ bool Decoder::get_RGB(RGB &rgb) {
         return false;
     }
 
-    uint16_t rgb565 = buffer[buf_head]; 
+    rgb = buffer[buf_head]; 
     buf_head = (buf_head + 1) % BUFFER_SIZE;
-    rgb565 |= (buffer[buf_head] << BITS_IN_BYTE);
+    rgb |= (buffer[buf_head] << BITS_IN_BYTE);
     buf_head = (buf_head + 1) % BUFFER_SIZE;
     size -= 2;
     if (size == 0) flush = false;
 
-    rgb565_to_rgb888(rgb565, rgb);
     return true;
 }
 

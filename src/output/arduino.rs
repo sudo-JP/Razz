@@ -46,6 +46,7 @@ impl ArduinoFrameHeader {
         data.extend_from_slice(&width.to_le_bytes());
         data.extend_from_slice(&height.to_le_bytes());
         let header_checksum = CRC16.checksum(&data);
+        println!("Frameheader Checksum {:X}", header_checksum);
         
         Self { magic, width, height, header_checksum }
     }
@@ -110,7 +111,11 @@ impl ArduinoOutput {
             .open()?;
 
         
-        port.write_all(&bytes)?;
+    for chunk in bytes.chunks(32) {
+        port.write_all(chunk)?;
+        port.flush()?;
+        std::thread::sleep(std::time::Duration::from_millis(20));
+    }
         println!("Successfully wrote {} bytes", bytes.len());
         port.flush()?;
         Ok(())

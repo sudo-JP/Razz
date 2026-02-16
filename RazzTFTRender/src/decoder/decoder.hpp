@@ -1,10 +1,9 @@
 #pragma once
 #include <stdint.h>
 #include "CRC16.h"
-#include <stdint.h>
 
 #define MAGIC_BYTES 0xBABE
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 1024 
 #define R_MASK 0x1F
 #define G_MASK 0x3F
 #define B_MASK 0x1F
@@ -20,9 +19,7 @@ enum class DecodeState {
     READ_PAYLOAD_CHECKSUM, 
 };
 
-struct RGB {
-    uint8_t r; uint8_t g; uint8_t b;
-};
+typedef uint16_t RGB;
 
 class Decoder {
 public:
@@ -40,11 +37,9 @@ public:
     inline bool is_flush() { return flush; }
     inline void clear_corruption() { corrupted = false; }
     inline bool is_corrupted() { return corrupted; }
+    size_t img_size;
 
 private: 
-    // RGB conversion
-    void rgb565_to_rgb888(uint16_t rgb565, RGB &rgb888);
-
     // Handle feed 
     void handle_sync(uint8_t byte);
     void handle_header(uint8_t byte);
@@ -66,7 +61,6 @@ private:
 
     uint16_t width;
     uint16_t height;
-    size_t img_size;
     uint16_t checksum;
 
     DecodeState state;
