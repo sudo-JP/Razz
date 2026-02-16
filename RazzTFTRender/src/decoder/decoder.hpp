@@ -2,8 +2,9 @@
 #include <stdint.h>
 #include "CRC16.h"
 
+#include "../render/renderer.hpp"
 #define MAGIC_BYTES 0xBABE
-#define BUFFER_SIZE 1024 
+#define BUFFER_SIZE 128 
 #define R_MASK 0x1F
 #define G_MASK 0x3F
 #define B_MASK 0x1F
@@ -29,6 +30,7 @@ public:
     {}
 
 
+    void setrender(Renderer *r) { render = r; }
     void feed(uint8_t byte);
     bool get_RGB(RGB&);
     inline DecodeState get_state() { return state; }
@@ -38,6 +40,8 @@ public:
     inline void clear_corruption() { corrupted = false; }
     inline bool is_corrupted() { return corrupted; }
     size_t img_size;
+    bool flush;
+    Renderer *render;
 
 private: 
     // Handle feed 
@@ -66,6 +70,5 @@ private:
     DecodeState state;
     size_t bytes_read;
 
-    bool flush;
     bool corrupted; 
 };

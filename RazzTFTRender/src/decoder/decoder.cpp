@@ -72,6 +72,9 @@ void Decoder::handle_payload(uint8_t byte) {
     size++;
     crc.add(byte);
 
+    if (size == BUFFER_SIZE) {
+        flush = true;
+    }
     if (bytes_read == img_size) {
         // Flush 
         flush = true;

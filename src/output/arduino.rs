@@ -110,13 +110,15 @@ impl ArduinoOutput {
             .timeout(time::Duration::from_millis(1000))
             .open()?;
 
+        // Waiting for connection before sending data 
+        std::thread::sleep(std::time::Duration::from_millis(2000));
         
-    for chunk in bytes.chunks(32) {
-        port.write_all(chunk)?;
-        port.flush()?;
-        std::thread::sleep(std::time::Duration::from_millis(20));
-    }
-        println!("Successfully wrote {} bytes", bytes.len());
+        for chunk in bytes.chunks(32) {
+            port.write_all(chunk)?;
+            port.flush()?;
+            std::thread::sleep(std::time::Duration::from_millis(50));
+            println!("Successfully wrote {} bytes", chunk.len());
+        }
         port.flush()?;
         Ok(())
     }

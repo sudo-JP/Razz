@@ -3,7 +3,7 @@
 
 void Renderer::begin() {
     screen.begin();
-    screen.setAddrWindow(0, 0, WIDTH - 1, HEIGHT - 1);
+    screen.setAddrWindow(0, 0, WIDTH, HEIGHT);
     clear();
 }
 
