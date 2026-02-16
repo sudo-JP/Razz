@@ -1,8 +1,10 @@
 #include "HardwareSerial.h"
+#include "src/render/renderer.hpp"
 #include "src/decoder/decoder.hpp"
 #define SERIAL_BAUD_RATE 115200
 
 Decoder decoder;
+Renderer render;
 
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
@@ -29,4 +31,16 @@ void loop() {
         decoder.feed(Serial.read());
     }*/
     Serial.println((int)decoder.get_state());
+    if (Serial.available() && !decoder.is_full()) {
+        decoder.feed(Serial.read());
+    }
+
+    if (decoder.is_corrupted()) {
+        // Reset
+        decoder.clear_corruption();
+    }
+
+    if (decoder.is_flush() && decoder.get_size() > 0) {
+        // Draw etc
+    }
 }

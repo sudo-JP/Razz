@@ -3,8 +3,8 @@
 #include "CRC16.h"
 #include <stdint.h>
 
-#define BUFFER_SIZE 512
 #define MAGIC_BYTES 0xBABE
+#define BUFFER_SIZE 512
 #define R_MASK 0x1F
 #define G_MASK 0x3F
 #define B_MASK 0x1F
@@ -20,27 +20,49 @@ enum class DecodeState {
     READ_PAYLOAD_CHECKSUM, 
 };
 
+struct RGB {
+    uint8_t r; uint8_t g; uint8_t b;
+};
+
 class Decoder {
 public:
     Decoder() : state(DecodeState::FIND_SYNC), width(0), 
     height(0), img_size(0), bytes_read(0), crc(XMODEM_INIT),
-    buf_idx(0) {}
-    void feed(uint8_t byte);
+    buf_head(0), buf_tail(0), size(0), flush(false), corrupted(false)
+    {}
 
+
+    void feed(uint8_t byte);
+    bool get_RGB(RGB&);
     inline DecodeState get_state() { return state; }
+    inline bool is_full() { return size == BUFFER_SIZE; }
+    inline size_t get_size() { return size; }
+    inline bool is_flush() { return flush; }
+    inline void clear_corruption() { corrupted = false; }
+    inline bool is_corrupted() { return corrupted; }
 
 private: 
-    void rgb565_to_rgb888(uint16_t rgb565, uint8_t &r, uint8_t &g, uint8_t &b);
+    // RGB conversion
+    void rgb565_to_rgb888(uint16_t rgb565, RGB &rgb888);
 
+    // Handle feed 
     void handle_sync(uint8_t byte);
     void handle_header(uint8_t byte);
     void handle_payload(uint8_t byte);
     void handle_checksum_payload(uint8_t byte);
     bool checksum_check(uint8_t byte);
 
+    // Hard reset
+    void reset();
+
+    // Checksum
     CRC16 crc;
+
+    // Data
     uint8_t buffer[BUFFER_SIZE];
-    size_t buf_idx;
+    size_t size;
+    size_t buf_head;
+    size_t buf_tail;
 
     uint16_t width;
     uint16_t height;
@@ -49,4 +71,7 @@ private:
 
     DecodeState state;
     size_t bytes_read;
+
+    bool flush;
+    bool corrupted; 
 };

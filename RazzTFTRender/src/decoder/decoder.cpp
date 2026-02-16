@@ -1,9 +1,9 @@
 #include "decoder.hpp"
 
-void Decoder::rgb565_to_rgb888(uint16_t rgb565, uint8_t &r, uint8_t &g, uint8_t &b) {
-    r = ((rgb565 >> 11) & R_MASK) << 3;
-    g = ((rgb565 >> 5) & G_MASK) << 2;
-    b = (rgb565 & B_MASK) << 3;
+void Decoder::rgb565_to_rgb888(uint16_t rgb565, RGB &rgb888) {
+    rgb888.r = ((rgb565 >> 11) & R_MASK) << 3;
+    rgb888.g = ((rgb565 >> 5) & G_MASK) << 2;
+    rgb888.b = (rgb565 & B_MASK) << 3;
 }
 
 void Decoder::feed(uint8_t byte) {
@@ -74,18 +74,18 @@ void Decoder::handle_header(uint8_t byte) {
     return;
 }
 
+/*
+ * Precondition: size < BUFFER_SIZE 
+ * */
 void Decoder::handle_payload(uint8_t byte) {
-    if (buf_idx == BUFFER_SIZE) {
-        // Flush
-
-        buf_idx = 0;
-    } 
-
-    buffer[buf_idx++] = byte;
+    buffer[buf_tail] = byte;
+    buf_tail = (buf_tail + 1) % BUFFER_SIZE; 
+    size++;
     crc.add(byte);
 
     if (bytes_read == img_size) {
         // Flush 
+        flush = true;
         bytes_read = 0;
         state = DecodeState::READ_PAYLOAD_CHECKSUM;
         return;
@@ -99,8 +99,7 @@ bool Decoder::checksum_check(uint8_t byte) {
     bytes_read = 0;
     // Check checksum
     if (checksum != crc.calc()) {
-        crc.restart();
-        state = DecodeState::FIND_SYNC;
+        reset();
         return false;
     }
     return true;
@@ -111,10 +110,43 @@ void Decoder::handle_checksum_payload(uint8_t byte) {
         bytes_read++;
         checksum = (byte & BYTE_MASK);
     } else {
-        // NOTE: if this fail, return a signal to display to not render
-        checksum_check(byte);
+        if (!checksum_check(byte)) {
+            corrupted = true;
+            reset();
+        } else {
+            flush = true;
+        }
 
         // Ready for the next byte 
         state = DecodeState::FIND_SYNC;
     }
+}
+
+/*
+ * Precondition: flush == true && not empty
+ * */
+bool Decoder::get_RGB(RGB &rgb) {
+    // If size is not even, theres corruption, reset everything
+    if ((size & 1) == 1) {
+        reset();
+        return false;
+    }
+
+    uint16_t rgb565 = buffer[buf_head]; 
+    buf_head = (buf_head + 1) % BUFFER_SIZE;
+    rgb565 |= (buffer[buf_head] << BITS_IN_BYTE);
+    buf_head = (buf_head + 1) % BUFFER_SIZE;
+    size -= 2;
+    if (size == 0) flush = false;
+
+    rgb565_to_rgb888(rgb565, rgb);
+    return true;
+}
+
+void Decoder::reset() {
+    buf_head = 0;
+    buf_tail = 0;
+    size = 0;
+    state = DecodeState::FIND_SYNC;
+    crc.restart();
 }
