@@ -139,5 +139,7 @@ void Decoder::reset() {
     buf_tail = 0;
     size = 0;
     state = DecodeState::FIND_SYNC;
+    corrupted = false; 
+    flush = false; 
     crc.restart();
 }

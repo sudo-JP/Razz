@@ -24,8 +24,8 @@ public:
     void begin();
     void clear();
     void add_color(RGB);
-    TFT screen;
 
 
 private: 
+    TFT screen;
 };

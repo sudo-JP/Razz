@@ -30,7 +30,6 @@ public:
     {}
 
 
-    void setrender(Renderer *r) { render = r; }
     void feed(uint8_t byte);
     bool get_RGB(RGB&);
     inline DecodeState get_state() { return state; }
@@ -39,9 +38,6 @@ public:
     inline bool is_flush() { return flush; }
     inline void clear_corruption() { corrupted = false; }
     inline bool is_corrupted() { return corrupted; }
-    size_t img_size;
-    bool flush;
-    Renderer *render;
 
 private: 
     // Handle feed 
@@ -65,10 +61,12 @@ private:
 
     uint16_t width;
     uint16_t height;
+    size_t img_size;
     uint16_t checksum;
 
     DecodeState state;
     size_t bytes_read;
 
     bool corrupted; 
+    bool flush;
 };

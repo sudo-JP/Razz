@@ -9,10 +9,8 @@ Renderer render;
 bool flag = false;
 
 void setup() {
-    pinMode(3, OUTPUT);
     Serial.begin(SERIAL_BAUD_RATE);
     render.begin();
-    decoder.setrender(&render);
 }
 
 void loop() {
@@ -21,15 +19,15 @@ void loop() {
         decoder.feed(byte);
     }
 
-    /*if (decoder.is_corrupted()) {
+    if (decoder.is_corrupted()) {
         // Reset
-        render.clear();
+        render.begin();
         decoder.clear_corruption();
-    }*/
+    }
     while (decoder.is_flush() && decoder.get_size() > 0) {
         RGB rgb;
         if (!decoder.get_RGB(rgb)) {
-            //render.clear();
+            render.begin();
             break;
         }
         render.add_color(rgb);
