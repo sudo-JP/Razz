@@ -1,5 +1,6 @@
 use crc::{Crc, CRC_16_XMODEM};
 use std::{time};
+use owo_colors::OwoColorize;
 
 use crate::render::Image;
 
@@ -24,17 +25,18 @@ struct ArduinoFrame {
     payload_checksum: u16, 
 }
 
-fn rgb888_to_rgb565(r: u8, g: u8, b: u8) -> u16 {
-    let red = (r as u16 >> 3) << 11;
+/// Due to hardware spec, i gotta use bgr instead
+fn rgb888_to_bgr565(r: u8, g: u8, b: u8) -> u16 {
+    let blue = (b as u16 >> 3) << 11;
     let green = (g as u16 >> 2) << 5;
-    let blue = b as u16 >> 3;
-    red | green | blue
+    let red = r as u16 >> 3;
+    blue | green | red 
 }
 
 fn rgb565_converter(img: &Image) -> Vec<u16> {
     img.matrix
         .chunks_exact(3)
-        .map(|rgb| rgb888_to_rgb565(rgb[0], rgb[1], rgb[2]))
+        .map(|rgb| rgb888_to_bgr565(rgb[0], rgb[1], rgb[2]))
         .collect()
 }
 
@@ -109,23 +111,30 @@ impl ArduinoOutput {
             .timeout(time::Duration::from_millis(1000))
             .open()?;
 
+        // Waiting for connection before sending data 
+        std::thread::sleep(time::Duration::from_millis(5000));
         
         port.write_all(&bytes)?;
-        println!("Successfully wrote {} bytes", bytes.len());
         port.flush()?;
         Ok(())
     }
 
     pub fn stream(&self, img: &Image) -> () {
         // Convert to smaller byte format
+        println!("{}", "Compressing the image...".yellow());
         let payload = self.compress_img(img);
 
         // Generate data bytes
+        println!("{}", "Encoding the image to binary...".yellow());
         let bytes = self.encode(img, payload);
 
         // Stream data
+        println!("{}", "Streaming the image to Arduino...".yellow());
         if let Err(e) = self.stream_to_port(bytes) {
-            eprintln!("Failed to stream: {}", e);
+            eprintln!("{} {}", "Failed to stream".red(), e.red());
         }
+
+        println!("{}", "Successfully streamed image to Arduino".green());
+
     }
 }

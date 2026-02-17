@@ -1,10 +1,10 @@
 #pragma once
 #include <stdint.h>
 #include "CRC16.h"
-#include <stdint.h>
 
+#include "../render/renderer.hpp"
 #define MAGIC_BYTES 0xBABE
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 512 
 #define R_MASK 0x1F
 #define G_MASK 0x3F
 #define B_MASK 0x1F
@@ -20,9 +20,7 @@ enum class DecodeState {
     READ_PAYLOAD_CHECKSUM, 
 };
 
-struct RGB {
-    uint8_t r; uint8_t g; uint8_t b;
-};
+typedef uint16_t RGB;
 
 class Decoder {
 public:
@@ -42,9 +40,6 @@ public:
     inline bool is_corrupted() { return corrupted; }
 
 private: 
-    // RGB conversion
-    void rgb565_to_rgb888(uint16_t rgb565, RGB &rgb888);
-
     // Handle feed 
     void handle_sync(uint8_t byte);
     void handle_header(uint8_t byte);
@@ -72,6 +67,6 @@ private:
     DecodeState state;
     size_t bytes_read;
 
-    bool flush;
     bool corrupted; 
+    bool flush;
 };

@@ -5,6 +5,7 @@ use crate::render::Image;
 use crate::vec3::Color3;
 use crate::{random_f64, random_range, ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Point3, Renderer, Sphere, Vec3, World};
 use clap::{ValueEnum,Parser};
+use owo_colors::OwoColorize;
 
 #[allow(non_camel_case_types)]
 #[derive(Clone, Debug, ValueEnum)]
@@ -38,6 +39,9 @@ pub struct Cli {
 
     #[arg(long, value_enum, help = "Output type", default_value_t = RenderOutput::ppm)]
     pub otype: RenderOutput, 
+
+    #[arg(long, help = "Samples per pixel", default_value_t = 50)]
+    pub spp: i32, 
     // TODO: Add viewport width and height, check 
     // either or then calculate based on aspect ratio 
 }
@@ -124,7 +128,7 @@ fn ray_trace(cli: &Cli) -> Image {
     let sph = Sphere::new(Point3::new(4., 1., 0.), 1., Arc::clone(&metal));
     world.push(Box::new(sph));
     // Render the image, store result in img
-    let renderer = Renderer::new(10);
+    let renderer = Renderer::new(cli.spp);
     renderer.cpu_render(&mut img, &cam, &world);
 
     img
@@ -132,6 +136,7 @@ fn ray_trace(cli: &Cli) -> Image {
 
 impl Cli {
     pub fn run(&self) {
+        println!("{}", "Rendering the image...".yellow());
         match self.otype {
             RenderOutput::ppm => self.ppm(ray_trace(&self)),
             RenderOutput::arduino => self.arduino(ray_trace(&self)),
@@ -150,6 +155,14 @@ impl Cli {
     }
 
     fn arduino(&self, img: Image) {
+        let output = PPMOutput::new("test.ppm".to_string());
+        match output.write(&img) {
+            Ok(_) => {}
+            Err(e) => match e {
+                OutputError::InvalidOutput => eprintln!("Can't create file"),
+                OutputError::OutputError => eprintln!("Can't write to file"),
+            }
+        }
         let output = ArduinoOutput::new(self.output.clone());
         output.stream(&img);
     }
