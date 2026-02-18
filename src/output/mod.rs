@@ -1,6 +1,7 @@
 use crate::render::Image;
 pub mod ppm;
 pub mod arduino;
+pub mod encoding;
 
 pub use ppm::PPMOutput;
 pub use arduino::ArduinoOutput;
@@ -12,5 +13,5 @@ pub enum OutputError {
 }
 
 pub trait ImageOutput {
-    fn write(&self, image: &Image) -> Result<(), OutputError>;
+    fn output(&self, image: &Image) -> Result<(), OutputError>;
 }

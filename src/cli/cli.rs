@@ -145,8 +145,8 @@ impl Cli {
 
     fn ppm(&self, img: Image) {
         let output = PPMOutput::new(self.output.clone());
-        match output.write(&img) {
-            Ok(_) => {}
+        match output.output(&img) {
+            Ok(_) => { println!("{}", "Successfully written to .ppm".green()) }
             Err(e) => match e {
                 OutputError::InvalidOutput => eprintln!("Can't create file"),
                 OutputError::OutputError => eprintln!("Can't write to file"),
@@ -155,15 +155,13 @@ impl Cli {
     }
 
     fn arduino(&self, img: Image) {
-        let output = PPMOutput::new("test.ppm".to_string());
-        match output.write(&img) {
+        let output = ArduinoOutput::new(self.output.clone());
+        match output.output(&img) {
             Ok(_) => {}
             Err(e) => match e {
-                OutputError::InvalidOutput => eprintln!("Can't create file"),
-                OutputError::OutputError => eprintln!("Can't write to file"),
+                OutputError::InvalidOutput => eprint!("Can't compress image"),
+                OutputError::OutputError => eprint!("Can't stream image"),
             }
         }
-        let output = ArduinoOutput::new(self.output.clone());
-        output.stream(&img);
     }
 }

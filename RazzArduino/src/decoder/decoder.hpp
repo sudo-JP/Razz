@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include "CRC16.h"
 
-#include "../render/renderer.hpp"
 #define MAGIC_BYTES 0xBABE
 #define BUFFER_SIZE 512 
 #define R_MASK 0x1F

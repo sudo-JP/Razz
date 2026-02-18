@@ -18,7 +18,7 @@ impl PPMOutput {
 
 
 impl ImageOutput for PPMOutput {
-    fn write(&self, img: &Image) -> Result<(), OutputError> {
+    fn output(&self, img: &Image) -> Result<(), OutputError> {
         let file = match File::create(&self.path) {
             Ok(f) => f, 
             Err(_) => { return Err(OutputError::InvalidOutput); }

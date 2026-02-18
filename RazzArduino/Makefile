@@ -1,4 +1,4 @@
-PROJECT_NAME = RazzTFTRender
+PROJECT_NAME = RazzArduino
 SKETCH := ../$(PROJECT_NAME)
 BOARD = arduino:avr:uno
 PORT = /dev/ttyUSB0
@@ -16,10 +16,10 @@ build: build_name
 		$(SKETCH)
 
 build_name: 
-	mv ./$(PROJECT_NAME).cpp ./$(PROJECT_NAME).ino
+	mv "./$(PROJECT_NAME).cpp" "./$(PROJECT_NAME).ino"
 
 work_name: 
-	mv ./$(PROJECT_NAME).ino ./$(PROJECT_NAME).cpp
+	mv "./$(PROJECT_NAME).ino" "./$(PROJECT_NAME).cpp"
 
 upload:
 	arduino-cli upload \

@@ -6,7 +6,6 @@
 
 Decoder decoder;
 Renderer render;
-bool flag = false;
 
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
