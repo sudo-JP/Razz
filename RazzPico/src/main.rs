@@ -1,16 +1,19 @@
 #![no_std]
 #![no_main]
 
+// Hardware blah blah
 use embassy_executor::Spawner;
 use embassy_rp::spi::{Config, Spi};
 use embassy_rp::gpio::{Level, Output};
+use embedded_hal_bus::spi::ExclusiveDevice;
+use embedded_graphics::prelude::*;
+use panic_halt as _;
+
+// Screen 
 use mipidsi::Builder;
 use mipidsi::models::ST7735s;
 use mipidsi::interface::SpiInterface;
 use mipidsi::TestImage;
-use embedded_hal_bus::spi::ExclusiveDevice;
-use embedded_graphics::prelude::*;
-use panic_halt as _;
 
 
 #[embassy_executor::main]
