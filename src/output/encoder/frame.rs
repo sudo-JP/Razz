@@ -58,7 +58,7 @@ fn compress_img(img: &Image) -> Vec<u8> {
     .collect()
 }
 
-pub struct FrameBuilder {
+pub struct Encoder {
     width: u16,
     height: u16,
     payload: Vec<u8>,
@@ -66,7 +66,7 @@ pub struct FrameBuilder {
 }
 
 
-impl FrameBuilder {
+impl Encoder {
     pub fn new(img: &Image) -> Self {
         let payload = compress_img(img);
         Self {
@@ -77,13 +77,13 @@ impl FrameBuilder {
         }
     }
 
-    pub fn with_header(mut self) -> FrameBuilder {
+    pub fn with_header(mut self) -> Encoder {
         let header = FrameHeader::new(MAGIC_BYTES, self.width, self.height);
         self.header = Some(header);
         self
     } 
 
-    pub fn build(self) -> Vec<u8> {
+    pub fn encode(self) -> Vec<u8> {
         if let Some(header) = self.header {
             let mut bytes = Vec::with_capacity(
                 size_of::<FrameHeader>() + 

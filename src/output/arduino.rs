@@ -1,7 +1,7 @@
 use std::{time};
 use owo_colors::OwoColorize;
 
-use crate::{output::{encoding::FrameBuilder, ImageOutput, OutputError}, render::Image};
+use crate::{output::{encoder::Encoder, ImageOutput, OutputError}, render::Image};
 
 pub struct ArduinoOutput {
     path: String,
@@ -34,9 +34,9 @@ impl ImageOutput for ArduinoOutput {
 
         // Generate data bytes
         println!("{}", "Encoding the image to binary...".yellow());
-        let bytes = FrameBuilder::new(img)
+        let bytes = Encoder::new(img)
             .with_header()
-            .build();
+            .encode();
 
         // Stream data
         println!("{}", "Streaming the image to Arduino...".yellow());

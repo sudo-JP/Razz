@@ -1,7 +1,7 @@
 use crate::render::Image;
 pub mod ppm;
 pub mod arduino;
-pub mod encoding;
+pub mod encoder;
 
 pub use ppm::PPMOutput;
 pub use arduino::ArduinoOutput;

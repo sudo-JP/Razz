@@ -3,6 +3,11 @@ use std::time::Duration;
 //use razz::cli::Cli;
 use rumqttc::{MqttOptions, AsyncClient, QoS};
 use tokio::{task, time};
+
+use std::env;
+use dotenvy::dotenv;
+
+
 #[tokio::main]
 async fn main()  {
     //let cli = Cli::parse();

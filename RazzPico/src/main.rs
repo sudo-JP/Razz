@@ -14,7 +14,13 @@ use mipidsi::Builder;
 use mipidsi::models::ST7735s;
 use mipidsi::interface::SpiInterface;
 use mipidsi::TestImage;
+use embassy_rp::pio::Pio;
+use static_cell::StaticCell;
 
+const WIFI_SSID: &str = env!("WIFI_SSID");
+const WIFI_PASSWORD: &str = env!("WIFI_PASSWORD");
+
+static STATE: StaticCell<cyw43::State> = StaticCell::new();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -24,6 +30,11 @@ async fn main(_spawner: Spawner) {
     let dc = Output::new(p.PIN_13, Level::Low);
     let cs = Output::new(p.PIN_5, Level::High);
     let rst = Output::new(p.PIN_14, Level::Low);
+
+    let pwr = Output::new(p.PIN_23, Level::Low);
+    let cs = Output::new(p.PIN_25, Level::High);
+    let mut pio = Pio::new(p.PIO0, Irqs);
+    let spi = cyw43_pio::PioSpi::new(&mut pio.common, pio.sm0, pio.DMA_CH0, cs, p.PIN_24, p.PIN_29);
 
     let mut config = Config::default();
     config.frequency = 1_000_000;
@@ -44,5 +55,7 @@ async fn main(_spawner: Spawner) {
 
     lcd_led.set_high();
 
+    let fw = cyw43_firmware::CYW43_43439A0;
+    let clm = cyw43_firmware::CYW43_43439A0_CLM;
     loop {}
 }
