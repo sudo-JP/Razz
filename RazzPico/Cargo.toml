@@ -26,6 +26,7 @@ mipidsi = "0.10.0"
 panic-halt = "0.2"
 cyw43-firmware = { version = "0.1", features = ["wifi"] }
 rust-mqtt = { version = "0.3", default-features = false, features = ["no_std"] }
+embedded-io-async = { version = "0.6" }
 
 [package.metadata.rust-analyzer]
 rustc_source = "discover"
