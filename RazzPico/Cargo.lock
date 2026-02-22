@@ -1218,6 +1218,7 @@ dependencies = [
  "cyw43-pio",
  "dotenvy",
  "embassy-executor",
+ "embassy-futures",
  "embassy-net",
  "embassy-rp",
  "embassy-sync",

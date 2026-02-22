@@ -10,6 +10,9 @@ use embassy_rp::Peri;
 use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29, DMA_CH0, PIO0};
 use embassy_rp::clocks::RoscRng;
 
+use embassy_time::{Timer, Duration};
+use embassy_futures::select::{select, Either};
+
 pub struct WifiPins<'d> {
     pub pwr: Peri<'d, PIN_23>,
     pub cs: Peri<'d, PIN_25>,
@@ -72,9 +75,9 @@ impl Wifi {
         spawner.spawn(wifi_task(runner)).unwrap();
 
         control.init(clm).await;
-        control
+        /*control
             .set_power_management(cyw43::PowerManagementMode::PowerSave)
-            .await;
+            .await;*/
 
 
         // stack setup
@@ -96,11 +99,15 @@ impl Wifi {
         (Self { control }, stack)
     }
 
-    pub async fn connect(&mut self) {
-        self.control.join(WIFI_SSID, 
-            JoinOptions::new(WIFI_PASSWORD.as_bytes()))
-            .await.unwrap();
-        self.control.gpio_set(0, true).await; // onboard LED on success
+    pub async fn connect(&mut self) -> Result<(), &'static str> {
+        match select(
+            self.control.join(WIFI_SSID, JoinOptions::new(WIFI_PASSWORD.as_bytes())),
+            Timer::after(Duration::from_secs(10))
+        ).await {
+            Either::First(Ok(_)) => Ok(()),
+            Either::First(Err(_)) => Err("join failed"),
+            Either::Second(_) => Err("timeout"),
+        }
     }
 }
 

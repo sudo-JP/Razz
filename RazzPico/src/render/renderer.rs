@@ -10,7 +10,7 @@ use embassy_rp::{gpio::{Level, Output}};
 use embassy_rp::peripherals::{PIN_12, PIN_13, PIN_14, PIN_4, PIN_5, PIN_6, PIN_7, SPI0};
 
 // Graphics
-use embedded_graphics::prelude::*;
+use embedded_graphics::{mono_font::{ascii::FONT_6X13, MonoTextStyle}, pixelcolor::Rgb565, prelude::*, text::Text};
 use mipidsi::TestImage;
 
 // Misc
@@ -89,5 +89,18 @@ impl Renderer {
         TestImage::new()
             .draw(&mut self.display)
             .unwrap()
+    }
+
+    pub fn clear(&mut self) {
+        self.display.clear(Rgb565::BLACK)
+            .unwrap();
+    }
+
+    pub fn text(&mut self, s: &str, line: u8) {
+        let y = 10 + (line as i32 * 12);
+        let style = MonoTextStyle::new(&FONT_6X13, Rgb565::WHITE);
+        Text::new(s, Point::new(10, y), style)
+            .draw(&mut self.display)
+            .unwrap();
     }
 }
