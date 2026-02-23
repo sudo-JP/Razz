@@ -39,24 +39,16 @@ async fn main(spawner: Spawner) {
     };
 
     renderer.text(WIFI_SSID, 1);
-    delay(5000);
     renderer.text(WIFI_PASSWORD, 2);
-    delay(5000);
     
     let (mut wifi, stack) = Wifi::new(spawner, wifi_pins)
         .await;
     renderer.text("Init Wifi", 3);
-    delay(1000);
-    match wifi.connect().await {
-        Ok(_) => renderer.text("connected", 4),
-        Err(e) => renderer.text(e, 4),
-    }
-    delay(1000);
     stack.wait_link_up().await;
-    renderer.text("Wait Link Up", 5);
-    delay(1000);
+    renderer.text("Wait Link Up", 4);
+
     stack.wait_config_up().await;
-    renderer.text("Wait Config Up", 6);
+    renderer.text("Wait Config Up", 5);
 
     loop {}
 }
