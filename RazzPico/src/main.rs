@@ -1,15 +1,16 @@
 #![no_std]
 #![no_main]
 
+use cortex_m::asm::delay;
 // Hardware blah blah
 use embassy_executor::Spawner;
-use embassy_net::Stack;
 use panic_halt as _;
 
 use razzpico::networking::wifi::WifiPins;
 use razzpico::{Renderer, RendererPins, Wifi};
-use static_cell::StaticCell;
 
+const WIFI_SSID: &str = env!("WIFI_SSID");
+const WIFI_PASSWORD: &str = env!("WIFI_PASSWORD");
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
@@ -25,6 +26,8 @@ async fn main(spawner: Spawner) {
         spi0: p.SPI0.into(),
     };
     let mut renderer = Renderer::new(rend_pins);
+    renderer.on();
+    renderer.clear();
 
     let wifi_pins = WifiPins{
         pwr: p.PIN_23.into(),
@@ -35,12 +38,17 @@ async fn main(spawner: Spawner) {
         pio: p.PIO0.into(),
     };
 
+    renderer.text(WIFI_SSID, 1);
+    renderer.text(WIFI_PASSWORD, 2);
+    
     let (mut wifi, stack) = Wifi::new(spawner, wifi_pins)
         .await;
-
-    wifi.connect().await;
+    renderer.text("Init Wifi", 3);
     stack.wait_link_up().await;
+    renderer.text("Wait Link Up", 4);
+
     stack.wait_config_up().await;
+    renderer.text("Wait Config Up", 5);
 
     loop {}
 }

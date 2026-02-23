@@ -10,6 +10,11 @@ use embassy_rp::Peri;
 use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29, DMA_CH0, PIO0};
 use embassy_rp::clocks::RoscRng;
 
+use embassy_time::{Timer, Duration};
+use embassy_futures::select::{select, Either};
+
+use crate::networking::ip::IPv4Addr;
+
 pub struct WifiPins<'d> {
     pub pwr: Peri<'d, PIN_23>,
     pub cs: Peri<'d, PIN_25>,
@@ -27,6 +32,7 @@ bind_interrupts!(struct Irqs{
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
 });
 
+// ENV 
 const WIFI_SSID: &str = env!("WIFI_SSID");
 const WIFI_PASSWORD: &str = env!("WIFI_PASSWORD");
 
@@ -72,13 +78,29 @@ impl Wifi {
         spawner.spawn(wifi_task(runner)).unwrap();
 
         control.init(clm).await;
-        control
-            .set_power_management(cyw43::PowerManagementMode::PowerSave)
-            .await;
 
+        // Connect to wifi
+        control.join(WIFI_SSID, JoinOptions::new(WIFI_PASSWORD.as_bytes()))
+            .await
+            .unwrap();
 
         // stack setup
-        let config = embassy_net::Config::dhcpv4(Default::default());
+        let pico_ip = IPv4Addr::get_pico_ip();
+        let address = pico_ip.to_embassy_ip();
+
+        let gateway_ip = IPv4Addr::get_gateway();
+        let gateway = embassy_net::Ipv4Address::new(
+            gateway_ip.oct1,
+            gateway_ip.oct2,
+            gateway_ip.oct3,
+            gateway_ip.oct4
+        );
+
+        let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
+            address: embassy_net::Ipv4Cidr::new(address, IPv4Addr::get_mask()),
+            gateway: Some(gateway),
+            dns_servers: Default::default(),
+        });
         let mut rng = RoscRng;
 
         static STACK: StaticCell<embassy_net::Stack<'static>> = StaticCell::new();
@@ -96,11 +118,5 @@ impl Wifi {
         (Self { control }, stack)
     }
 
-    pub async fn connect(&mut self) {
-        self.control.join(WIFI_SSID, 
-            JoinOptions::new(WIFI_PASSWORD.as_bytes()))
-            .await.unwrap();
-        self.control.gpio_set(0, true).await; // onboard LED on success
-    }
 }
 
