@@ -12,10 +12,26 @@ After that, I plan to learn physics, and make a physics simulation. To top every
 I understand most of the part in Ray Tracing In One Weekend. Three quarter of the book does required me to do write out the math, or just understanding them in general. However, the latter quarter...is something else. The math gets more abstract, less explanation of why this is the case, and leave more of the math to the mathematicians. It is a valid approach to not fully understand the math from a CS perspective, however, I feel like I've been left too much in the dark. I'll try to brush up my math still for the next chapter. 
 
 ### Arduino 
-Arduino poses challenging problems like hardware constraints, embedded system protocol, hardware, and timing issue. Here are a list of things that I had trouble with: 
-* Hardware Constraints: Arduino Uno only have 2KB of RAM, but the TFT render have 128x160 (Yes, this is another issue-ish where the dimension is a bit weird how width is 128 and height is 160). This means that I can't store all image in a buffer of 128 * 160 * 3 (RGB Value). The solution I used for this was converting RGB888 to BGR565, which means converting 3 bytes RGB down to 2 bytes. Still doesn't resolve the limited RAM though. I decided to use a temporary smaller buffer of size 512, flush it when the buffer is full, or when image received. Worked pretty well. 
-* Embedded System Protocol: I learned how to send Magic Bytes to verify and to have a fall back state. Setup header struct with image dimension, sending byte by byte to the serial. Also learned what checksum is, and how can I use that to verify my data. Another problem that took hours to debug was I open a connection with Arduino and send data to early, the image was noisy and the color was wrong. I had to enforce a longer timeout for the port to be ready. Moreover, I had a state machine on Arduino to verify the work, with bit manipulation and fall back state in case someting is corrupted. 
-* Hardware Issue: For some reason, my TFT screen uses BGR instead of RGB. That wasn't big of an issue. The timing issue with port openning delay is worse, with noisy color etc. I thought it was hardware issue since the picture rendered ONCE, and never again. I tried to use initR() but then it started to draw from a quarter of the screen to the right instead from regular left to right, hence the 128x160 issue. I went back to begin() and it worked better. Also, I use setAddrWindow to keep the hardware connection "hot". Luckily, with the API, the pushColor() accept a 565 color value, so I just need to pass from my protocol.
+Working with Arduino presented several interconnected challenges spanning hardware constraints, protocol design, and timing issues:
+
+### Hardware Constraints
+Arduino Uno has only 2KB of RAM, insufficient for storing a full 128×160 TFT frame buffer (128 × 160 × 3 = 61KB for RGB888). My solution involved two optimizations:
+- **Color compression**: Converting RGB888 (3 bytes/pixel) to RGB565 (2 bytes/pixel), reducing payload size by 33%
+- **Circular buffer**: Implementing a 512-byte staging buffer with incremental flushing. Buffer chunks are pushed to the display via `pushColor()` as they arrive, avoiding full-frame storage
+
+### Protocol Design
+I designed a custom binary serial protocol with the following features:
+- **Magic bytes** (0xBABE) for frame synchronization and recovery
+- **Header structure** containing image dimensions (width, height) for validation
+- **CRC16 checksums** for both header and payload integrity verification
+- **State machine parser** (FIND_SYNC → READ_HEADER → READ_PAYLOAD → VERIFY) with automatic fallback to FIND_SYNC on corruption
+
+The biggest debugging challenge was deterministic image corruption caused by sending data before Arduino completed initialization. The display reset (triggered by opening the serial port via DTR signal) takes ~2-5 seconds. Solution: implement a handshake where Arduino sends a ready byte (0xAA) after initialization, and Rust blocks on `read()` before transmitting.
+
+### Hardware Quirks
+- **BGR color order**: Display hardware interprets RGB565 as BGR565. Fixed by swapping red/blue channels in the Rust encoder
+- **Display initialization**: `screen.begin()` worked reliably for correct scan direction (top-left to bottom-right), while `initR()` variants produced quarter-screen offsets or incorrect orientations
+- **setAddrWindow optimization**: Setting the draw window once in `setup()` allows subsequent `pushColor()` calls to stream pixels sequentially without repeated addressing overhead
 
 
 ## Image 

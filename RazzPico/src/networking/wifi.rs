@@ -85,19 +85,14 @@ impl Wifi {
             .unwrap();
 
         // stack setup
-        let pico_ip = IPv4Addr::get_pico_ip();
-        let address = pico_ip.to_embassy_ip();
+        let pico_addr = IPv4Addr::get_pico_ip()
+            .to_embassy_ip();
 
-        let gateway_ip = IPv4Addr::get_gateway();
-        let gateway = embassy_net::Ipv4Address::new(
-            gateway_ip.oct1,
-            gateway_ip.oct2,
-            gateway_ip.oct3,
-            gateway_ip.oct4
-        );
+        let gateway = IPv4Addr::get_gateway()
+            .to_embassy_gateway();
 
         let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
-            address: embassy_net::Ipv4Cidr::new(address, IPv4Addr::get_mask()),
+            address: embassy_net::Ipv4Cidr::new(pico_addr, IPv4Addr::get_mask()),
             gateway: Some(gateway),
             dns_servers: Default::default(),
         });
