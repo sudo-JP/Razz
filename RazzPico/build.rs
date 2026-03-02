@@ -41,4 +41,25 @@ fn main() {
         .for_each(|(index, value)| {
             println!("cargo:rustc-env=GATEWAY_{}={}", index, value);
         });
+
+    let broker = env::var("BROKER")
+        .expect("Broker not found");
+    let broker_ips = split_ip(&broker);
+
+    broker_ips 
+        .iter()
+        .enumerate()
+        .for_each(|(index, value)| {
+            println!("cargo:rustc-env=BROKER_{}={}", index, value);
+        });
+
+    // MQTT 
+    let mqtt_port = env::var("MQTT_PORT")
+        .expect("MQTT Port not found");
+    println!("cargo:rustc-env=MQTT_PORT={}", mqtt_port);
+         
+    let mqtt_topic = env::var("MQTT_TOPIC")
+        .expect("MQTT Topic Not Set");
+    println!("cargo:rustc-env=MQTT_TOPIC={}", mqtt_topic);
+
 }

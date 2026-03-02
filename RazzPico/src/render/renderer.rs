@@ -30,6 +30,8 @@ pub struct Renderer {
 
 use embassy_rp::Peri;
 
+use crate::networking::mqtt::MQTT_CHANNEL;
+
 pub struct RendererPins<'d> {
     pub pin_led: Peri<'d, PIN_12>,
     pub pin_dc: Peri<'d, PIN_13>,
@@ -102,5 +104,14 @@ impl Renderer {
         Text::new(s, Point::new(10, y), style)
             .draw(&mut self.display)
             .unwrap();
+    }
+
+    pub async fn consume(&mut self) {
+        let receiver = MQTT_CHANNEL.receiver();
+        loop {
+            let (buf, len) = receiver.receive().await;
+            let msg = core::str::from_utf8(&buf[..len]).unwrap();
+            self.text(msg, 1);
+        }
     }
 }

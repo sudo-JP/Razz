@@ -15,6 +15,10 @@ use embassy_futures::select::{select, Either};
 
 use crate::networking::ip::IPv4Addr;
 
+// ENV 
+const WIFI_SSID: &str = env!("WIFI_SSID");
+const WIFI_PASSWORD: &str = env!("WIFI_PASSWORD");
+
 pub struct WifiPins<'d> {
     pub pwr: Peri<'d, PIN_23>,
     pub cs: Peri<'d, PIN_25>,
@@ -32,9 +36,6 @@ bind_interrupts!(struct Irqs{
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
 });
 
-// ENV 
-const WIFI_SSID: &str = env!("WIFI_SSID");
-const WIFI_PASSWORD: &str = env!("WIFI_PASSWORD");
 
 #[embassy_executor::task]
 async fn wifi_task(runner: cyw43::Runner<'static, Output<'static>, 
