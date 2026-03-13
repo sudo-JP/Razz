@@ -1,4 +1,4 @@
-use crate::{Interval, Ray};
+use razz_core::math::{Interval, Ray};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub struct World {

@@ -1,6 +1,8 @@
 use rayon::{iter::{IndexedParallelIterator, ParallelIterator}, slice::ParallelSliceMut};
 
-use crate::{linear_to_gamma, render::Image, Camera, Interval, Vec3, World};
+use crate::{render::{ray_color, Image}, Camera, World};
+
+use razz_core::math::{linear_to_gamma, Interval, Vec3};
 
 const MAX_DEPTH: i32 = 50;
 
@@ -29,7 +31,7 @@ impl Renderer {
             // Sampling pixel
             for _ in 0..self.samples_per_pxl {
                 let r = cam.ray(row, col);
-                color = r.ray_color(world, MAX_DEPTH) + color;
+                color = ray_color(&r, world, MAX_DEPTH) + color;
             }
 
             // Color vector

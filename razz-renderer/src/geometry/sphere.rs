@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use crate::hittable::HitSide;
-use crate::{Interval, Material};
-use crate::{vec3::dot, Ray, Vec3};
+use razz_core::math::{vec3::dot, Ray, Vec3, Interval};
+use crate::{Material};
 use crate::geometry::hittable::{HitRecord, Hittable};
 
 pub type Point3 = Vec3;

@@ -23,6 +23,19 @@ const MQTT_TOPIC: &str = env!("MQTT_TOPIC");
 
 pub static MQTT_CHANNEL: Channel<CriticalSectionRawMutex, ([u8; 512], usize), 4> = Channel::new();
 
+#[embassy_executor::task]
+pub async fn mqtt_task(stack: &'static embassy_net::Stack<'static>) {
+    let mqtt = MqttClient::new();
+    mqtt.run(stack).await;
+}
+
+async fn debug_msg(msg: &[u8]) {
+    let mut buf = [0u8; 512];
+    let len = msg.len().min(512);
+    buf[..len].copy_from_slice(&msg[..len]);
+    MQTT_CHANNEL.sender().send((buf, len)).await;
+}
+
 impl MqttClient {
     pub fn new() -> Self {
         let ip = IPv4Addr::get_broker();
@@ -37,6 +50,7 @@ impl MqttClient {
     }
 
     pub async fn run(&self, stack: &'static embassy_net::Stack<'static>) {
+        debug_msg(b"run started").await;
         let mut buffer = [0; BUFFER_SIZE];
         let mut buffer = BumpBuffer::new(&mut buffer);
 
@@ -52,6 +66,7 @@ impl MqttClient {
                 self.port))
             .await.unwrap();
 
+        debug_msg(b"socket ok").await;
 
         let connect_opt = ConnectOptions{
             session_expiry_interval: SessionExpiryInterval::Seconds(60),
@@ -68,6 +83,8 @@ impl MqttClient {
             Some(MqttString::try_from("pico").unwrap()))
             .await
             .unwrap();
+
+        debug_msg(b"connect ok").await;
 
         let sub_opt = SubscriptionOptions {
             retain_handling: RetainHandling::SendIfNotSubscribedBefore,

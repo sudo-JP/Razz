@@ -1,4 +1,5 @@
-use crate::{hittable::HitSide, material::material::ScatterResult, random_f64, vec3::{dot, refract, Color3}, HitRecord, Material, Ray};
+use crate::{hittable::HitSide, material::material::ScatterResult, HitRecord, Material};
+use razz_core::math::{random_f64, vec3::{dot, refract, Color3}, Ray};
 
 pub struct Dielectric {
     refraction_idx: f64,

@@ -6,7 +6,9 @@ use cortex_m::asm::delay;
 use embassy_executor::Spawner;
 use panic_halt as _;
 
+use razzpico::networking::mqtt::mqtt_task;
 use razzpico::networking::wifi::WifiPins;
+use razzpico::networking::MqttClient;
 use razzpico::{Renderer, RendererPins, Wifi};
 
 const WIFI_SSID: &str = env!("WIFI_SSID");
@@ -43,12 +45,14 @@ async fn main(spawner: Spawner) {
     
     let (mut wifi, stack) = Wifi::new(spawner, wifi_pins)
         .await;
+    //embassy_time::Timer::after_millis(2000).await;
     renderer.text("Init Wifi", 3);
-    stack.wait_link_up().await;
-    renderer.text("Wait Link Up", 4);
+    spawner.spawn(mqtt_task(stack)).unwrap();
 
-    stack.wait_config_up().await;
-    renderer.text("Wait Config Up", 5);
+    renderer.text("Consume", 4);
+    renderer.clear();
+    embassy_time::Timer::after_millis(2000).await;
+    renderer.consume().await;
 
     loop {}
 }

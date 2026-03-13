@@ -34,6 +34,6 @@ https://github.com/user-attachments/assets/beb13901-d2f5-4c20-9113-03e83370cab0
 ## Run 
 To run, do 
 ```bash
-cargo run --release -- --output test.ppm --width 1000 --height 1000
+cargo run -p razz-renderer --release -- --output test.ppm --width 1000 --height 1000
 ```
 

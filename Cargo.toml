@@ -1,28 +1,11 @@
-[package]
-name = "razz"
-version = "0.1.0"
-edition = "2024"
-authors = ["Jason Phan"]
+[workspace]
+members = [
+    "razz-compiler",
+    "razz-core",
+    "razz-renderer"
+]
 
-[dependencies]
-# Misc
-anyhow = "1.0"
-clap = { version = "4.5.53", features = ["derive"] }
-owo-colors = "4.2.3"
+resolver = "2"
 
-# Parallel
-rayon = "1.11.0"
-
-# Random
-rand = "0.9.2"
-
-# Arduino stuff
-crc = "3.4.0"
-serialport = "4.8.1"
-
-# MQTT
-rumqttc = "0.25.1"
-tokio = { version = "1.49.0", features = ["full"] }
-
-# Wifi stuff
-dotenvy = "0.15.7"
+[workspace.dependencies]
+razz-core = { path = "razz-core" }

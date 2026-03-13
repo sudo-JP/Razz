@@ -1,7 +1,5 @@
 use crate::render::Image;
-use crate::vec3::cross;
-use crate::{math::Point3};
-use crate::{random_f64, Ray, Vec3};
+use razz_core::math::{vec3::cross, Point3, random_f64, Ray, Vec3};
 
 
 pub struct Camera {
