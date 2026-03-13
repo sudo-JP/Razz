@@ -1,7 +1,7 @@
 use std::ops::{Add, Mul, Sub, Div};
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
 
-use crate::{random_f64, random_range};
+use crate::math::{random_f64, random_range};
 
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;

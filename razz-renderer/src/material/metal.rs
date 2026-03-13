@@ -1,4 +1,5 @@
-use crate::{material::material::ScatterResult, vec3::Color3, HitRecord, Material, Ray, Vec3};
+use crate::{material::material::ScatterResult, HitRecord, Material};
+use razz_core::math::{Ray, Vec3, vec3::Color3};
 
 pub struct Metal {
     albedo: Color3,

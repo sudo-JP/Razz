@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
-use crate::vec3::dot;
-use crate::{Interval, Material, Ray};
-use crate::math::{Point3, Vec3};
+use razz_core::math::vec3::dot;
+use razz_core::math::{Interval, Ray};
+use razz_core::math::{Point3, Vec3};
+use crate::Material;
 
 // From the book
 // Inside == True

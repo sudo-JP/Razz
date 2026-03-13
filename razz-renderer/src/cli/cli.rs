@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use crate::output::{ImageOutput, OutputError};
 use crate::render::Image;
-use crate::vec3::Color3;
-use crate::{random_f64, random_range, ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Point3, Renderer, Sphere, Vec3, World};
+use razz_core::math::vec3::{Color3, Point3, Vec3};
+use razz_core::math::{random_f64, random_range};
+use crate::{ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World};
 use clap::{ValueEnum,Parser};
 use owo_colors::OwoColorize;
 

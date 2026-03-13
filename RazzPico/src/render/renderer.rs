@@ -26,6 +26,7 @@ type Display = mipidsi::Display<SpiInterface<'static,
 pub struct Renderer {
     display: Display,
     power: Output<'static>,
+    idx: u8,
 }
 
 use embassy_rp::Peri;
@@ -82,7 +83,7 @@ impl Renderer {
             .init(&mut embassy_time::Delay)
             .unwrap();
 
-        Self { display: display, power: lcd_led }
+        Self { display: display, power: lcd_led, idx: 0 }
     }
 
     pub fn on(&mut self) { self.power.set_high(); }
@@ -111,7 +112,8 @@ impl Renderer {
         loop {
             let (buf, len) = receiver.receive().await;
             let msg = core::str::from_utf8(&buf[..len]).unwrap();
-            self.text(msg, 1);
+            self.text(msg, self.idx);
+            self.idx += 1;
         }
     }
 }

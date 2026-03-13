@@ -1,4 +1,5 @@
-use crate::{HitRecord, Point3, Ray};
+use crate::{HitRecord};
+use razz_core::math::{Point3, Ray};
 
 pub enum ScatterResult {
     Scattered {

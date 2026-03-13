@@ -1,0 +1,27 @@
+[package]
+name = "razz-renderer"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jason Phan"]
+
+[dependencies]
+# Misc
+anyhow = "1.0"
+clap = { version = "4.5.53", features = ["derive"] }
+owo-colors = "4.2.3"
+
+# Parallel
+rayon = "1.11.0"
+
+# Arduino stuff
+crc = "3.4.0"
+serialport = "4.8.1"
+
+# MQTT
+rumqttc = "0.25.1"
+tokio = { version = "1.49.0", features = ["full"] }
+
+# Wifi stuff
+dotenvy = "0.15.7"
+
+razz-core.workspace = true 
