@@ -24,4 +24,5 @@ tokio = { version = "1.49.0", features = ["full"] }
 # Wifi stuff
 dotenvy = "0.15.7"
 
-razz-core.workspace = true 
+razz-core = { path = "../razz-core/" }
+

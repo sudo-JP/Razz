@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::output::{ImageOutput, OutputError};
 use crate::render::Image;
+use crate::world::Background;
 use razz_core::math::vec3::{Color3, Point3, Vec3};
 use razz_core::math::{random_f64, random_range};
 use crate::{ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World};
@@ -76,7 +77,8 @@ fn ray_trace(cli: &Cli) -> Image {
     let ground_mat: Arc<dyn Material + Send + Sync> = Arc::new(Lambertian::new(Color3::new(0.5, 0.5, 0.5)));
 
     // World
-    let mut world = World::new();
+    let bg = Background::new(Vec3::new(0.5, 0.7, 1.0), Vec3::new(1., 1., 1.));
+    let mut world = World::new(bg);
     let sph1 = Sphere::new(Point3::new(0., -1000., 0.), 1000., Arc::clone(&ground_mat));
     world.push(Box::new(sph1));
 

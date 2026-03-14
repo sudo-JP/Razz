@@ -31,7 +31,7 @@ impl Renderer {
             // Sampling pixel
             for _ in 0..self.samples_per_pxl {
                 let r = cam.ray(row, col);
-                color = ray_color(&r, world, MAX_DEPTH) + color;
+                color = ray_color(&r, world, MAX_DEPTH, &world.bg) + color;
             }
 
             // Color vector

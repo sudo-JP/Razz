@@ -1,0 +1,57 @@
+fn add(a: int, b: int) -> int {
+    return a + b; 
+}
+
+fn main() -> null {
+    // This is a comment, -> means access the json object 
+    // Type can be inferred 
+    cam = GET /camera;
+    cam->x = 5; 
+    // Adjust camera angle 
+    PATCH /camera cam;
+    color = POST /color {
+        r: add(b:3, a: 2), 
+        g: 5, 
+        b: 5, 
+    };
+    // Type can be specified 
+    // Some types like the background or camera is in the language itself
+    background: Background = GET /background; 
+    background->color = color;
+
+    PUT /background background;
+    a = 255; 
+    for (i = 2; i < 100; i += 1) {
+        a += -i; 
+    }
+    // can't access i here 
+    b: bool = false; 
+    if a > 100 {
+        color->g = a; 
+    } else if a < 50 && a >= 20 || (a == 99 && !b){
+        color->b = 1; 
+    }
+    else {
+        color->r = 2; 
+    }
+    color->g = add (a: 100,
+        b: -1
+    ); 
+    POST /sphere {
+        x: 1,
+        y: 2, 
+        z: 3, 
+        color: color,
+    }; 
+    
+    PATCH /output {
+        type: PPM,
+        file: "test.ppm"
+    }; 
+
+
+    PATCH /output {
+        type: Arduino,
+        file: "test.ppm" // Ignored? 
+    }; 
+}

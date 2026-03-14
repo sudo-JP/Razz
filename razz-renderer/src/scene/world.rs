@@ -1,8 +1,28 @@
-use razz_core::math::{Interval, Ray};
+use razz_core::math::{vec3::Color3, Interval, Ray};
 use crate::geometry::hittable::{HitRecord, Hittable};
+
+/// Background struct holds the lerp color representation.
+/// 
+pub struct Background {
+    pub top: Color3, 
+    pub bottom: Color3, 
+}
+
+impl Background {
+    pub fn new(top: Color3, bottom: Color3) -> Self {
+        Self { top, bottom }
+    }
+
+    pub fn new_normalize(top: Color3, bottom: Color3) -> Self {
+        let norm_top = Color3::new(top.x() / 255., top.y() / 255., top.z() / 255.);
+        let norm_bot = Color3::new(bottom.x() / 255., bottom.y() / 255., bottom.z() / 255.);
+        Self { top: norm_top, bottom: norm_bot }
+    }
+}
 
 pub struct World {
     pub objects: Vec<Box<dyn Hittable>>,
+    pub bg: Background,
 }
 
 impl Hittable for World {
@@ -26,7 +46,7 @@ impl Hittable for World {
 }
 
 impl World {
-    pub fn new() -> Self { Self { objects: vec![] }}
+    pub fn new(bg: Background) -> Self { Self { objects: vec![], bg }}
 
     pub fn push(&mut self, object: Box<dyn Hittable>) {
         self.objects.push(object);

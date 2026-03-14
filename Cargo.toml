@@ -2,10 +2,14 @@
 members = [
     "razz-compiler",
     "razz-core",
-    "razz-renderer"
+    "razz-renderer", 
+    "razz-pico"
 ]
 
 resolver = "2"
 
-[workspace.dependencies]
-razz-core = { path = "razz-core" }
+default-members = [
+    "razz-core", 
+    "razz-renderer",
+    "razz-compiler"
+]
