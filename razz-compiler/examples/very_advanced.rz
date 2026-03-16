@@ -1,23 +1,26 @@
-fn add(a: int, b: int) -> int {
+fn add(a: int, b: int) int {
     return a + b; 
 }
 
-fn main() -> null {
+fn main() null {
     // This is a comment, -> means access the json object 
     // Type can be inferred 
     cam = GET /camera;
     cam->x = 5; 
     // Adjust camera angle 
     PATCH /camera cam;
-    color = POST /color {
+
+    color = Color {
         r: add(b:3, a: 2), 
         g: 5, 
         b: 5, 
     };
+
     // Type can be specified 
     // Some types like the background or camera is in the language itself
     background: Background = GET /background; 
-    background->color = color;
+    background->top = color;
+    background->bottom = Color { r: 255, g: 255, b: 255 };
 
     PUT /background background;
     a = 255; 
@@ -37,10 +40,16 @@ fn main() -> null {
     color->g = add (a: 100,
         b: -1
     ); 
-    POST /sphere {
+
+    coord = Vec3 {
         x: 1,
         y: 2, 
         z: 3, 
+    };
+
+    POST /sphere {
+        coord: coord,
+        radius: 0.5,
         color: color,
     }; 
     
