@@ -1,4 +1,17 @@
-pub enum Token {
+pub struct Token {
+    pub kind: TokenKind, 
+    pub line: usize, 
+    pub col: usize, 
+}
+
+impl Token {
+    pub fn new(kind: TokenKind, line: usize, col: usize) -> Self {
+        Self { kind, line, col } 
+    }
+}
+
+#[derive(Debug)]
+pub enum TokenKind {
     // Statement
     Fn, 
     Return, 
@@ -74,11 +87,13 @@ pub enum Token {
     FloatLit(f64), 
     StringLit(String), 
     BoolLit(bool), 
-    NullLit, 
     Ident(String),
+    NullLit, 
 
     // Output Types
     PPM, 
     Arduino,
+
     Eof,
 }
+
