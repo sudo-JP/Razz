@@ -4,12 +4,6 @@ pub struct Token {
     pub col: usize, 
 }
 
-impl Token {
-    pub fn new(kind: TokenKind, line: usize, col: usize) -> Self {
-        Self { kind, line, col } 
-    }
-}
-
 #[derive(Debug)]
 pub enum TokenKind {
     // Statement
