@@ -1,0 +1,6 @@
+IntLit(123) Line: 1 Col: 1
+FloatLit(12.3) Line: 2 Col: 1
+StringLit("this is a string") Line: 3 Col: 1
+StringLit("multi\nline\nstring") Line: 6 Col: 1
+StringLit("") Line: 7 Col: 1
+Eof

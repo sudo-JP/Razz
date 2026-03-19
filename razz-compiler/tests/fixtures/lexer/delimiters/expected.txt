@@ -1,0 +1,7 @@
+LBrace Line: 1 Col: 1
+LParen Line: 2 Col: 5 
+RParen Line: 2 Col: 6
+Colon Line: 2 Col: 8 
+SemiCol Line: 2 Col: 9
+RBrace Line: 3 Col: 1
+Eof 

@@ -9,11 +9,12 @@ pub struct LexError {
 #[derive(Debug)]
 pub enum LexErrorKind {
     InvalidChar(char),
+    InvalidNumber,
     UnterminatedString,
 }
 
 pub struct Lexer {
-    chars: Vec<char>, 
+    chars: Vec<u8>, 
     tokens: Vec<Token>, 
     lex_errors: Vec<LexError>,
 
@@ -27,7 +28,7 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(contents: &str) -> Self {
-        let chars = contents.chars().collect();
+        let chars = contents.as_bytes().to_vec();
         Self { 
             chars, 
             tokens: Vec::new(), 
@@ -67,7 +68,7 @@ impl Lexer {
     }
 
     // Advancing to the next char 
-    fn advance(&mut self) -> char {
+    fn advance(&mut self) -> u8 {
         let c = self.chars[self.current];
         self.current += 1; 
         self.col += 1;
@@ -75,7 +76,7 @@ impl Lexer {
     }
 
     // Conditional advance
-    fn expect(&mut self, expected: char) -> bool {
+    fn expect(&mut self, expected: u8) -> bool {
         // Out of bound 
         if self.is_at_end() { return false; }
 
@@ -88,65 +89,146 @@ impl Lexer {
         return true; 
     }
 
+    // Peek ahead without consuming 
+    fn peek(&self) -> u8 {
+        if self.is_at_end() { b'\0' }
+        else { self.chars[self.current] }
+    }
+
+    fn peak_next(&self) -> u8 {
+        if self.current + 1 >= self.chars.len() {
+            b'\0'
+        } else { self.chars[self.current + 1] }
+    }
+
+    // Handle string types
+    fn string(&mut self) {
+        // Keep going until " or end of file
+        while self.peek() != b'"' && !self.is_at_end() {
+            if self.peek() == b'\n' {
+                self.line += 1; 
+                self.col = 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            self.add_err(LexErrorKind::UnterminatedString);
+            return; 
+        }
+
+        // close "
+        self.advance();
+
+        let str_slice = &self.chars[self.start + 1..self.current - 1];
+        
+        let value = String::from_utf8(str_slice.to_vec()).unwrap();
+        self.add_token(TokenKind::StringLit(value));
+    }
+
+    // Handle number
+    fn number(&mut self) {
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        // For fraction 
+        if self.peek() == b'.' && self.peak_next().is_ascii_digit() {
+            self.advance();
+        } else if self.peek() == b'.' && !self.peak_next().is_ascii_digit() {
+            self.advance();
+            self.add_err(LexErrorKind::InvalidNumber);
+            return;
+        }
+        else {
+            // For Int 
+            let str_slice = &self.chars[self.start..self.current];
+            let value: i32 = String::from_utf8(str_slice.to_vec())
+                .unwrap()
+                .parse()
+                .unwrap();
+            self.add_token(TokenKind::IntLit(value));
+            return;  
+        }
+
+        // Only fractions get here
+        // Same loop to get all the number
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        let str_slice = &self.chars[self.start..self.current];
+        let value: f64 = String::from_utf8(str_slice.to_vec())
+            .unwrap()
+            .parse()
+            .unwrap(); 
+        self.add_token(TokenKind::FloatLit(value));
+    }
+
     fn scan_token(&mut self) {
         let c = self.advance();
 
         match c {
-            '(' => self.add_token(TokenKind::LParen),
-            ')' => self.add_token(TokenKind::RParen),
-            '{' => self.add_token(TokenKind::LBrace),
-            '}' => self.add_token(TokenKind::RBrace),
-            ';' => self.add_token(TokenKind::SemiCol),
-            ',' => self.add_token(TokenKind::Comma),
+            // DELIMITERS
+            b'(' => self.add_token(TokenKind::LParen),
+            b')' => self.add_token(TokenKind::RParen),
+            b'{' => self.add_token(TokenKind::LBrace),
+            b'}' => self.add_token(TokenKind::RBrace),
+            b';' => self.add_token(TokenKind::SemiCol),
+            b':' => self.add_token(TokenKind::Colon),
+            b',' => self.add_token(TokenKind::Comma),
 
             // ARITHMETIC, HANDLES + and +=, also other things
-            '+' => if self.expect('=') {
+            b'+' => if self.expect(b'=') {
                 self.add_token(TokenKind::AddE);
             } else { self.add_token(TokenKind::Add); }
 
-            '-' => if self.expect('=') {
+            b'-' => if self.expect(b'=') {
                 self.add_token(TokenKind::SubE);
-            } else if self.expect('>') {
+            } else if self.expect(b'>') {
                 self.add_token(TokenKind::Arrow);
             } else { self.add_token(TokenKind::Sub); }
 
-            '*' => if self.expect('=') {
+            b'*' => if self.expect(b'=') {
                 self.add_token(TokenKind::MultE);
             } else { self.add_token(TokenKind::Mult); }
 
             // Boolean stuff, except for assign 
-            '=' => if self.expect('=') {
+            b'=' => if self.expect(b'=') {
                 self.add_token(TokenKind::Eq);
             } else { self.add_token(TokenKind::Assign); }
 
-            '<' => if self.expect('=') {
+            b'<' => if self.expect(b'=') {
                 self.add_token(TokenKind::Le);
             } else { self.add_token(TokenKind::Lt); }
 
-            '>' => if self.expect('=') {
+            b'>' => if self.expect(b'=') {
                 self.add_token(TokenKind::Ge);
             } else { self.add_token(TokenKind::Gt); }
 
-            '!' => if self.expect('=') {
+            b'!' => if self.expect(b'=') {
                 self.add_token(TokenKind::Neq);
             } else { self.add_token(TokenKind::Not); }
 
-            '&' => if self.expect('&') {
+            b'&' => if self.expect(b'&') {
                 self.add_token(TokenKind::And);
-            } else { self.add_err(LexErrorKind::InvalidChar(c)); }
+            } else { self.add_err(LexErrorKind::InvalidChar(c as char)); }
 
-            '|' => if self.expect('|') {
+            b'|' => if self.expect(b'|') {
                 self.add_token(TokenKind::Or);
-            } else { self.add_err(LexErrorKind::InvalidChar(c)); }
+            } else { self.add_err(LexErrorKind::InvalidChar(c as char)); }
 
             // NOTE: Still missing / because its a bit complex with //, /**/, /endpoint and div 
             // TODO: Add Endpoints, string, numbers and Types 
+            b'"' => self.string(),
 
             // WHITESPACES 
-            ' ' | '\r' | '\t' => {}
-            '\n' => { self.col = 1; self.line += 1; }
+            b'\n' => { self.col = 1; self.line += 1; }
+            b' ' | b'\r' | b'\t' => {}
             _ => { 
-                self.add_err(LexErrorKind::InvalidChar(c));
+                if c.is_ascii_digit() {
+                    self.number();
+                } else { self.add_err(LexErrorKind::InvalidChar(c as char)); }
             }
         }
     }

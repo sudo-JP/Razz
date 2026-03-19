@@ -1,0 +1,18 @@
+Add Line: 1 Col: 1
+AddE Line: 1 Col: 3
+Sub Line: 1 Col: 6
+SubE Line: 1 Col: 8
+Mult Line: 1 Col: 11
+MultE Line: 1 Col: 13
+Eq Line: 2 Col: 1
+Neq Line: 2 Col: 4
+Gt Line: 2 Col: 7
+Ge Line: 2 Col: 9
+Lt Line: 2 Col: 12
+Le Line: 2 Col: 14
+And Line: 3 Col: 1
+Or Line: 3 Col: 4
+Not Line: 3 Col: 7
+Assign Line: 4 Col: 1
+Arrow Line: 4 Col: 3
+Eof

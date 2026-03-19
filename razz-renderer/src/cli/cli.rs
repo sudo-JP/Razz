@@ -9,11 +9,10 @@ use crate::{ArduinoOutput, Camera, Dielectric, Lambertian, Material, Metal, PPMO
 use clap::{ValueEnum,Parser};
 use owo_colors::OwoColorize;
 
-#[allow(non_camel_case_types)]
 #[derive(Clone, Debug, ValueEnum)]
 pub enum RenderOutput {
-    ppm,
-    arduino,
+    PPM,
+    Arduino,
 }
 
 #[derive(Parser, Debug)]
@@ -39,7 +38,7 @@ pub struct Cli {
     #[arg(long, help = "Camera position z", default_value_t)]
     pub cz: f64,
 
-    #[arg(long, value_enum, help = "Output type", default_value_t = RenderOutput::ppm)]
+    #[arg(long, value_enum, help = "Output type", default_value_t = RenderOutput::PPM)]
     pub otype: RenderOutput, 
 
     #[arg(long, help = "Samples per pixel", default_value_t = 50)]
@@ -141,8 +140,8 @@ impl Cli {
     pub fn run(&self) {
         println!("{}", "Rendering the image...".yellow());
         match self.otype {
-            RenderOutput::ppm => self.ppm(ray_trace(&self)),
-            RenderOutput::arduino => self.arduino(ray_trace(&self)),
+            RenderOutput::PPM => self.ppm(ray_trace(&self)),
+            RenderOutput::Arduino => self.arduino(ray_trace(&self)),
         }
     }
 
