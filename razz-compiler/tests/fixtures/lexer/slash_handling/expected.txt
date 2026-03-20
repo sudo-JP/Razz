@@ -1,0 +1,8 @@
+EPCamera Line: 1 Col: 1
+EPSphere Line: 2 Col: 1
+EPBackground Line: 3 Col: 1
+EPImage Line: 4 Col: 1
+EPOutput Line: 5 Col: 1
+Div Line: 7 Col: 1
+DivE Line: 8 Col: 2
+Eof

@@ -1,7 +1,20 @@
+use std::fmt;
+
+
 pub struct Token {
     pub kind: TokenKind, 
     pub line: usize, 
     pub col: usize, 
+}
+
+// For debugging and test
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.kind {
+            TokenKind::Eof => write!(f, "Eof"),
+            _ => write!(f, "{:?} Line: {} Col: {}", self.kind, self.line, self.col),
+        }
+    }
 }
 
 #[derive(Debug)]

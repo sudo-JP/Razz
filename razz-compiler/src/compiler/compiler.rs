@@ -1,11 +1,10 @@
 use clap::ValueEnum;
 use crate::lexer::tokens::Token;
 
-use crate::lexer::lexer::{LexErrorKind, Lexer};
-use owo_colors::OwoColorize;
+use crate::lexer::lexer::{LexError, Lexer};
 
 #[derive(ValueEnum, Clone, PartialEq)]
-pub enum CompileTarget {
+pub enum CompilerStage {
     Lexer, 
     Parser, 
     AST, 
@@ -14,46 +13,45 @@ pub enum CompileTarget {
     Codegen, 
 }
 
-pub struct Compiler;
-
-
-fn validate_lexer_tokens(lexer: Lexer, c: &CompileTarget) -> Option<Vec<Token>> {
-    let tokens = match lexer.scan_tokens() {
-        Ok(t) => t,
-        Err(bad_toks) => {
-            for t in &bad_toks {
-                if let LexErrorKind::InvalidChar(c) = t.kind {
-                    eprintln!("{} Invalid token {} at line: {}, column: {}", 
-                        "Error:".red(), c as char, t.line, t.col);
-                } else {
-                    eprintln!("{} Unterminated String at line: {}, column: {}", 
-                        "Error".red(), t.line, t.col);
-                }
-            }
-            return None; 
-        }
-    };
-
-    if matches!(c, CompileTarget::Lexer) {
-        for t in &tokens {
-            println!("Line: {}, Col: {}, Kind: {:?} ", t.line, t.col, t.kind);
-        }
-    }
-
-    Some(tokens)
+pub enum CompilerOutput {
+    Lexer(Vec<Token>),
+    Parser, 
+    AST, 
+    TypeCheck, 
+    IR,
+    Codegen,
 }
 
+pub enum CompilerError {
+    Lexer(Vec<LexError>),
+    Parser, 
+    AST, 
+    TypeCheck, 
+    IR,
+    Codegen,
+}
+
+
+pub struct Compiler;
 impl Compiler {
 
-    pub fn compiles(contents: &str, c: CompileTarget) {
+    pub fn compiles(contents: &str, c: CompilerStage) -> Result<CompilerOutput, CompilerError> {
         // LEXER 
         let lexer = Lexer::new(contents);
-
-        let Some(_tokens) = validate_lexer_tokens(lexer, &c) 
-            else { return };
+        let _lexed = match lexer.lex() {
+            Ok(tokens) => {
+                if matches!(c, CompilerStage::Lexer) {
+                    return Ok(CompilerOutput::Lexer(tokens));
+                }
+                tokens
+            }
+            Err(bad_toks) => {
+                return Err(CompilerError::Lexer(bad_toks));
+            }
+        };
 
         // PARSER 
-        println!("{}", "Finished".green());
+        Ok(CompilerOutput::Codegen)
     }
 
 }

@@ -1,7 +1,7 @@
 use std::fs;
 use owo_colors::OwoColorize;
 
-use razz_compiler::lexer::{lexer::Lexer, tokens::{Token, TokenKind}};
+use razz_compiler::{compiler::compiler::{Compiler, CompilerError, CompilerOutput, CompilerStage}};
 
 pub fn load_fixture(path: &str) -> (String, String) {
     let input = fs::read_to_string(format!("{}/input.rz", path))
@@ -15,27 +15,23 @@ pub fn load_fixture(path: &str) -> (String, String) {
     (input, expected)
 }
 
-fn format_token(token: &Token) -> String {
-    match token.kind {
-        TokenKind::Eof => "Eof".to_string(),       
-        _ => format!("{:?} Line: {} Col: {}", token.kind, token.line, token.col),
-    }
-}
 
 pub fn run_lexer(input: &str) -> String {
-    match Lexer::new(input).scan_tokens() {
-        Ok(tokens) => tokens
+    let output = Compiler::compiles(input, CompilerStage::Lexer);
+    match output {
+        Ok(CompilerOutput::Lexer(tokens)) => 
+            tokens
             .iter()
-            .map(|t| format_token(t))
+            .map(|t| t.to_string())
             .collect::<Vec<_>>()
             .join("\n"),
-        Err(errors) => errors
+        Err(CompilerError::Lexer(errors)) => 
+            errors
             .iter()
-            .map(|e| format!("ERROR: {:?} Line: {} Col: {}", e.kind, e.line, e.col)
-                .trim_end()
-                .to_string())
+            .map(|e| e.to_string())
             .collect::<Vec<_>>()
             .join("\n"),
+        _ => unreachable!("{}", "FAILED TO RUN LEXER".red().bold())
     }
 }
 

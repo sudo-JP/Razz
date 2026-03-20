@@ -27,3 +27,17 @@ fn literals_basic_invalid() {
     let actual = common::run_lexer(&input);
     common::colored_assert(&actual, &expected);
 }
+
+#[test]
+fn slash_handling() {
+    let (input, expected) = common::load_fixture("tests/fixtures/lexer/slash_handling");
+    let actual = common::run_lexer(&input);
+    common::colored_assert(&actual, &expected);
+}
+
+#[test]
+fn slash_invalid() {
+    let (input, expected) = common::load_fixture("tests/fixtures/lexer/slash_invalid");
+    let actual = common::run_lexer(&input);
+    common::colored_assert(&actual, &expected);
+}

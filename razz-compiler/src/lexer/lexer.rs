@@ -1,4 +1,5 @@
 use crate::lexer::tokens::{Token, TokenKind};
+use std::fmt;
 
 pub struct LexError {
     pub kind: LexErrorKind,
@@ -10,7 +11,16 @@ pub struct LexError {
 pub enum LexErrorKind {
     InvalidChar(char),
     InvalidNumber,
+    InvalidEndpoint(String),
+    UnterminatedComment,
     UnterminatedString,
+}
+
+// For debugging and test
+impl fmt::Display for LexError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ERROR: {:?} Line: {} Col: {}", self.kind, self.line, self.col)
+    }
 }
 
 pub struct Lexer {
@@ -42,7 +52,7 @@ impl Lexer {
         }
     }
 
-    pub fn scan_tokens(mut self) -> Result<Vec<Token>, Vec<LexError>> {
+    pub fn lex(mut self) -> Result<Vec<Token>, Vec<LexError>> {
         while !self.is_at_end() {
             self.start = self.current;
             self.curr_col = self.col;
@@ -59,8 +69,11 @@ impl Lexer {
     fn is_at_end(&self) -> bool { self.current >= self.chars.len() }
 
     // Append token to the token array with line and col  
+    // Also ignore tokens when there's error, saving space
     fn add_token(&mut self, kind: TokenKind) {
-        self.tokens.push(Token{kind, line: self.line, col: self.curr_col});
+        if self.lex_errors.len() == 0 {
+            self.tokens.push(Token{kind, line: self.line, col: self.curr_col});
+        }
     }
 
     fn add_err(&mut self, kind: LexErrorKind) {
@@ -165,6 +178,75 @@ impl Lexer {
         self.add_token(TokenKind::FloatLit(value));
     }
 
+    fn match_endpoint(&self, s: &str) -> Option<TokenKind> {
+        match s {
+            "camera" => Some(TokenKind::EPCamera),
+            "sphere" => Some(TokenKind::EPSphere),
+            "background" => Some(TokenKind::EPBackground),
+            "image" => Some(TokenKind::EPImage),
+            "output" => Some(TokenKind::EPOutput),
+            _ => None,
+        }
+    }
+
+    fn handle_slash(&mut self) {
+        // Single line comment 
+        if self.expect(b'/') {
+            while self.peek() != b'\n' && !self.is_at_end() {
+                self.advance();
+            }
+        } 
+        // Multiple lines comment 
+        else if self.expect(b'*') {
+            let start_line = self.line;
+            let start_col = self.col;
+            while (self.peek() != b'*' || self.peak_next() != b'/')
+                && !self.is_at_end() {
+                if self.peek() == b'\n' {
+                    self.line += 1; 
+                    self.col = 1;
+                }
+                self.advance();
+            }
+            if self.is_at_end() {
+                self.lex_errors.push(LexError { 
+                    kind: LexErrorKind::UnterminatedComment, 
+                    line: start_line, col: start_col 
+                });
+                return;
+            }
+
+            // Consume */
+            self.advance();
+            self.advance();
+        } 
+        // Division equal
+        else if self.expect(b'=') {
+            self.add_token(TokenKind::DivE);
+        }
+        // Endpoints
+        else if self.peek().is_ascii_alphabetic() {
+            while self.peek().is_ascii_alphabetic() 
+            && !self.is_at_end() {
+                self.advance();
+            }
+
+            let str_slice = &self.chars[self.start + 1..self.current];
+
+            let endpoint = String::from_utf8(str_slice.to_vec())
+                .unwrap();
+
+            match self.match_endpoint(&endpoint) {
+                Some(t) => self.add_token(t),
+                None => self.add_err(LexErrorKind::InvalidEndpoint(endpoint)),
+            }
+        } 
+        // Div 
+        else {
+            self.add_token(TokenKind::Div);
+        }
+    }
+
     fn scan_token(&mut self) {
         let c = self.advance();
 
@@ -218,9 +300,10 @@ impl Lexer {
                 self.add_token(TokenKind::Or);
             } else { self.add_err(LexErrorKind::InvalidChar(c as char)); }
 
-            // NOTE: Still missing / because its a bit complex with //, /**/, /endpoint and div 
-            // TODO: Add Endpoints, string, numbers and Types 
             b'"' => self.string(),
+
+            b'/' => self.handle_slash(),
+            // TODO: Add Ident
 
             // WHITESPACES 
             b'\n' => { self.col = 1; self.line += 1; }
