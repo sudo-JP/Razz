@@ -1,0 +1,16 @@
+fn test(a: int, b: float) int {
+    x = a + b * 2 - 1;
+    y += 10;
+    z->x;
+    eq_check = a == b;
+    cmp = a >= 5;
+    val = a < b && a != 0 || !b;
+    cam = GET /camera;
+    background = PATCH /background;
+    out = PUT /output;
+    str1 = "hello
+world";
+    str2 = "";
+    int_lit = 123;
+    float_lit = 3.14;
+}

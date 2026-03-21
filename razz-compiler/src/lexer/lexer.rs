@@ -247,6 +247,63 @@ impl Lexer {
         }
     }
 
+    #[inline]
+    fn is_valid_ident_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || c == b'_'
+    }
+
+    fn identifier(&mut self) {
+        while self.is_valid_ident_char(self.peek()) { 
+            self.advance();
+        }
+        let str_slice = &self.chars[self.start..self.current];
+        let ident = String::from_utf8(str_slice.to_vec())
+            .unwrap();
+
+        match ident.as_str() {
+            // HTTP 
+            "GET" => self.add_token(TokenKind::Get),
+            "PUT" => self.add_token(TokenKind::Put),
+            "POST" => self.add_token(TokenKind::Post),
+            "PATCH" => self.add_token(TokenKind::Patch),
+            
+            // Function
+            "fn" => self.add_token(TokenKind::Fn),
+            "return" => self.add_token(TokenKind::Return),
+
+            // Cond
+            "if" => self.add_token(TokenKind::If),
+            "else" => self.add_token(TokenKind::Else),
+
+            // Loop
+            "for" => self.add_token(TokenKind::For),
+            "while" => self.add_token(TokenKind::While),
+
+            // Types
+            "int" => self.add_token(TokenKind::Int),
+            "float" => self.add_token(TokenKind::Float),
+            "true" => self.add_token(TokenKind::BoolLit(true)),
+            "false" => self.add_token(TokenKind::BoolLit(false)),
+            "string" => self.add_token(TokenKind::String),
+            "null" => self.add_token(TokenKind::NullLit),
+            "bool" => self.add_token(TokenKind::Bool),
+
+            // Very specific types
+            "Vec3" => self.add_token(TokenKind::Vec3),
+            "Point3" => self.add_token(TokenKind::Point3),
+            "Color" => self.add_token(TokenKind::Color),
+            "Output" => self.add_token(TokenKind::Output),
+            "Background" => self.add_token(TokenKind::Background),
+            "Camera" => self.add_token(TokenKind::Camera),
+            "Sphere" => self.add_token(TokenKind::Sphere),
+
+            "PPM" => self.add_token(TokenKind::PPM),
+            "Arduino" => self.add_token(TokenKind::Arduino),
+
+            _ => self.add_token(TokenKind::Ident(ident)),
+        }
+    }
+
     fn scan_token(&mut self) {
         let c = self.advance();
 
@@ -303,7 +360,6 @@ impl Lexer {
             b'"' => self.string(),
 
             b'/' => self.handle_slash(),
-            // TODO: Add Ident
 
             // WHITESPACES 
             b'\n' => { self.col = 1; self.line += 1; }
@@ -311,6 +367,8 @@ impl Lexer {
             _ => { 
                 if c.is_ascii_digit() {
                     self.number();
+                } else if self.is_valid_ident_char(c) {
+                    self.identifier();
                 } else { self.add_err(LexErrorKind::InvalidChar(c as char)); }
             }
         }

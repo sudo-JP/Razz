@@ -7,7 +7,9 @@ use owo_colors::OwoColorize;
 fn main() -> io::Result<()> {
     let cli = Cli::parse();
     let contents = fs::read_to_string(cli.path)?;
-    let output = Compiler::compiles(&contents, cli.compile);
+    let compiler = Compiler::new(cli.compile);
+    let output = compiler.compiles(&contents);
+    let mut is_err = false;
     match output {
         Ok(CompilerOutput::Lexer(tokens)) => {
             for token in tokens {
@@ -15,8 +17,10 @@ fn main() -> io::Result<()> {
             }
         }
         Err(CompilerError::Lexer(err_toks)) => {
-            for token in err_toks {
-                println!("{}", token.to_string());
+            is_err = true;
+            for e in err_toks {
+                eprintln!("{}: {:?} Line: {} Col: {}", 
+                    "error".red().bold(), e.kind, e.line, e.col);
             }
         }
 
@@ -24,7 +28,11 @@ fn main() -> io::Result<()> {
         _ => {}
     }
 
-    println!("{}", "Finished".green().bold());
+    if is_err {
+        println!("{}: {}", "error".red().bold(), "could not compiled due to previous errors");
+    } else {
+        println!("{}", "Finished".green().bold());
+    }
 
     Ok(())
 }

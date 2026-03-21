@@ -41,3 +41,17 @@ fn slash_invalid() {
     let actual = common::run_lexer(&input);
     common::colored_assert(&actual, &expected);
 }
+
+#[test]
+fn verbose() {
+    let (input, expected) = common::load_fixture("tests/fixtures/lexer/verbose");
+    let actual = common::run_lexer(&input);
+    common::colored_assert(&actual, &expected);
+}
+
+#[test]
+fn endpoints_valid() {
+    let (input, expected) = common::load_fixture("tests/fixtures/lexer/endpoints_valid");
+    let actual = common::run_lexer(&input);
+    common::colored_assert(&actual, &expected);
+}

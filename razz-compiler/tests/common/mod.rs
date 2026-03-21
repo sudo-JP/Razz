@@ -1,5 +1,6 @@
 use std::fs;
 use owo_colors::OwoColorize;
+use similar::{ChangeTag, TextDiff};
 
 use razz_compiler::{compiler::compiler::{Compiler, CompilerError, CompilerOutput, CompilerStage}};
 
@@ -17,7 +18,8 @@ pub fn load_fixture(path: &str) -> (String, String) {
 
 
 pub fn run_lexer(input: &str) -> String {
-    let output = Compiler::compiles(input, CompilerStage::Lexer);
+    let compiler = Compiler::new(CompilerStage::Lexer);
+    let output = compiler.compiles(input);
     match output {
         Ok(CompilerOutput::Lexer(tokens)) => 
             tokens
@@ -37,10 +39,22 @@ pub fn run_lexer(input: &str) -> String {
 
 pub fn colored_assert(actual: &str, expected: &str) {
     if actual != expected {
-        // Print both for debugging
-        println!("{}\n{}\n", "===== ACTUAL ====".red().bold(), actual);
-        println!("{}\n{}\n", "==== EXPECTED ====".blue().bold(),expected);
-        // Panic after printing
+        let diff = TextDiff::from_lines(actual, expected);
+
+        println!("{}", "===== DIFF (Actual vs Expected) ====".yellow().bold());
+
+        for change in diff.iter_all_changes() {
+            match change.tag() {
+                // Deletions from 'actual' (what was there but shouldn't be)
+                ChangeTag::Delete => print!("{}{}", "-".red(), change.value().red()),
+                // Additions from 'expected' (what should have been there)
+                ChangeTag::Insert => print!("{}{}", "+".green(), change.value().green()),
+                // Equal parts
+                ChangeTag::Equal => print!(" {}", change.value()),
+            };
+        }
+        
+        println!("\n");
         panic!("{}", "Assertion failed".red().bold());
-    } 
+    }
 }

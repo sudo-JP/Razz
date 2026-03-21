@@ -1,0 +1,5 @@
+GET /camera;
+POST /sphere;
+PUT /background;
+PATCH /image;
+GET /output;

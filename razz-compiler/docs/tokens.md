@@ -5,6 +5,7 @@ A list of tokens Razz Language will have
 - FN: `fn`
 - RETURN: `return`
 - FOR: `for`
+- WHILE `while`
 - IF: `if`
 - ELSE: `else`
 

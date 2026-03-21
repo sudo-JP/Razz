@@ -32,15 +32,21 @@ pub enum CompilerError {
 }
 
 
-pub struct Compiler;
-impl Compiler {
+pub struct Compiler {
+    flag: CompilerStage,
+}
 
-    pub fn compiles(contents: &str, c: CompilerStage) -> Result<CompilerOutput, CompilerError> {
+impl Compiler {
+    pub fn new(c: CompilerStage) -> Self {
+        Self { flag: c }
+    }
+
+    pub fn compiles(&self, contents: &str) -> Result<CompilerOutput, CompilerError> {
         // LEXER 
         let lexer = Lexer::new(contents);
         let _lexed = match lexer.lex() {
             Ok(tokens) => {
-                if matches!(c, CompilerStage::Lexer) {
+                if matches!(self.flag, CompilerStage::Lexer) {
                     return Ok(CompilerOutput::Lexer(tokens));
                 }
                 tokens

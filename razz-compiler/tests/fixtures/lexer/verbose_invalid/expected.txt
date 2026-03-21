@@ -1,0 +1,10 @@
+ERROR: InvalidChar('@') Line: 2 Col: 9
+ERROR: InvalidNumber Line: 3 Col: 9
+ERROR: UnterminatedString Line: 4 Col: 9
+ERROR: InvalidEndpoint("unknown") Line: 5 Col: 9
+ERROR: InvalidChar('#') Line: 6 Col: 9
+ERROR: InvalidNumber Line: 7 Col: 9
+ERROR: InvalidEndpoint("camerax") Line: 8 Col: 9
+ERROR: InvalidChar('$') Line: 9 Col: 9
+ERROR: UnterminatedString Line: 10 Col: 9
+ERROR: InvalidChar('`') Line: 11 Col: 9

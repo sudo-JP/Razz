@@ -1,0 +1,12 @@
+fn test(a: int) int {
+    x = @invalid;
+    y = 1.;
+    z = "unterminated;
+    w = /unknown;
+    v = #bad;
+    u = 2.3.4;
+    t = /camerax;
+    s = $symbol;
+    r = "hello
+    q = `backtick`;
+}
