@@ -1,5 +1,5 @@
 # Razz
-Razz is a graphics and simulation playground exploring ray tracing, image transformation, and possibly physics
+Razz is a graphics and simulation playground exploring ray tracing, compilers, image transformation, and possibly physics
 
 ## Plan 
 I'm currently following this book: [Ray Tracing: The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html) for this project. 

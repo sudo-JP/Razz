@@ -7,7 +7,6 @@ use crate::lexer::lexer::{LexError, Lexer};
 pub enum CompilerStage {
     Lexer, 
     Parser, 
-    AST, 
     TypeCheck, 
     IR, 
     Codegen, 
@@ -16,7 +15,6 @@ pub enum CompilerStage {
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser, 
-    AST, 
     TypeCheck, 
     IR,
     Codegen,
@@ -25,7 +23,6 @@ pub enum CompilerOutput {
 pub enum CompilerError {
     Lexer(Vec<LexError>),
     Parser, 
-    AST, 
     TypeCheck, 
     IR,
     Codegen,

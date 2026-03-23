@@ -4,10 +4,6 @@ pub enum BinOpKind {
     Sub, 
     Div, 
     Mult, 
-    AddE, 
-    SubE, 
-    DivE,
-    MultE,
     // Comparison
     Lt, 
     Le, 
@@ -35,12 +31,6 @@ pub enum Literal {
     Null,
 }
 
-pub enum HTTPMethod {
-    Get, 
-    Post, 
-    Put, 
-    Patch, 
-}
 
 pub enum Endpoint {
     Sphere, 
@@ -50,11 +40,15 @@ pub enum Endpoint {
     Output,
 }
 
+/// Argument to function 
+/// func((<name>: <expr>)*)
 pub struct Arg {
     pub name: String, 
     pub expr: Expr,
 }
 
+/// Struct field 
+/// <key>: <value>
 pub struct StructField {
     pub key: String, 
     pub value: Expr,
@@ -62,36 +56,42 @@ pub struct StructField {
 
 pub enum Expr {
     // Operations
-    /// left + right
+    // <left> <op> <right>
+    /// 1 + 2 
     BinOp {
         left: Box<Expr>,
         op: BinOpKind, 
         right: Box<Expr>
     },
-    /// -expr, !expr 
+    /// Unary Operation 
+    /// <op><value>
+    /// e.g !true
     UnaryOp {
-        value: Box<Expr>, 
         op: UnaryOpKind,
+        value: Box<Expr>, 
     },
+    /// Function Call
+    /// <name>((<arg>)*)
     /// Function call func(name: expr) 
     FunctionCall {
         name: String, 
         args: Vec<Arg>,
     },
-    /// Access JSON, background->color
+    /// Access JSON
+    /// <obj>-><key>
+    /// background->color
     FieldAccess {
         obj: Box<Expr>,
         key: String,
     },
     /// Endpoint access
-    HTTPRequest {
-        method: HTTPMethod,
-        endpoint: Endpoint,
-        body: Option<Box<Expr>>,
-    },
+    /// GET <endpoint> 
+    /// e.g GET /camera 
+    HTTPRequest(Endpoint),
     /// Literals
     Constant(Literal),
-    /// StructField { name: "Jason Phan", program: "Razz" }
+    /// <name> { (<field>)* }
+    /// Struct { author: "Jason Phan", program: "Razz" }
     StructLiteral {
         name: String, 
         fields: Vec<StructField>,
