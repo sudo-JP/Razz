@@ -69,7 +69,7 @@ pub enum Stmt {
     },
     /// For loop statement
     /// Can have multiple expr, separated by comma
-    /// for (<decl>; <cond>; (<expr>|<expr>,)*) { <body> }
+    /// for <decl>; <cond>; (<expr>|<expr>,)* { <body> }
     For {
         decl: Box<Stmt>, 
         cond: Expr, 
