@@ -39,6 +39,8 @@ Stmt ::= Assign
     | HTTPRequest 
     | ExprStmt ;
 
+ExprStmt ::= Expr ";" ;
+
 Assign ::= IDENT [ ":" Type ] "=" Expr ";" ;
 
 While ::= "while" Expr Block  ;

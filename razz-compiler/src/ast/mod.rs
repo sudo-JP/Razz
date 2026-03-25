@@ -2,6 +2,7 @@ use crate::ast::statement::FnDecl;
 
 pub mod expression;
 pub mod statement;
+pub mod traversal;
 
 pub struct Span {
     pub line: usize, 

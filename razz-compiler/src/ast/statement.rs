@@ -73,7 +73,7 @@ pub enum Stmt {
     For {
         decl: Box<Stmt>, 
         cond: Expr, 
-        expr: Vec<Stmt>, 
+        update: Vec<Stmt>, 
         body: Vec<Stmt>,
     }, 
     /// Return statement, return <expr>
