@@ -1,13 +1,10 @@
-use crate::ast::statement::FnDecl;
+use crate::{ast::statement::FnDecl, common::Span};
 
 pub mod expression;
 pub mod statement;
 pub mod traversal;
+pub mod debug;
 
-pub struct Span {
-    pub line: usize, 
-    pub col: usize, 
-}
 
 pub struct Spanned<T> {
     pub node: T,
@@ -15,6 +12,7 @@ pub struct Spanned<T> {
 }
 
 /// Language types
+#[derive(Debug)]
 pub enum Type {
     Int,
     Float,

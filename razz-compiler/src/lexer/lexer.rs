@@ -1,10 +1,9 @@
-use crate::lexer::tokens::{Token, TokenKind};
+use crate::{common::Span, lexer::tokens::{Token, TokenKind}};
 use std::fmt;
 
 pub struct LexError {
     pub kind: LexErrorKind,
-    pub line: usize,
-    pub col: usize,
+    pub span: Span,
 }
 
 #[derive(Debug)]
@@ -19,7 +18,7 @@ pub enum LexErrorKind {
 // For debugging and test
 impl fmt::Display for LexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ERROR: {:?} Line: {} Col: {}", self.kind, self.line, self.col)
+        write!(f, "ERROR: {:?} Line: {} Col: {}", self.kind, self.span.line, self.span.col)
     }
 }
 
@@ -72,12 +71,14 @@ impl Lexer {
     // Also ignore tokens when there's error, saving space
     fn add_token(&mut self, kind: TokenKind) {
         if self.lex_errors.len() == 0 {
-            self.tokens.push(Token{kind, line: self.line, col: self.curr_col});
+            let span = Span{line: self.line, col: self.curr_col};
+            self.tokens.push(Token{kind, span});
         }
     }
 
     fn add_err(&mut self, kind: LexErrorKind) {
-        self.lex_errors.push(LexError{kind, line: self.line, col: self.curr_col});
+        let span = Span{line: self.line, col: self.curr_col};
+        self.lex_errors.push(LexError{kind, span});
     }
 
     // Advancing to the next char 
@@ -198,8 +199,7 @@ impl Lexer {
         } 
         // Multiple lines comment 
         else if self.expect(b'*') {
-            let start_line = self.line;
-            let start_col = self.col;
+            let span = Span{line: self.line, col: self.col};
             while (self.peek() != b'*' || self.peak_next() != b'/')
                 && !self.is_at_end() {
                 if self.peek() == b'\n' {
@@ -211,7 +211,7 @@ impl Lexer {
             if self.is_at_end() {
                 self.lex_errors.push(LexError { 
                     kind: LexErrorKind::UnterminatedComment, 
-                    line: start_line, col: start_col 
+                    span,
                 });
                 return;
             }

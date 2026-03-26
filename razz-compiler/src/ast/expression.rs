@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum BinOpKind {
     // Arithmetic
     Add, 
@@ -16,13 +17,15 @@ pub enum BinOpKind {
     Or, 
 }
 
-pub enum UnaryOpKind {
+#[derive(Debug)]
+pub enum UnOpKind {
     /// !expr
     Not, 
     /// -expr
     Minus, 
 }
 
+#[derive(Debug)]
 pub enum Literal {
     Int(i32),
     Float(f64),
@@ -32,6 +35,7 @@ pub enum Literal {
 }
 
 
+#[derive(Debug)]
 pub enum Endpoint {
     Sphere, 
     Camera, 
@@ -42,6 +46,7 @@ pub enum Endpoint {
 
 /// Argument to function 
 /// func((<name>: <expr>)*)
+#[derive(Debug)]
 pub struct Arg {
     pub name: String, 
     pub expr: Expr,
@@ -49,11 +54,13 @@ pub struct Arg {
 
 /// Struct field 
 /// <key>: <value>
+#[derive(Debug)]
 pub struct StructField {
     pub key: String, 
     pub value: Expr,
 }
 
+#[derive(Debug)]
 pub enum Expr {
     // Operations
     // <left> <op> <right>
@@ -66,8 +73,8 @@ pub enum Expr {
     /// Unary Operation 
     /// <op><value>
     /// e.g !true
-    UnaryOp {
-        op: UnaryOpKind,
+    UnOp {
+        op: UnOpKind,
         value: Box<Expr>, 
     },
     /// Function Call

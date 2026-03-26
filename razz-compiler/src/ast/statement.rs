@@ -1,18 +1,21 @@
 use crate::ast::{expression::{Endpoint, Expr}, Type};
 
 /// else if <cond> { <body> }
+#[derive(Debug)]
 pub struct ElseIf {
     pub cond: Expr, 
     pub body: Vec<Stmt>,
 }
 
 /// Function parameter 
+#[derive(Debug)]
 pub struct Param {
     pub name: String, 
     pub ty: Type,
 }
 
 /// Compound Assignment Operator
+#[derive(Debug)]
 pub enum CompoundOp {
     /// `+=`
     AddE, 
@@ -25,6 +28,7 @@ pub enum CompoundOp {
 }
 
 /// HTTP Method for statements
+#[derive(Debug)]
 pub enum HTTPMethod {
     Post, 
     Put, 
@@ -33,6 +37,7 @@ pub enum HTTPMethod {
 
 /// Function definition
 /// fn <name>((<param>)*) <type> { (<body>)* }
+#[derive(Debug)]
 pub struct FnDecl {
     pub name: String,
     pub params: Vec<Param>,
@@ -40,6 +45,7 @@ pub struct FnDecl {
     pub body: Vec<Stmt>,
 }
 
+#[derive(Debug)]
 pub enum Stmt {
     /// Variable declartion, e.g: <name> = <expr>
     /// Assignment can be inferred, e.g foo = 5 is an int

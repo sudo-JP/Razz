@@ -1,10 +1,11 @@
 use std::fmt;
 
+use crate::common::Span;
+
 
 pub struct Token {
     pub kind: TokenKind, 
-    pub line: usize, 
-    pub col: usize, 
+    pub span: Span,
 }
 
 // For debugging and test
@@ -12,12 +13,12 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             TokenKind::Eof => write!(f, "Eof"),
-            _ => write!(f, "{:?} Line: {} Col: {}", self.kind, self.line, self.col),
+            _ => write!(f, "{:?} Line: {} Col: {}", self.kind, self.span.line, self.span.col),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenKind {
     // Statement
     /// fn
