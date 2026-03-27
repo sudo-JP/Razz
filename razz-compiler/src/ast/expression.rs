@@ -80,6 +80,11 @@ pub enum Expr {
     /// Function Call
     /// <name>((<arg>)*)
     /// Function call func(name: expr) 
+    /// Using a vec because cache locality
+    /// is faster, better to do O(n^2) than
+    /// O(n). Most people call a function 
+    /// with at most 5 args anyway, only bad perf
+    /// when >= 100 args
     FunctionCall {
         name: String, 
         args: Vec<Arg>,
@@ -99,6 +104,8 @@ pub enum Expr {
     Constant(Literal),
     /// <name> { (<field>)* }
     /// Struct { author: "Jason Phan", program: "Razz" }
+    /// Fields share the same reason with function
+    /// call above, with why using vec over hash map
     StructLiteral {
         name: String, 
         fields: Vec<StructField>,

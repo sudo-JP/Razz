@@ -2,7 +2,7 @@ use std::fs;
 use owo_colors::OwoColorize;
 use similar::{ChangeTag, TextDiff};
 
-use razz_compiler::{compiler::compiler::{Compiler, CompilerError, CompilerOutput, CompilerStage}};
+use razz_compiler::compiler::{compiler::{Compiler, CompilerOutput, CompilerStage}, error::CompilerError};
 
 pub fn load_fixture(path: &str) -> (String, String) {
     let input = fs::read_to_string(format!("{}/input.rz", path))

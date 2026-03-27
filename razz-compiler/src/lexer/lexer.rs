@@ -1,26 +1,5 @@
-use crate::{common::Span, lexer::tokens::{Token, TokenKind}};
-use std::fmt;
-
-pub struct LexError {
-    pub kind: LexErrorKind,
-    pub span: Span,
-}
-
-#[derive(Debug)]
-pub enum LexErrorKind {
-    InvalidChar(char),
-    InvalidNumber,
-    InvalidEndpoint(String),
-    UnterminatedComment,
-    UnterminatedString,
-}
-
-// For debugging and test
-impl fmt::Display for LexError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ERROR: {:?} Line: {} Col: {}", self.kind, self.span.line, self.span.col)
-    }
-}
+use crate::{common::Span, lexer::{error::{LexError, LexErrorKind}, tokens::{Token, TokenKind}}};
+use std::str;
 
 pub struct Lexer {
     chars: Vec<u8>, 
@@ -136,8 +115,10 @@ impl Lexer {
 
         let str_slice = &self.chars[self.start + 1..self.current - 1];
         
-        let value = String::from_utf8(str_slice.to_vec()).unwrap();
-        self.add_token(TokenKind::StringLit(value));
+        match str::from_utf8(str_slice) {
+            Ok(s) => self.add_token(TokenKind::StringLit(s.to_string())),
+            Err(_) => self.add_err(LexErrorKind::InvalidEncoding),
+        }
     }
 
     // Handle number
@@ -157,11 +138,16 @@ impl Lexer {
         else {
             // For Int 
             let str_slice = &self.chars[self.start..self.current];
-            let value: i32 = String::from_utf8(str_slice.to_vec())
-                .unwrap()
-                .parse()
-                .unwrap();
-            self.add_token(TokenKind::IntLit(value));
+
+            let Ok(s) = str::from_utf8(str_slice) else {
+                return self.add_err(LexErrorKind::InvalidEncoding);
+            };
+
+            let Ok(val) = s.parse::<i32>() else {
+                return self.add_err(LexErrorKind::InvalidNumber);
+            };
+
+            self.add_token(TokenKind::IntLit(val));
             return;  
         }
 
@@ -172,11 +158,15 @@ impl Lexer {
         }
 
         let str_slice = &self.chars[self.start..self.current];
-        let value: f64 = String::from_utf8(str_slice.to_vec())
-            .unwrap()
-            .parse()
-            .unwrap(); 
-        self.add_token(TokenKind::FloatLit(value));
+        let Ok(s) = str::from_utf8(str_slice) else {
+            return self.add_err(LexErrorKind::InvalidEncoding);
+        };
+
+        let Ok(val) = s.parse::<f64>() else {
+            return self.add_err(LexErrorKind::InvalidNumber);
+        };
+
+        self.add_token(TokenKind::FloatLit(val));
     }
 
     fn match_endpoint(&self, s: &str) -> Option<TokenKind> {
@@ -233,12 +223,13 @@ impl Lexer {
 
             let str_slice = &self.chars[self.start + 1..self.current];
 
-            let endpoint = String::from_utf8(str_slice.to_vec())
-                .unwrap();
+            let Ok(endpoint) = str::from_utf8(str_slice) else {
+                return self.add_err(LexErrorKind::InvalidEncoding);
+            };
 
             match self.match_endpoint(&endpoint) {
                 Some(t) => self.add_token(t),
-                None => self.add_err(LexErrorKind::InvalidEndpoint(endpoint)),
+                None => self.add_err(LexErrorKind::InvalidEndpoint(endpoint.to_string())),
             }
         } 
         // Div 
@@ -257,10 +248,12 @@ impl Lexer {
             self.advance();
         }
         let str_slice = &self.chars[self.start..self.current];
-        let ident = String::from_utf8(str_slice.to_vec())
-            .unwrap();
 
-        match ident.as_str() {
+        let Ok(ident) = str::from_utf8(str_slice) else {
+            return self.add_err(LexErrorKind::InvalidEncoding); 
+        };
+
+        match ident {
             // HTTP 
             "GET" => self.add_token(TokenKind::Get),
             "PUT" => self.add_token(TokenKind::Put),
@@ -300,7 +293,7 @@ impl Lexer {
             "PPM" => self.add_token(TokenKind::PPM),
             "Arduino" => self.add_token(TokenKind::Arduino),
 
-            _ => self.add_token(TokenKind::Ident(ident)),
+            _ => self.add_token(TokenKind::Ident(ident.to_string())),
         }
     }
 

@@ -1,7 +1,7 @@
 use std::{fs, io};
 
 use clap::Parser;
-use razz_compiler::{cli::Cli, compiler::compiler::{Compiler, CompilerError, CompilerOutput}};
+use razz_compiler::{cli::Cli, compiler::{compiler::{Compiler,CompilerOutput}, error::CompilerError}};
 use owo_colors::OwoColorize;
 
 fn main() -> io::Result<()> {

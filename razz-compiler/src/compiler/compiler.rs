@@ -1,7 +1,10 @@
 use clap::ValueEnum;
+use crate::ast::Program;
+use crate::compiler::error::CompilerError;
 use crate::lexer::tokens::Token;
 
-use crate::lexer::lexer::{LexError, Lexer};
+use crate::lexer::lexer::Lexer;
+use crate::parser::parser::Parser;
 
 #[derive(ValueEnum, Clone, PartialEq)]
 pub enum CompilerStage {
@@ -14,20 +17,11 @@ pub enum CompilerStage {
 
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
-    Parser, 
+    Parser(Program), 
     TypeCheck, 
     IR,
     Codegen,
 }
-
-pub enum CompilerError {
-    Lexer(Vec<LexError>),
-    Parser, 
-    TypeCheck, 
-    IR,
-    Codegen,
-}
-
 
 pub struct Compiler {
     flag: CompilerStage,
@@ -39,21 +33,25 @@ impl Compiler {
     }
 
     pub fn compiles(&self, contents: &str) -> Result<CompilerOutput, CompilerError> {
-        // LEXER 
+        // ============= LEXER =============  
         let lexer = Lexer::new(contents);
-        let _lexed = match lexer.lex() {
-            Ok(tokens) => {
-                if matches!(self.flag, CompilerStage::Lexer) {
-                    return Ok(CompilerOutput::Lexer(tokens));
-                }
-                tokens
-            }
-            Err(bad_toks) => {
-                return Err(CompilerError::Lexer(bad_toks));
-            }
-        };
 
-        // PARSER 
+        let tokens = lexer.lex()
+            .map_err(CompilerError::Lexer)?;
+
+        if matches!(self.flag, CompilerStage::Lexer) {
+            return Ok(CompilerOutput::Lexer(tokens));
+        }
+
+        // ============= PARSER ============= 
+        let mut parser = Parser::new(tokens);
+        let prog = parser.parse()
+            .map_err(CompilerError::Parser)?;
+
+        if matches!(self.flag, CompilerStage::Parser) {
+            return Ok(CompilerOutput::Parser(prog));
+        }
+
         Ok(CompilerOutput::Codegen)
     }
 
