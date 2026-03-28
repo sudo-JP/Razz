@@ -7,7 +7,7 @@ Parser rule for Razz, grammar notation in code representation
 - `{}` or `[]`: `while` or `for` loop 
 
 ```
-Program ::= { FuncDecl } ;
+Program ::= { FuncDecl } EOF ;
 
 Param ::= IDENT ":" Type ;
 
@@ -89,11 +89,13 @@ factor ::= unary { ("*" | "/") unary } ;
 unary ::= ("!" | "-") unary
     | field_access ;
 
-Arg ::= IDENT ":" Expr ; 
-
 field_access ::= function_call { "->" IDENT } ; 
     
-function_call ::= IDENT "(" [ Arg { "," Arg } ] ")" 
+Arg ::= IDENT ":" Expr ; 
+
+Args ::= [ Arg { "," Arg } ] ;
+
+function_call ::= IDENT "(" Args ")" 
     | primary ;
 
 StructField ::= IDENT ":" Expr ;

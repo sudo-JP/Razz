@@ -1,18 +1,19 @@
-use crate::{ast::Program, lexer::tokens::{Token, TokenKind}, parser::error::ParserError};
+use crate::{ast::{Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
 
 pub struct Parser {
     tokens: Vec<Token>,
+    parser_errors: Vec<ParserError>,
     current: usize
 }
 
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, current: 0 }
+        Self { tokens, current: 0, parser_errors: Vec::new() }
     }
 
-    pub fn parse(&mut self) -> Result<Program, ParserError> {
-        todo!()
+    pub fn parse(mut self) -> Result<Program, Vec<ParserError>> {
+        Err(self.parser_errors)
     }
 
     /// Utilities functions
@@ -49,6 +50,14 @@ impl Parser {
         &self.tokens[self.current]
     }
 
+    /// Peek next look ahead by 1, this is a LL(2) parser
+    pub (in crate::parser) fn peek_next(&self) -> &Token {
+        if self.current + 1 >= self.tokens.len() {
+            // Must have EOF 
+            &self.tokens.last().unwrap()
+        } else { &self.tokens[self.current + 1] }
+    }
+
     /// Look for token we already consumed 
     #[inline]
     pub(in crate::parser) fn previous(&self) -> &Token {
@@ -59,6 +68,34 @@ impl Parser {
     #[inline]
     pub(in crate::parser) fn is_at_end(&self) -> bool {
         matches!(self.peek().kind, TokenKind::Eof)
+    }
+
+    pub(in crate::parser) fn consume(&mut self, t: &TokenKind) -> Result<&Token, ParserError> {
+        if self.check(t) { Ok(self.advance()) }
+        else { 
+            let token = self.peek();
+            let span = token.span;
+            let kind = ParserErrorKind::InvalidToken(token.kind.clone());
+            Err(ParserError{ span, kind }) 
+        }
+    }
+
+    pub(in crate::parser) fn consume_ident(&mut self) -> Result<String, ParserError> {
+        let token = self.peek();
+        if let TokenKind::Ident(s) = &token.kind {
+            let string = s.to_string();
+            self.advance();
+            return Ok(string);
+        }
+        let span = token.span; 
+        let kind = ParserErrorKind::InvalidToken(token.kind.clone());
+        Err(ParserError{ span, kind })
+    }
+
+    pub(in crate::parser) fn error(&self, token: &Token) -> ParserError {
+        let span = token.span; 
+        let kind = ParserErrorKind::InvalidToken(token.kind.clone());
+        ParserError{ span, kind }
     }
 }
 
