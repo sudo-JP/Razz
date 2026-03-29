@@ -289,7 +289,9 @@ impl Lexer {
             "Background" => self.add_token(TokenKind::Background),
             "Camera" => self.add_token(TokenKind::Camera),
             "Sphere" => self.add_token(TokenKind::Sphere),
+            "Image" => self.add_token(TokenKind::Image),
 
+            // Built in types
             "PPM" => self.add_token(TokenKind::PPM),
             "Arduino" => self.add_token(TokenKind::Arduino),
 

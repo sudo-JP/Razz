@@ -1,4 +1,4 @@
-use crate::{ast::{Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::Endpoint, Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -87,9 +87,22 @@ impl Parser {
             self.advance();
             return Ok(string);
         }
-        let span = token.span; 
-        let kind = ParserErrorKind::InvalidToken(token.kind.clone());
-        Err(ParserError{ span, kind })
+        Err(self.error(token))
+    }
+
+    pub(in crate::parser) fn consume_endpoint(&mut self) -> Result<Endpoint, ParserError> {
+        let token = self.peek();
+        let endpoint = match &token.kind {
+            TokenKind::EPCamera => Endpoint::Camera,
+            TokenKind::EPSphere => Endpoint::Sphere,
+            TokenKind::EPBackground => Endpoint::Background,
+            TokenKind::EPImage => Endpoint::Image, 
+            TokenKind::EPOutput => Endpoint::Output,
+            _ => { return Err(self.error(token)) }
+        };
+
+        self.advance();
+        Ok(endpoint)
     }
 
     pub(in crate::parser) fn error(&self, token: &Token) -> ParserError {

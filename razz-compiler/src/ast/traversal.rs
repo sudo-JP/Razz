@@ -1,4 +1,4 @@
-use crate::ast::{expression::Expr, statement::Stmt};
+use crate::ast::{expression::Expr, statement::{FnDecl, Stmt}, Program};
 
 /// Walkable trait, used to traverse the AST tree
 pub trait Walkable {
@@ -66,8 +66,6 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
                 .for_each(|instr| walker.visit_stmt(instr));
         },
         Stmt::Return(e) => walker.visit_expr(e),
-        Stmt::FnDecl(decl) => decl.body.iter()
-            .for_each(|instr| walker.visit_stmt(instr)),
         Stmt::CompoundAssign { expr, .. } => walker.visit_expr(expr),
         Stmt::HTTPRequest { body, .. } => walker.visit_expr(body),
         Stmt::Expr(e) => walker.visit_expr(e),

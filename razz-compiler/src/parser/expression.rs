@@ -1,6 +1,6 @@
-use crate::{ast::{expression::{Arg, BinOpKind, Expr, UnOpKind}, Spanned}, 
+use crate::{ast::{expression::{Arg, BinOpKind, Expr, SpecificType, StructField, UnOpKind}, Spanned}, 
     lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
-
+use crate::ast::expression::Literal;
 use super::parser::Parser;
 
 impl Parser {
@@ -185,9 +185,11 @@ impl Parser {
 
     /// field_access ::= function_call { "->" IDENT } ; 
     fn field_access(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.functional_call()?.node; 
+        let mut node = self.function_call()?.node; 
         let rules = [TokenKind::Arrow];
         let span = self.peek().span;
+        println!("function call: {:?}", node);
+        println!("peek: {:?}", self.peek().kind);
 
         while self.match_token(&rules) {
             let ident = self.consume_ident()?;
@@ -201,7 +203,7 @@ impl Parser {
 
     /// function_call ::= IDENT "(" [ Arg { "," Arg } ] ")" 
     /// | primary ;
-    fn functional_call(&mut self) -> Result<Spanned<Expr>, ParserError> {
+    fn function_call(&mut self) -> Result<Spanned<Expr>, ParserError> {
         let span = self.peek().span;
         if let TokenKind::Ident(ident) = &self.peek().kind
             && self.peek_next().kind == TokenKind::LParen
@@ -244,8 +246,9 @@ impl Parser {
         Ok(args)
     }
 
-    /// Arg ::= IDENT ":" Expr ; 
-    fn arg(&mut self) -> Result<Arg, ParserError> {
+    /// Used to parse 
+    /// IDENT ":" Expr ; 
+    fn parse_named_expr(&mut self) -> Result<(String, Expr), ParserError> {
         let token = self.peek();
         let TokenKind::Ident(ident) = &token.kind else {
             let span = token.span; 
@@ -260,10 +263,150 @@ impl Parser {
         }
         self.advance();
         let expr = self.expression()?;
-        Ok(Arg{ name, expr: expr.node })
+        Ok((name, expr.node))
     }
 
+    /// Arg ::= IDENT ":" Expr ; 
+    fn arg(&mut self) -> Result<Arg, ParserError> {
+        let (name, expr) = self.parse_named_expr()?;
+        Ok(Arg{ name, expr })
+    }
+
+    /// StructLiteral ::= IDENT "{" [ StructField { "," StructField } ] "}" ; 
+    /// 
+    /// GET_Request ::= "GET" Endpoint ; 
+    /// 
+    /// primary ::= IDENT 
+    /// | NUMBER 
+    /// | STRING 
+    /// | "true"
+    /// | "false"
+    /// | "null"
+    /// | StructLiteral 
+    /// | GET_Request
+    /// | "(" Expr ")" ;
     fn primary(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        todo!()
+        let token = self.peek();
+        let span = token.span;
+        let kind = token.kind.clone();
+
+        let node = match kind {
+            TokenKind::StringLit(s) => { 
+                self.advance();
+                Expr::Constant(Literal::String(s))
+            },
+            TokenKind::IntLit(i) => {
+                self.advance();
+                Expr::Constant(Literal::Int(i))
+            }, 
+            TokenKind::FloatLit(f) => {
+                self.advance();
+                Expr::Constant(Literal::Float(f))
+            }, 
+            TokenKind::BoolLit(b) => {
+                self.advance();
+                Expr::Constant(Literal::Bool(b))
+            }, 
+            TokenKind::NullLit => {
+                self.advance();
+                Expr::Constant(Literal::Null)
+            },
+            TokenKind::Get => self.get_request()?,
+            TokenKind::LParen => {
+                self.advance();
+                let expr = self.expression()?;
+                self.consume(&TokenKind::RParen)?;
+                expr.node
+            }, 
+            TokenKind::Ident(s) => {
+                // Either an identifier or struct literal, lookahead by 2
+                if matches!(self.peek_next().kind, TokenKind::LBrace) {
+                    self.struct_literal()?
+                }
+                else { 
+                    self.advance();
+                    Expr::Identifier(s) 
+                }
+            },
+            TokenKind::Vec3 
+            | TokenKind::Point3
+            | TokenKind::Color
+            | TokenKind::Background 
+            | TokenKind::Camera 
+            | TokenKind::Output 
+            | TokenKind::Sphere 
+            | TokenKind::Image 
+            => self.struct_literal()?,
+            _ => { return Err(self.error(token)); }
+        };
+
+        Ok(Spanned{ node, span })
+    }
+
+    /// GET_Request ::= "GET" Endpoint ; 
+    fn get_request(&mut self) -> Result<Expr, ParserError> {
+        self.advance();
+        Ok(Expr::HTTPRequest(self.consume_endpoint()?))
+    }
+
+    /// StructLiteral ::= SpecificType "{" StructFields "}" ; 
+    fn struct_literal(&mut self) -> Result<Expr, ParserError> {
+        let ty = self.specific_type()?;
+        self.consume(&TokenKind::LBrace)?;
+        let fields = self.struct_fields()?;
+        self.consume(&TokenKind::RBrace)?;
+        Ok(Expr::StructLiteral { ty , fields })
+    }
+
+    /// SpecificType ::= "Vec3" 
+    /// | "Point3" 
+    /// | "Color" 
+    /// | "Background" 
+    /// | "Camera" 
+    /// | "Output" 
+    /// | "Sphere" 
+    /// | "Image" ;
+    fn specific_type(&mut self) -> Result<SpecificType, ParserError> {
+        let token = self.peek();
+        let ty = match token.kind {
+            TokenKind::Vec3 => SpecificType::Vec3,
+            TokenKind::Point3 => SpecificType::Point3,
+            TokenKind::Color => SpecificType::Color,
+            TokenKind::Background => SpecificType::Background,
+            TokenKind::Camera => SpecificType::Camera,
+            TokenKind::Output => SpecificType::Output,
+            TokenKind::Sphere => SpecificType::Sphere, 
+            TokenKind::Image => SpecificType::Image,
+            _ => { return Err(self.error(token)); }
+        };
+        self.advance(); 
+        Ok(ty)
+    }
+
+    /// StructFields ::= [ StructField { "," StructField } ]
+    /// Same pattern as function call
+    fn struct_fields(&mut self) -> Result<Vec<StructField>, ParserError> {
+        let mut fields: Vec<StructField> = vec![];
+        let curr = self.peek();
+
+        // Check if fields exist 
+        if matches!(&curr.kind, TokenKind::Ident(_)) {
+            fields.push(self.struct_field()?);
+        } else {
+            return Ok(fields);
+        }
+
+        let rules = [TokenKind::Comma];
+        while self.match_token(&rules) {
+            fields.push(self.struct_field()?);
+        }
+
+        Ok(fields)
+    }
+
+    /// StructField ::= IDENT ":" Expr ;
+    fn struct_field(&mut self) -> Result<StructField, ParserError> {
+        let (key, value) = self.parse_named_expr()?;
+        Ok(StructField { key, value })
     }
 }

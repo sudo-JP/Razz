@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BinOpKind {
     // Arithmetic
     Add, 
@@ -42,6 +42,18 @@ pub enum Endpoint {
     Background, 
     Image,
     Output,
+}
+
+#[derive(Debug)]
+pub enum SpecificType {
+    Vec3, 
+    Point3,
+    Color, 
+    Background, 
+    Camera, 
+    Output,
+    Sphere, 
+    Image,
 }
 
 /// Argument to function 
@@ -107,7 +119,7 @@ pub enum Expr {
     /// Fields share the same reason with function
     /// call above, with why using vec over hash map
     StructLiteral {
-        name: String, 
+        ty: SpecificType, 
         fields: Vec<StructField>,
     },
     /// Identifer name

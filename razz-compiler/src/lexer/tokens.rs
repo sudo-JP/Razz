@@ -77,6 +77,8 @@ pub enum TokenKind {
     Camera, 
     /// Sphere
     Sphere, 
+    /// Image 
+    Image,
     // Operators
     // Arithmetic
     /// `+`

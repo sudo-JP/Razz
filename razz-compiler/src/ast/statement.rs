@@ -84,8 +84,6 @@ pub enum Stmt {
     }, 
     /// Return statement, return <expr>
     Return(Expr),
-    /// Function definition, a wrapper for the struct
-    FnDecl(FnDecl),
     /// Compound assignment operator
     /// <name> <op> <expr> 
     /// e.g foo += (1 * 2)

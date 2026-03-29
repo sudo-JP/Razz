@@ -18,7 +18,9 @@ Type ::= "int"
     | "bool" 
     | "string" 
     | "null" 
-    | "Vec3" 
+    | SpecificType ;
+
+SpecificType ::= "Vec3" 
     | "Point3" 
     | "Color" 
     | "Background" 
@@ -34,7 +36,6 @@ Stmt ::= Assign
     | If 
     | For 
     | Return 
-    | FnDecl 
     | CompoundAssign 
     | HTTPRequest 
     | ExprStmt ;
@@ -100,7 +101,9 @@ function_call ::= IDENT "(" Args ")"
 
 StructField ::= IDENT ":" Expr ;
 
-StructLiteral ::= IDENT "{" [ StructField { "," StructField } ] "}" ; 
+StructFields ::= [ StructField { "," StructField } ]
+
+StructLiteral ::= SpecificType "{" StructFields "}" ; 
 
 GET_Request ::= "GET" Endpoint ; 
 
