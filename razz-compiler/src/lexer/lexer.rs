@@ -1,4 +1,4 @@
-use crate::{common::Span, lexer::{error::{LexError, LexErrorKind}, tokens::{Token, TokenKind}}};
+use crate::{common::Position, lexer::{error::{LexError, LexErrorKind}, tokens::{Token, TokenKind}}};
 use std::str;
 
 pub struct Lexer {
@@ -50,14 +50,14 @@ impl Lexer {
     // Also ignore tokens when there's error, saving space
     fn add_token(&mut self, kind: TokenKind) {
         if self.lex_errors.len() == 0 {
-            let span = Span{line: self.line, col: self.curr_col};
-            self.tokens.push(Token{kind, span});
+            let pos = Position{line: self.line, col: self.curr_col};
+            self.tokens.push(Token{kind, pos});
         }
     }
 
     fn add_err(&mut self, kind: LexErrorKind) {
-        let span = Span{line: self.line, col: self.curr_col};
-        self.lex_errors.push(LexError{kind, span});
+        let pos = Position{line: self.line, col: self.curr_col};
+        self.lex_errors.push(LexError{kind, pos});
     }
 
     // Advancing to the next char 
@@ -189,7 +189,7 @@ impl Lexer {
         } 
         // Multiple lines comment 
         else if self.expect(b'*') {
-            let span = Span{line: self.line, col: self.col};
+            let pos = Position{line: self.line, col: self.col};
             while (self.peek() != b'*' || self.peak_next() != b'/')
                 && !self.is_at_end() {
                 if self.peek() == b'\n' {
@@ -201,7 +201,7 @@ impl Lexer {
             if self.is_at_end() {
                 self.lex_errors.push(LexError { 
                     kind: LexErrorKind::UnterminatedComment, 
-                    span,
+                    pos,
                 });
                 return;
             }

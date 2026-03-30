@@ -74,9 +74,7 @@ impl Parser {
         if self.check(t) { Ok(self.advance()) }
         else { 
             let token = self.peek();
-            let span = token.span;
-            let kind = ParserErrorKind::InvalidToken(token.kind.clone());
-            Err(ParserError{ span, kind }) 
+            Err(self.error(token)) 
         }
     }
 
@@ -106,10 +104,36 @@ impl Parser {
     }
 
     pub(in crate::parser) fn error(&self, token: &Token) -> ParserError {
-        let span = token.span; 
+        let span = Span{start: token.pos, end: token.pos}; 
         let kind = ParserErrorKind::InvalidToken(token.kind.clone());
         ParserError{ span, kind }
     }
-}
 
+    pub(in crate::parser) fn error_at(&self, span: Span, kind: TokenKind) -> ParserError {
+        let kind = ParserErrorKind::InvalidToken(kind);
+        ParserError{ span, kind }
+    }
+
+    pub(in crate::parser) fn synchronize(&mut self) {
+        while !self.is_at_end() {
+            if let TokenKind::SemiCol = self.previous().kind {
+                return;
+            }
+
+            // Valid token to fall back to 
+            match self.peek().kind {
+                TokenKind::Fn 
+                | TokenKind::For 
+                | TokenKind::If
+                | TokenKind::While 
+                | TokenKind::Return 
+                | TokenKind::Post 
+                | TokenKind::Put 
+                | TokenKind::Patch => { return; },
+                _ => {},
+            }
+            self.advance();
+        }
+    }
+}
 

@@ -10,6 +10,13 @@ pub trait Walkable {
         walk_stmt(self, stmt);
     }
 
+    fn visit_program(&mut self, prog: &Program) {
+        walk_program(self, prog);
+    }
+
+    fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
+        walk_fn_decl(self, fn_decl);
+    }
 }
 
 /// Walk on only expr 
@@ -28,7 +35,7 @@ pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
 
         Expr::HTTPRequest(_) 
             | Expr::Constant(_)
-            | Expr::Identifier(_)
+            | Expr::Ident(_)
             => {},
     }
 }
@@ -70,4 +77,14 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
         Stmt::HTTPRequest { body, .. } => walker.visit_expr(body),
         Stmt::Expr(e) => walker.visit_expr(e),
     }
+}
+
+pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
+    prog.statements.iter()
+        .for_each(|f| walker.visit_fn_decl(f));
+}
+
+pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {
+    func.body.iter()
+        .for_each(|stmt| walker.visit_stmt(stmt));
 }

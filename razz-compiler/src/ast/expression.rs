@@ -123,5 +123,5 @@ pub enum Expr {
         fields: Vec<StructField>,
     },
     /// Identifer name
-    Identifier(String),
+    Ident(String),
 }

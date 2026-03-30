@@ -50,7 +50,9 @@ If ::= "if" Expr Block
     { "else" "if" Expr Block }
     [ "else" Block ] ;
 
-For ::= "for" Stmt ";" Expr ";" { Stmt } Block  ;
+ForSet ::= Assign | CompoundAssign ;
+
+For ::= "for" [ ForSet ] ";" [ Expr ] ";" [ ForSet { ","  ForSet } ] Block ;
 
 Return ::= "return" Expr ";" ;
 

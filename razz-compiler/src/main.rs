@@ -20,7 +20,7 @@ fn main() -> io::Result<()> {
             is_err = true;
             for e in err_toks {
                 eprintln!("{}: {:?} Line: {} Col: {}", 
-                    "error".red().bold(), e.kind, e.span.line, e.span.col);
+                    "error".red().bold(), e.kind, e.pos.line, e.pos.col);
             }
         }
 

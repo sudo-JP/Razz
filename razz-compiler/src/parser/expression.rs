@@ -1,5 +1,4 @@
-use crate::{ast::{expression::{Arg, BinOpKind, Expr, SpecificType, StructField, UnOpKind}, Spanned}, 
-    lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::{Arg, BinOpKind, Expr, SpecificType, StructField, UnOpKind}, Spanned}, common::Span, lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
 use crate::ast::expression::Literal;
 use super::parser::Parser;
 
@@ -13,68 +12,98 @@ impl Parser {
 
     /// logic_or ::= logic_and { "||" logic_and } ; 
     fn logic_or(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.logic_and()?.node;
+        let logic_and = self.logic_and()?;
+        let mut node = logic_and.node;
         let rules = [TokenKind::Or];
-        let span = self.peek().span;
+        let start = logic_and.span.start;
+        let mut end = start;
 
         while self.match_token(&rules) {
             let op = BinOpKind::Or;
-            let right = Box::new(self.logic_and()?.node);
+            let logic_and = self.logic_and()?;
+            let right = Box::new(logic_and.node);
+            end = logic_and.span.end;
+
             node = Expr::BinOp{
                 left: Box::new(node), 
                 op,
                 right,
             };
         }
+
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// logic_and ::= equality { "&&" equality } ; 
     fn logic_and(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.equality()?.node; 
+        let equality = self.equality()?;
+        let mut node = equality.node; 
+        let start = equality.span.start;
+        let mut end = start;
+
         let rules = [TokenKind::And];
-        let span = self.peek().span;
 
         while self.match_token(&rules) {
             let op = BinOpKind::And;
-            let right = Box::new(self.equality()?.node);
+            let equality = self.equality()?;
+            end = equality.span.end;
+            let right = Box::new(equality.node);
             node = Expr::BinOp { 
                 left: Box::new(node), 
                 op, 
                 right: right,
             }
         }
+
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// equality ::= comparison { ("==" | "!=") comparison } ;
     fn equality(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.comparison()?.node; 
+        let comparison = self.comparison()?;
+        let mut node = comparison.node; 
         let rules = [TokenKind::Eq];
-        let span = self.peek().span;
+        let start = comparison.span.start;
+        let mut end = start;
+
 
         while self.match_token(&rules) {
-            let op = BinOpKind::Eq;
-            let right = Box::new(self.equality()?.node);
+            let op = match self.previous().kind {
+                TokenKind::Eq => BinOpKind::Eq,
+                TokenKind::Neq => BinOpKind::Neq,
+                _ => { 
+                    let kind = ParserErrorKind::InvalidToken(self.previous().kind.clone());
+                    return Err(ParserError{span: Span{start, end}, kind}); 
+                }
+            };
+            let comparison = self.comparison()?;
+            let right = Box::new(comparison.node);
+            end = comparison.span.end;
+            
             node = Expr::BinOp { 
                 left: Box::new(node), 
                 op, 
                 right: right,
             }
         }
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// comparison ::= term { ("<" | "<=" | ">" | ">=") term } ; 
     fn comparison(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.term()?.node; 
+        let term = self.term()?;
+        let mut node = term.node; 
         let rules = [
             TokenKind::Lt, 
             TokenKind::Le, 
             TokenKind::Gt,
             TokenKind::Ge,
         ];
-        let span = self.peek().span;
+        let start = term.span.start;
+        let mut end = start;
 
         while self.match_token(&rules) {
             let op = match self.previous().kind {
@@ -84,28 +113,33 @@ impl Parser {
                 TokenKind::Ge => BinOpKind::Ge, 
                 _ => { 
                     let kind = ParserErrorKind::InvalidToken(self.previous().kind.clone());
-                    return Err(ParserError{span, kind}); 
+                    return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
+            let term = self.term()?;
+            end = term.span.end;
 
-            let right = Box::new(self.term()?.node);
+            let right = Box::new(term.node);
             node = Expr::BinOp { 
                 left: Box::new(node), 
                 op, 
                 right: right,
             }
         }
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// term ::= factor { ("+" | "-") factor } ;
     fn term(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.factor()?.node; 
+        let factor = self.factor()?;
+        let mut node = factor.node; 
         let rules = [
             TokenKind::Add,
             TokenKind::Sub,
         ];
-        let span = self.peek().span;
+        let start = factor.span.start;
+        let mut end = start;
 
         while self.match_token(&rules) {
             let op = match self.previous().kind {
@@ -113,28 +147,33 @@ impl Parser {
                 TokenKind::Sub => BinOpKind::Sub, 
                 _ => { 
                     let kind = ParserErrorKind::InvalidToken(self.previous().kind.clone());
-                    return Err(ParserError{span, kind}); 
+                    return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
 
-            let right = Box::new(self.factor()?.node);
+            let factor = self.factor()?;
+            let right = Box::new(factor.node);
+            end = factor.span.end;
             node = Expr::BinOp { 
                 left: Box::new(node), 
                 op, 
                 right: right,
             }
         }
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// factor ::= unary { ("*" | "/") unary } ; 
     fn factor(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.unary()?.node; 
+        let unary = self.unary()?;
+        let mut node = unary.node; 
         let rules = [
             TokenKind::Mult,
             TokenKind::Div,
         ];
-        let span = self.peek().span;
+        let start = unary.span.start;
+        let mut end = start;
 
         while self.match_token(&rules) {
             let op = match self.previous().kind {
@@ -142,17 +181,20 @@ impl Parser {
                 TokenKind::Div => BinOpKind::Div, 
                 _ => { 
                     let kind = ParserErrorKind::InvalidToken(self.previous().kind.clone());
-                    return Err(ParserError{span, kind}); 
+                    return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
 
-            let right = Box::new(self.unary()?.node);
+            let unary = self.unary()?;
+            let right = Box::new(unary.node);
+            end = unary.span.end;
             node = Expr::BinOp { 
                 left: Box::new(node), 
                 op, 
                 right: right,
             }
         }
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     } 
 
@@ -165,18 +207,22 @@ impl Parser {
         ];
 
         if self.match_token(&rules) {
-            let span = self.previous().span;
+            let start = self.previous().pos;
+            let mut end = start;
             let op = match self.previous().kind {
                 TokenKind::Sub => UnOpKind::Minus, 
                 TokenKind::Not => UnOpKind::Not, 
                 _ => {
                     let kind = ParserErrorKind::InvalidToken(self.previous().kind.clone());
-                    return Err(ParserError{span, kind}); 
+                    return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
-            let value = Box::new(self.unary()?.node); 
+            let unary = self.unary()?;
+            end = unary.span.end;
+            let value = Box::new(unary.node); 
             let node = Expr::UnOp { op, value };
 
+            let span = Span{start, end};
             return Ok(Spanned { node, span });
         }
 
@@ -185,29 +231,31 @@ impl Parser {
 
     /// field_access ::= function_call { "->" IDENT } ; 
     fn field_access(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let mut node = self.function_call()?.node; 
+        let func_call = self.function_call()?;
+        let mut node = func_call.node; 
         let rules = [TokenKind::Arrow];
-        let span = self.peek().span;
-        println!("function call: {:?}", node);
-        println!("peek: {:?}", self.peek().kind);
+        let start = func_call.span.start;
+        let mut end = start;
 
         while self.match_token(&rules) {
             let ident = self.consume_ident()?;
+            end = self.previous().pos;
             node = Expr::FieldAccess { 
                 obj: Box::new(node), 
                 key: ident,
             };
         }
+        let span = Span{start, end};
         Ok(Spanned { node , span })
     }
 
     /// function_call ::= IDENT "(" [ Arg { "," Arg } ] ")" 
     /// | primary ;
     fn function_call(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let span = self.peek().span;
         if let TokenKind::Ident(ident) = &self.peek().kind
             && self.peek_next().kind == TokenKind::LParen
         {
+            let start = self.peek().pos;
             // Move pass IDENT (
             let name = ident.to_string();
             self.advance();
@@ -215,11 +263,13 @@ impl Parser {
             // We are in function
             let args = self.args()?;
             let token = self.peek();
+            let end = token.pos;
             if !matches!(token.kind, TokenKind::RParen) {
                 return Err(self.error(token));
             }
             self.advance();
             let node = Expr::FunctionCall { name, args };
+            let span = Span{start, end};
             return Ok(Spanned{node, span});
         }
         self.primary() 
@@ -251,9 +301,10 @@ impl Parser {
     fn parse_named_expr(&mut self) -> Result<(String, Expr), ParserError> {
         let token = self.peek();
         let TokenKind::Ident(ident) = &token.kind else {
-            let span = token.span; 
+            let start = token.pos;
+            let end = start; 
             let kind = ParserErrorKind::InvalidToken(token.kind.clone());
-            return Err(ParserError{ span, kind });
+            return Err(ParserError{ span: Span{start, end}, kind });
         };
         let name = ident.to_string();
         self.advance();
@@ -286,48 +337,25 @@ impl Parser {
     /// | GET_Request
     /// | "(" Expr ")" ;
     fn primary(&mut self) -> Result<Spanned<Expr>, ParserError> {
-        let token = self.peek();
-        let span = token.span;
+        let token = self.advance();
+        let start = token.pos;
+        let span = Span{start, end: start};
         let kind = token.kind.clone();
 
         let node = match kind {
-            TokenKind::StringLit(s) => { 
-                self.advance();
-                Expr::Constant(Literal::String(s))
-            },
-            TokenKind::IntLit(i) => {
-                self.advance();
-                Expr::Constant(Literal::Int(i))
-            }, 
-            TokenKind::FloatLit(f) => {
-                self.advance();
-                Expr::Constant(Literal::Float(f))
-            }, 
-            TokenKind::BoolLit(b) => {
-                self.advance();
-                Expr::Constant(Literal::Bool(b))
-            }, 
-            TokenKind::NullLit => {
-                self.advance();
-                Expr::Constant(Literal::Null)
-            },
+            TokenKind::StringLit(s) => Expr::Constant(Literal::String(s)),
+            TokenKind::IntLit(i) => Expr::Constant(Literal::Int(i)), 
+            TokenKind::FloatLit(f) => Expr::Constant(Literal::Float(f)), 
+            TokenKind::BoolLit(b) => Expr::Constant(Literal::Bool(b)), 
+            TokenKind::NullLit => Expr::Constant(Literal::Null),
+
             TokenKind::Get => self.get_request()?,
             TokenKind::LParen => {
-                self.advance();
                 let expr = self.expression()?;
                 self.consume(&TokenKind::RParen)?;
                 expr.node
             }, 
-            TokenKind::Ident(s) => {
-                // Either an identifier or struct literal, lookahead by 2
-                if matches!(self.peek_next().kind, TokenKind::LBrace) {
-                    self.struct_literal()?
-                }
-                else { 
-                    self.advance();
-                    Expr::Identifier(s) 
-                }
-            },
+            TokenKind::Ident(s) => Expr::Ident(s),
             TokenKind::Vec3 
             | TokenKind::Point3
             | TokenKind::Color
@@ -337,7 +365,7 @@ impl Parser {
             | TokenKind::Sphere 
             | TokenKind::Image 
             => self.struct_literal()?,
-            _ => { return Err(self.error(token)); }
+            _ => { return Err(self.error_at(span, kind)); }
         };
 
         Ok(Spanned{ node, span })
@@ -345,7 +373,6 @@ impl Parser {
 
     /// GET_Request ::= "GET" Endpoint ; 
     fn get_request(&mut self) -> Result<Expr, ParserError> {
-        self.advance();
         Ok(Expr::HTTPRequest(self.consume_endpoint()?))
     }
 
@@ -367,7 +394,7 @@ impl Parser {
     /// | "Sphere" 
     /// | "Image" ;
     fn specific_type(&mut self) -> Result<SpecificType, ParserError> {
-        let token = self.peek();
+        let token = self.previous();
         let ty = match token.kind {
             TokenKind::Vec3 => SpecificType::Vec3,
             TokenKind::Point3 => SpecificType::Point3,
@@ -379,7 +406,6 @@ impl Parser {
             TokenKind::Image => SpecificType::Image,
             _ => { return Err(self.error(token)); }
         };
-        self.advance(); 
         Ok(ty)
     }
 
