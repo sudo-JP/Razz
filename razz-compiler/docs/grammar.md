@@ -11,7 +11,9 @@ Program ::= { FuncDecl } EOF ;
 
 Param ::= IDENT ":" Type ;
 
-FuncDecl ::= "fn" IDENT "(" [ Param { "," Param } ] ")" Type Block ;
+Params ::= [ Param { "," Param } ] ; 
+
+FuncDecl ::= "fn" IDENT "(" Params ")" Type Block ;
 
 Type ::= "int" 
     | "float" 
@@ -103,7 +105,7 @@ function_call ::= IDENT "(" Args ")"
 
 StructField ::= IDENT ":" Expr ;
 
-StructFields ::= [ StructField { "," StructField } ]
+StructFields ::= [ StructField { "," StructField } [ "," ] ] ; 
 
 StructLiteral ::= SpecificType "{" StructFields "}" ; 
 

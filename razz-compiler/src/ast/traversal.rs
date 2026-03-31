@@ -80,8 +80,8 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
 }
 
 pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
-    prog.statements.iter()
-        .for_each(|f| walker.visit_fn_decl(f));
+    prog.funcs.iter()
+        .for_each(|f| walker.visit_fn_decl(&f.node));
 }
 
 pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {

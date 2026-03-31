@@ -299,20 +299,8 @@ impl Parser {
     /// Used to parse 
     /// IDENT ":" Expr ; 
     fn parse_named_expr(&mut self) -> Result<(String, Expr), ParserError> {
-        let token = self.peek();
-        let TokenKind::Ident(ident) = &token.kind else {
-            let start = token.pos;
-            let end = start; 
-            let kind = ParserErrorKind::InvalidToken(token.kind.clone());
-            return Err(ParserError{ span: Span{start, end}, kind });
-        };
-        let name = ident.to_string();
-        self.advance();
-        let token = self.peek();
-        if !matches!(token.kind, TokenKind::Colon) {
-            return Err(self.error(token));
-        }
-        self.advance();
+        let name = self.consume_ident()?;
+        self.consume(&TokenKind::Colon)?;
         let expr = self.expression()?;
         Ok((name, expr.node))
     }
@@ -394,22 +382,10 @@ impl Parser {
     /// | "Sphere" 
     /// | "Image" ;
     fn specific_type(&mut self) -> Result<SpecificType, ParserError> {
-        let token = self.previous();
-        let ty = match token.kind {
-            TokenKind::Vec3 => SpecificType::Vec3,
-            TokenKind::Point3 => SpecificType::Point3,
-            TokenKind::Color => SpecificType::Color,
-            TokenKind::Background => SpecificType::Background,
-            TokenKind::Camera => SpecificType::Camera,
-            TokenKind::Output => SpecificType::Output,
-            TokenKind::Sphere => SpecificType::Sphere, 
-            TokenKind::Image => SpecificType::Image,
-            _ => { return Err(self.error(token)); }
-        };
-        Ok(ty)
+        self.match_specific_type(self.previous())
     }
 
-    /// StructFields ::= [ StructField { "," StructField } ]
+    /// StructFields ::= [ StructField { "," StructField } [ "," ] ] ;
     /// Same pattern as function call
     fn struct_fields(&mut self) -> Result<Vec<StructField>, ParserError> {
         let mut fields: Vec<StructField> = vec![];
@@ -424,6 +400,9 @@ impl Parser {
 
         let rules = [TokenKind::Comma];
         while self.match_token(&rules) {
+            if !matches!(self.peek().kind, TokenKind::Ident(_)) {
+                break;
+            }
             fields.push(self.struct_field()?);
         }
 

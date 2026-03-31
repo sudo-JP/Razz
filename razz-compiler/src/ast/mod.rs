@@ -1,4 +1,4 @@
-use crate::{ast::statement::FnDecl, common::Span};
+use crate::{ast::{expression::SpecificType, statement::FnDecl}, common::Span};
 
 pub mod expression;
 pub mod statement;
@@ -19,17 +19,10 @@ pub enum Type {
     Bool,
     String,
     Null,
-    Vec3,
-    Point3,
-    Color,
-    Background,
-    Camera,
-    Output,
-    Sphere,
-    Image,
+    SpecificType(SpecificType),
 }
 
 /// Top-level program node
 pub struct Program {
-    pub statements: Vec<FnDecl> 
+    pub funcs: Vec<Spanned<FnDecl>>
 }

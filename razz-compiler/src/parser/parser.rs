@@ -1,4 +1,4 @@
-use crate::{ast::{expression::Endpoint, Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::{Endpoint, SpecificType}, statement::FnDecl, Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -13,7 +13,28 @@ impl Parser {
     }
 
     pub fn parse(mut self) -> Result<Program, Vec<ParserError>> {
-        Err(self.parser_errors)
+        let mut funcs: Vec<Spanned<FnDecl>> = vec![];
+        // Run until no functions def are found 
+        while !self.is_at_end() {
+            if let TokenKind::Fn = self.peek().kind {
+                // Check for parse error 
+                match self.func_decl() {
+                    Ok(f) => funcs.push(f),
+                    Err(e) => {
+                        self.synchronize_fn();
+                        self.parser_errors.push(e);
+                    }
+                };
+            } else {
+                self.parser_errors.push(self.error(self.peek()));
+                self.synchronize_fn();
+            }
+        }
+        if !self.parser_errors.is_empty() {
+            Err(self.parser_errors)
+        } else {
+            Ok(Program { funcs })
+        }
     }
 
     /// Utilities functions
@@ -114,7 +135,16 @@ impl Parser {
         ParserError{ span, kind }
     }
 
-    pub(in crate::parser) fn synchronize(&mut self) {
+    fn synchronize_fn(&mut self) {
+        while !self.is_at_end() {
+            if let TokenKind::Fn = self.peek().kind {
+                return; 
+            }
+            self.advance(); 
+        }
+    }
+
+    pub(in crate::parser) fn synchronize_stmt(&mut self) {
         while !self.is_at_end() {
             if let TokenKind::SemiCol = self.previous().kind {
                 return;
@@ -135,5 +165,29 @@ impl Parser {
             self.advance();
         }
     }
+
+    /// SpecificType ::= "Vec3" 
+    /// | "Point3" 
+    /// | "Color" 
+    /// | "Background" 
+    /// | "Camera" 
+    /// | "Output" 
+    /// | "Sphere" 
+    /// | "Image" ;
+    pub(in crate::parser) fn match_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
+        let ty = match token.kind {
+            TokenKind::Vec3 => SpecificType::Vec3,
+            TokenKind::Point3 => SpecificType::Point3,
+            TokenKind::Color => SpecificType::Color,
+            TokenKind::Background => SpecificType::Background,
+            TokenKind::Camera => SpecificType::Camera,
+            TokenKind::Output => SpecificType::Output,
+            TokenKind::Sphere => SpecificType::Sphere, 
+            TokenKind::Image => SpecificType::Image,
+            _ => { return Err(self.error(token)); }
+        }; 
+        Ok(ty)
+    }
+
 }
 
