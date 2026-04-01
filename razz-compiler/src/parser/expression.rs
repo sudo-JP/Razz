@@ -382,7 +382,7 @@ impl Parser {
     /// | "Sphere" 
     /// | "Image" ;
     fn specific_type(&mut self) -> Result<SpecificType, ParserError> {
-        self.match_specific_type(self.previous())
+        self.assert_specific_type(self.previous())
     }
 
     /// StructFields ::= [ StructField { "," StructField } [ "," ] ] ;

@@ -44,7 +44,7 @@ impl Compiler {
         }
 
         // ============= PARSER ============= 
-        let mut parser = Parser::new(tokens);
+        let parser = Parser::new(tokens);
         let prog = parser.parse()
             .map_err(CompilerError::Parser)?;
 

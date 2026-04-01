@@ -135,6 +135,10 @@ impl Parser {
         ParserError{ span, kind }
     }
 
+    pub(in crate::parser) fn add_error(&mut self, e: ParserError) {
+        self.parser_errors.push(e);
+    }
+
     fn synchronize_fn(&mut self) {
         while !self.is_at_end() {
             if let TokenKind::Fn = self.peek().kind {
@@ -174,7 +178,7 @@ impl Parser {
     /// | "Output" 
     /// | "Sphere" 
     /// | "Image" ;
-    pub(in crate::parser) fn match_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
+    pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
         let ty = match token.kind {
             TokenKind::Vec3 => SpecificType::Vec3,
             TokenKind::Point3 => SpecificType::Point3,
