@@ -46,11 +46,11 @@ pub fn colored_assert(actual: &str, expected: &str) {
         for change in diff.iter_all_changes() {
             match change.tag() {
                 // Deletions from 'actual' (what was there but shouldn't be)
-                ChangeTag::Delete => print!("{}{}", "-".red(), change.value().red()),
+                ChangeTag::Delete => println!("{}{}", "-".red(), change.value().red()),
                 // Additions from 'expected' (what should have been there)
-                ChangeTag::Insert => print!("{}{}", "+".green(), change.value().green()),
+                ChangeTag::Insert => println!("{}{}", "+".green(), change.value().green()),
                 // Equal parts
-                ChangeTag::Equal => print!(" {}", change.value()),
+                ChangeTag::Equal => println!(" {}", change.value()),
             };
         }
         

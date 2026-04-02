@@ -6,6 +6,7 @@ pub mod traversal;
 pub mod debug;
 
 
+#[derive(Debug)]
 pub struct Spanned<T> {
     pub node: T,
     pub span: Span,

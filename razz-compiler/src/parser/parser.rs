@@ -2,7 +2,7 @@ use crate::{ast::{expression::{Endpoint, SpecificType}, statement::FnDecl, Progr
 
 pub struct Parser {
     tokens: Vec<Token>,
-    parser_errors: Vec<ParserError>,
+    pub(in crate::parser) parser_errors: Vec<ParserError>,
     current: usize
 }
 
@@ -133,10 +133,6 @@ impl Parser {
     pub(in crate::parser) fn error_at(&self, span: Span, kind: TokenKind) -> ParserError {
         let kind = ParserErrorKind::InvalidToken(kind);
         ParserError{ span, kind }
-    }
-
-    pub(in crate::parser) fn add_error(&mut self, e: ParserError) {
-        self.parser_errors.push(e);
     }
 
     fn synchronize_fn(&mut self) {

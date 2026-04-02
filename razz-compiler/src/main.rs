@@ -24,6 +24,12 @@ fn main() -> io::Result<()> {
             }
         }
 
+        Ok(CompilerOutput::Parser(_prog)) => {
+        }
+
+        Err(CompilerError::Parser(_e)) => {
+        }
+
         // Add more when the compiler grows 
         _ => {}
     }

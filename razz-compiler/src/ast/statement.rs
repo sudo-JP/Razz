@@ -1,4 +1,4 @@
-use crate::ast::{expression::{Endpoint, Expr}, Type};
+use crate::ast::{expression::{Endpoint, Expr}, Spanned, Type};
 
 /// else if <cond> { <body> }
 #[derive(Debug)]
@@ -42,7 +42,7 @@ pub struct FnDecl {
     pub name: String,
     pub params: Vec<Param>,
     pub return_type: Type, 
-    pub body: Vec<Stmt>,
+    pub body: Vec<Spanned<Stmt>>,
 }
 
 #[derive(Debug)]

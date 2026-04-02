@@ -52,7 +52,7 @@ If ::= "if" Expr Block
     { "else" "if" Expr Block }
     [ "else" Block ] ;
 
-ForSet ::= Assign | CompoundAssign ;
+ForSet ::= Assign | CompoundAssign | Expr ;
 
 For ::= "for" [ ForSet ] ";" [ Expr ] ";" [ ForSet { ","  ForSet } ] Block ;
 
