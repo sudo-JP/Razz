@@ -264,7 +264,7 @@ impl Parser {
             let args = self.args()?;
             let token = self.peek();
             let end = token.pos;
-            if !matches!(token.kind, TokenKind::RParen) {
+            if self.check(&TokenKind::RParen) {
                 return Err(self.error(token));
             }
             self.advance();

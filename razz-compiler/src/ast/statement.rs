@@ -4,7 +4,7 @@ use crate::ast::{expression::{Endpoint, Expr}, Spanned, Type};
 #[derive(Debug)]
 pub struct ElseIf {
     pub cond: Expr, 
-    pub body: Vec<Stmt>,
+    pub body: Vec<Spanned<Stmt>>,
 }
 
 /// Function parameter 
@@ -53,13 +53,13 @@ pub enum Stmt {
     Assign {
         name: String, 
         type_ann: Option<Type>,
-        expr: Expr,
+        expr: Spanned<Expr>,
     },
     /// While condition
     /// while <cond> { <body> }
     While {
-        cond: Expr, 
-        body: Vec<Stmt>,
+        cond: Spanned<Expr>, 
+        body: Vec<Spanned<Stmt>>,
     }, 
     /// If statement
     /// 0 or more else if 
@@ -69,18 +69,18 @@ pub enum Stmt {
     /// (<else>)?
     If {
         cond: Expr, 
-        body: Vec<Stmt>,
+        body: Vec<Spanned<Stmt>>,
         else_ifs: Vec<ElseIf>, 
-        else_clause: Option<Vec<Stmt>>,
+        else_clause: Option<Vec<Spanned<Stmt>>>,
     },
     /// For loop statement
     /// Can have multiple expr, separated by comma
-    /// for <decl>; <cond>; (<expr>|<expr>,)* { <body> }
+    /// for (<decl>)*; (<cond>)*; (<expr>|<expr>,)* { <body> }
     For {
-        decl: Box<Stmt>, 
-        cond: Expr, 
-        update: Vec<Stmt>, 
-        body: Vec<Stmt>,
+        decl: Option<Box<Spanned<Stmt>>>, 
+        cond: Option<Spanned<Expr>>, 
+        update: Vec<Spanned<Stmt>>, 
+        body: Vec<Spanned<Stmt>>,
     }, 
     /// Return statement, return <expr>
     Return(Expr),
@@ -90,7 +90,7 @@ pub enum Stmt {
     CompoundAssign {
         name: String,
         op: CompoundOp, 
-        expr: Expr,
+        expr: Spanned<Expr>,
     },
     /// HTTP Request statements 
     /// <method> <endpoint> <body> 
@@ -98,11 +98,11 @@ pub enum Stmt {
     HTTPRequest {
         method: HTTPMethod, 
         endpoint: Endpoint,
-        body: Expr, 
+        body: Spanned<Expr>, 
     },
     /// Expression as a statement 
     /// Expression that returns nothing
     /// This is for bare function call
     /// foo(), where foo() update the camera
-    Expr(Expr),
+    Expr(Spanned<Expr>),
 }

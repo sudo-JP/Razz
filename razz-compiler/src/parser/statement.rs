@@ -1,4 +1,5 @@
-use crate::{ast::{statement::{CompoundOp, FnDecl, Param, Stmt}, Spanned, Type}, common::Span, lexer::tokens::TokenKind, parser::error::ParserError};
+use crate::{ast::{statement::{CompoundOp, FnDecl, Param, Stmt}, Spanned, Type}, 
+    common::Span, lexer::tokens::TokenKind, parser::error::ParserError};
 
 use super::parser::Parser;
 
@@ -81,6 +82,7 @@ impl Parser {
                 Type::SpecificType(self.assert_specific_type(self.peek())?)
             }
         };
+        self.advance();
         Ok(ty)
     }
 
@@ -88,7 +90,7 @@ impl Parser {
     fn block(&mut self) -> Result<Spanned<Vec<Spanned<Stmt>>>, ParserError> {
         let mut stmts: Vec<Spanned<Stmt>> = vec![];
         let start = self.consume(&TokenKind::LBrace)?.pos;
-        while !self.is_at_end() && !matches!(self.peek().kind, TokenKind::RBrace) {
+        while !self.is_at_end() && self.check(&TokenKind::RBrace) {
             match self.stmt() {
                 Ok(stmt) => stmts.push(stmt), 
                 Err(e) => {
@@ -149,7 +151,7 @@ impl Parser {
         let start = self.peek().pos; 
         let name = self.consume_ident()?;
         self.consume(&TokenKind::Eq)?;
-        let expr = self.expression()?.node;
+        let expr = self.expression()?;
         let end = self.consume(&TokenKind::SemiCol)?.pos;
 
         let span = Span { start, end };
@@ -165,7 +167,7 @@ impl Parser {
         self.consume(&TokenKind::Colon)?;
         let type_ann = Some(self.consume_type()?);
         self.consume(&TokenKind::Eq)?;
-        let expr = self.expression()?.node;
+        let expr = self.expression()?;
         let end = self.consume(&TokenKind::SemiCol)?.pos; 
 
         let span = Span { start, end };
@@ -185,10 +187,12 @@ impl Parser {
         let op = match self.peek().kind {
             TokenKind::AddE => CompoundOp::AddE,
             TokenKind::SubE => CompoundOp::SubE, 
-            TokenKind::MultE => CompoundOp::MultE, TokenKind::DivE => CompoundOp::DivE, 
+            TokenKind::MultE => CompoundOp::MultE, 
+            TokenKind::DivE => CompoundOp::DivE, 
             _ => { return Err(self.error(self.peek())); }
         };
-        let expr = self.expression()?.node;
+        self.advance();
+        let expr = self.expression()?;
         let end = self.consume(&TokenKind::SemiCol)?.pos;
         
         let span = Span { start, end };
@@ -198,7 +202,15 @@ impl Parser {
 
     /// While ::= "while" Expr Block  ;
     fn parse_while(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        todo!()
+        let start = self.consume(&TokenKind::While)?.pos;
+        let cond = self.expression()?; 
+        let block = self.block()?;
+        let body = block.node;
+        let end = block.span.end;
+        
+        let span = Span{start, end};
+        let node = Stmt::While { cond, body };
+        Ok(Spanned { node, span })
     }
 
     /// If ::= "if" Expr Block 
@@ -211,9 +223,40 @@ impl Parser {
     /// ForSet ::= Assign | CompoundAssign | Expr ;
     /// For ::= "for" [ ForSet ] ";" [ Expr ] ";" [ ForSet { ","  ForSet } ] Block ;
     fn parse_for(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        // Check if its ident, then 
-        let _id = self.stmt_ident()?;
-        todo!()
+        let start = self.consume(&TokenKind::For)?.pos;
+        let decl = self.option_for_clause(|this| Ok(Box::new(this.stmt_ident()?)))?;
+        let cond = self.option_for_clause(|this| Ok(this.expression()?))?;
+
+        let mut update: Vec<Spanned<Stmt>> = vec![];
+        if !self.check(&TokenKind::LBrace) {
+            update.push(self.stmt_ident()?);
+            let rules = [TokenKind::Comma];
+            while self.match_token(&rules) {
+                update.push(self.stmt_ident()?);
+            }
+        }
+
+        let block = self.block()?;
+        let body = block.node;
+        let end = block.span.end; 
+        let span = Span{start, end};
+        let node = Stmt::For { decl, cond, update, body };
+        Ok(Spanned { node, span })
+    }
+
+    /// Helper method for parsing for, its a bit confusing 
+    /// Take in a closure, which is the current self, and return a result 
+    /// consume ";" token, and return appropriate optional argument of the for, e.g [ ForSet ]
+    fn option_for_clause<T, F>(&mut self, mut f: F) -> Result<Option<T>, ParserError>
+    where F: FnMut(&mut Self) -> Result<T, ParserError> {
+        if self.check(&TokenKind::SemiCol) {
+            self.consume(&TokenKind::SemiCol)?; 
+            Ok(None)
+        } else {
+            let res = Some(f(self)?);
+            self.consume(&TokenKind::SemiCol)?; 
+            Ok(res)
+        }
     }
 
     /// Return ::= "return" Expr ";" ;
@@ -248,7 +291,7 @@ impl Parser {
         let end = self.consume(&TokenKind::SemiCol)?.pos;
         let start = expr.span.start; 
 
-        let node = Stmt::Expr(expr.node);
+        let node = Stmt::Expr(expr);
         let span = Span { start, end };
         Ok(Spanned { node, span })
     }
