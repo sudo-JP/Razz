@@ -3,8 +3,8 @@ use crate::ast::{expression::{Endpoint, Expr}, Spanned, Type};
 /// else if <cond> { <body> }
 #[derive(Debug)]
 pub struct ElseIf {
-    pub cond: Expr, 
-    pub body: Vec<Spanned<Stmt>>,
+    pub cond: Spanned<Expr>, 
+    pub body: Spanned<Vec<Spanned<Stmt>>>,
 }
 
 /// Function parameter 
@@ -42,7 +42,7 @@ pub struct FnDecl {
     pub name: String,
     pub params: Vec<Param>,
     pub return_type: Type, 
-    pub body: Vec<Spanned<Stmt>>,
+    pub body: Spanned<Vec<Spanned<Stmt>>>,
 }
 
 #[derive(Debug)]
@@ -55,11 +55,15 @@ pub enum Stmt {
         type_ann: Option<Type>,
         expr: Spanned<Expr>,
     },
+    AssignObj {
+        target: Spanned<Expr>, 
+        expr: Spanned<Expr>,
+    },
     /// While condition
     /// while <cond> { <body> }
     While {
         cond: Spanned<Expr>, 
-        body: Vec<Spanned<Stmt>>,
+        body: Spanned<Vec<Spanned<Stmt>>>,
     }, 
     /// If statement
     /// 0 or more else if 
@@ -68,22 +72,22 @@ pub enum Stmt {
     /// (<else if>)* 
     /// (<else>)?
     If {
-        cond: Expr, 
-        body: Vec<Spanned<Stmt>>,
-        else_ifs: Vec<ElseIf>, 
-        else_clause: Option<Vec<Spanned<Stmt>>>,
+        cond: Spanned<Expr>, 
+        body: Spanned<Vec<Spanned<Stmt>>>,
+        else_ifs: Vec<Spanned<ElseIf>>, 
+        else_body: Option<Spanned<Vec<Spanned<Stmt>>>>,
     },
     /// For loop statement
     /// Can have multiple expr, separated by comma
-    /// for (<decl>)*; (<cond>)*; (<expr>|<expr>,)* { <body> }
+    /// for (<decl>)?; (<cond>)?; (<expr>|<expr>,)* { <body> }
     For {
-        decl: Option<Box<Spanned<Stmt>>>, 
+        decl: Option<Spanned<Box<Stmt>>>, 
         cond: Option<Spanned<Expr>>, 
         update: Vec<Spanned<Stmt>>, 
-        body: Vec<Spanned<Stmt>>,
+        body: Spanned<Vec<Spanned<Stmt>>>,
     }, 
     /// Return statement, return <expr>
-    Return(Expr),
+    Return(Spanned<Expr>),
     /// Compound assignment operator
     /// <name> <op> <expr> 
     /// e.g foo += (1 * 2)

@@ -46,21 +46,21 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
         Stmt::Assign { expr, .. } => walker.visit_expr(&expr.node),
         Stmt::While { cond, body } => {
             walker.visit_expr(&cond.node);
-            body.iter()
+            body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
         }
-        Stmt::If { cond, body, else_ifs, else_clause } => {
-            walker.visit_expr(cond);
-            body.iter()
+        Stmt::If { cond, body, else_ifs, else_body } => {
+            walker.visit_expr(&cond.node);
+            body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
             else_ifs.iter()
                 .for_each(|elif| {
-                    walker.visit_expr(&elif.cond);
-                    elif.body.iter()
+                    walker.visit_expr(&elif.node.cond.node);
+                    elif.node.body.node.iter()
                         .for_each(|instr| walker.visit_stmt(&instr.node));
                 });
-            if let Some(stmts) = else_clause {
-                stmts.iter()
+            if let Some(e) = else_body {
+                e.node.iter()
                     .for_each(|instr| walker.visit_stmt(&instr.node));
             }
         }, 
@@ -73,10 +73,10 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
             }
             update.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
-            body.iter()
+            body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
         },
-        Stmt::Return(e) => walker.visit_expr(e),
+        Stmt::Return(e) => walker.visit_expr(&e.node),
         Stmt::CompoundAssign { expr, .. } => walker.visit_expr(&expr.node),
         Stmt::HTTPRequest { body, .. } => walker.visit_expr(&body.node),
         Stmt::Expr(e) => walker.visit_expr(&e.node),
@@ -89,6 +89,6 @@ pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
 }
 
 pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {
-    func.body.iter()
+    func.body.node.iter()
         .for_each(|stmt| walker.visit_stmt(&stmt.node));
 }

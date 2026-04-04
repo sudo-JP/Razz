@@ -8,7 +8,7 @@ fn main() null {
     cam = GET /camera;
     cam->xFrom = 5; 
     // Adjust camera angle 
-    PATCH /camera cam;
+    PATCH /camera Camera cam;
 
     color = Color {
         r: add(b:3, a: 2), 
@@ -22,9 +22,9 @@ fn main() null {
     background->top = color;
     background->bottom = Color { r: 255, g: 255, b: 255 };
 
-    PUT /background background;
+    PUT /background Background background;
     a = 255; 
-    for (i = 2; i < 100; i += 1) {
+    for i = 2; i < 100; i += 1 {
         a += -i; 
     }
     // can't access i here 
@@ -47,19 +47,19 @@ fn main() null {
         z: 3, 
     };
 
-    POST /sphere {
+    POST /sphere Sphere {
         coord: coord,
         radius: 0.5,
         color: color,
     }; 
     
-    PATCH /output {
+    PATCH /output Output {
         type: PPM,
         file: "test.ppm"
     }; 
 
 
-    PATCH /output {
+    PATCH /output Output {
         type: Arduino,
         file: "test.ppm" // Ignored? 
     }; 

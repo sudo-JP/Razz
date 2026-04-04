@@ -46,13 +46,23 @@ ExprStmt ::= Expr ";" ;
 
 Assign ::= IDENT [ ":" Type ] "=" Expr ";" ;
 
+AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ";" ;
+
 While ::= "while" Expr Block  ;
 
-If ::= "if" Expr Block 
-    { "else" "if" Expr Block }
-    [ "else" Block ] ;
+ElseIf ::= { "else" "if" Expr Block } ;
 
-ForSet ::= Assign | CompoundAssign | Expr ;
+Else ::= [ "else" Block ] ;
+
+If ::= "if" Expr Block ElseIF Else ; 
+
+AssignBody ::= IDENT [ ":" Type ] "=" Expr ;
+
+CompoundAssignBody ::= IDENT CompoundOp Expr ;
+
+AssignObjBody ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ;
+
+ForSet ::= AssignBody | CompoundAssignBody | Expr ;
 
 For ::= "for" [ ForSet ] ";" [ Expr ] ";" [ ForSet { ","  ForSet } ] Block ;
 
