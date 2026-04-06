@@ -1,0 +1,6 @@
+fn foo() null {
+    cam = GET /camera;
+    for ; ; cam->x += 1 {
+        a = 1;
+    }
+}

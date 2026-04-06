@@ -1,0 +1,6 @@
+fn bad1() null {
+    a = ;
+}
+fn bad2() null {
+    b = ;
+}

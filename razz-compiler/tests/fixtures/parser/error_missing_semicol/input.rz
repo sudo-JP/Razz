@@ -1,0 +1,3 @@
+fn foo() null {
+    a = 5
+}

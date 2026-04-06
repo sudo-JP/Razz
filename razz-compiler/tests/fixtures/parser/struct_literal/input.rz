@@ -1,0 +1,3 @@
+fn foo() null {
+    c = Color { r: 1, g: 2, b: 3 };
+}

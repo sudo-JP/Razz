@@ -1,0 +1,5 @@
+fn foo() null {
+    cam = GET /camera;
+    cam->lookfrom = Vec3 { x: 1, y: 2, z: 3 };
+    cam->lookfrom->x = 5;
+}

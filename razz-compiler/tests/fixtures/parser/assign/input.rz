@@ -1,0 +1,5 @@
+fn foo() null {
+    a = 5;
+    b: int = 10;
+    c: bool = false;
+}

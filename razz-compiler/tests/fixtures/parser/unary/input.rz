@@ -1,0 +1,4 @@
+fn foo() null {
+    a = !true;
+    b = -5;
+}

@@ -1,0 +1,5 @@
+fn foo() null {
+    cam = GET /camera;
+    x = cam->lookfrom;
+    y = cam->lookfrom->x;
+}

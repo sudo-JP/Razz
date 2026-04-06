@@ -1,0 +1,3 @@
+fn add(foo: int, bar: int) int {
+    return foo + bar; 
+}

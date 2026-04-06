@@ -1,0 +1,6 @@
+fn bad() null {
+    a = ;
+}
+fn good() int {
+    return 1;
+}
