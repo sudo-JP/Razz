@@ -1,21 +1,21 @@
 use crate::ast::{expression::{Endpoint, Expr}, Spanned, Type};
 
 /// else if <cond> { <body> }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ElseIf {
     pub cond: Spanned<Expr>, 
     pub body: Spanned<Vec<Spanned<Stmt>>>,
 }
 
 /// Function parameter 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Param {
     pub name: String, 
     pub ty: Type,
 }
 
 /// Compound Assignment Operator
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CompoundOp {
     /// `+=`
     AddE, 
@@ -28,7 +28,7 @@ pub enum CompoundOp {
 }
 
 /// HTTP Method for statements
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HTTPMethod {
     Post, 
     Put, 
@@ -37,7 +37,7 @@ pub enum HTTPMethod {
 
 /// Function definition
 /// fn <name>((<param>)*) <type> { (<body>)* }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct FnDecl {
     pub name: String,
     pub params: Vec<Param>,
@@ -45,7 +45,7 @@ pub struct FnDecl {
     pub body: Spanned<Vec<Spanned<Stmt>>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Stmt {
     /// Variable declartion, e.g: <name> = <expr>
     /// Assignment can be inferred, e.g foo = 5 is an int
@@ -55,8 +55,17 @@ pub enum Stmt {
         type_ann: Option<Type>,
         expr: Spanned<Expr>,
     },
+    /// <target> itself is a chained of a->b->c->etc 
+    /// so <target> = <expr>;
     AssignObj {
         target: Spanned<Expr>, 
+        expr: Spanned<Expr>,
+    },
+    /// <target> itself is a chained of a->b->c->etc 
+    /// so <target> (+= | -= | /= | *=) <expr>
+    CompoundAssignObj {
+        target: Spanned<Expr>,
+        op: CompoundOp,
         expr: Spanned<Expr>,
     },
     /// While condition

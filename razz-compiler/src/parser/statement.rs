@@ -1,4 +1,4 @@
-use crate::{ast::{statement::{CompoundOp, ElseIf, FnDecl, HTTPMethod, Param, Stmt}, Spanned, Type}, 
+use crate::{ast::{expression::Expr, statement::{CompoundOp, ElseIf, FnDecl, HTTPMethod, Param, Stmt}, Spanned, Type}, 
     common::Span, lexer::tokens::TokenKind, parser::error::ParserError};
 
 use super::parser::Parser;
@@ -77,6 +77,8 @@ impl Parser {
             TokenKind::Int => Type::Int, 
             TokenKind::Float => Type::Float, 
             TokenKind::NullLit => Type::Null, 
+            TokenKind::String => Type::String, 
+            TokenKind::Bool => Type::Bool,
             _ => {
                 Type::SpecificType(self.assert_specific_type(self.peek())?)
             }
@@ -89,7 +91,7 @@ impl Parser {
     fn block(&mut self) -> Result<Spanned<Vec<Spanned<Stmt>>>, ParserError> {
         let mut stmts: Vec<Spanned<Stmt>> = vec![];
         let start = self.consume(&TokenKind::LBrace)?.pos;
-        while !self.is_at_end() && self.check(&TokenKind::RBrace) {
+        while !self.is_at_end() && !self.check(&TokenKind::RBrace) {
             match self.stmt() {
                 Ok(stmt) => stmts.push(stmt), 
                 Err(e) => {
@@ -145,19 +147,55 @@ impl Parser {
         // There are a couple cases here, it can be either
         // an assignment, compount assign, or an expr
         match self.peek_next().kind {
-            TokenKind::Eq => self.assign(), 
+            TokenKind::Assign => self.assign(), 
             TokenKind::Colon => self.assign_with_type(), 
             TokenKind::Arrow => self.assign_object(),
             TokenKind::AddE
             | TokenKind::SubE 
             | TokenKind::MultE 
             | TokenKind::DivE => self.compount_assign(), 
-            _ => self.expr_stmt(), 
+            _ => self.dangl_expr(),
         }
     }
 
+    /// AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ";" ;
     fn assign_object(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        todo!()
+        let mut node = Expr::Ident(self.consume_ident()?);
+        let start = self.previous().pos; 
+        let mut end = start; 
+        let rules = [TokenKind::Arrow]; 
+
+        while self.match_token(&rules) {
+            let ident = self.consume_ident()?;
+            end = self.previous().pos;
+            node = Expr::FieldAccess { 
+                obj: Box::new(node), 
+                key: ident,
+            };
+        }
+        let target = Spanned{node, span: Span{start, end}};
+        match self.peek().kind {
+            TokenKind::Assign => {
+                self.advance();
+                let expr = self.expression()?;
+                let span = Span{start, end};
+                Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
+            },
+            TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
+                let op = match self.peek().kind {
+                    TokenKind::AddE => CompoundOp::AddE,
+                    TokenKind::SubE => CompoundOp::SubE,
+                    TokenKind::MultE => CompoundOp::MultE,
+                    TokenKind::DivE => CompoundOp::DivE,
+                    _ => unreachable!(),
+                };
+                self.advance();
+                let expr = self.expression()?;
+                let span = Span{start, end};
+                Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
+            },
+            _ => Err(self.error(self.peek()))
+        }
     }
 
     /// Assign ::= IDENT "=" Expr ";" ;
@@ -165,7 +203,7 @@ impl Parser {
     fn assign(&mut self) -> Result<Spanned<Stmt>, ParserError> {
         let start = self.peek().pos; 
         let name = self.consume_ident()?;
-        self.consume(&TokenKind::Eq)?;
+        self.consume(&TokenKind::Assign)?;
         let expr = self.expression()?;
         let end = expr.span.end;
 
@@ -181,7 +219,7 @@ impl Parser {
         let name = self.consume_ident()?;  
         self.consume(&TokenKind::Colon)?;
         let type_ann = Some(self.consume_type()?);
-        self.consume(&TokenKind::Eq)?;
+        self.consume(&TokenKind::Assign)?;
         let expr = self.expression()?;
 
         let end = expr.span.end;
@@ -375,13 +413,24 @@ impl Parser {
         Ok(method)
     }
 
-    ///ExprStmt ::= Expr ";" ;
-    fn expr_stmt(&mut self) -> Result<Spanned<Stmt>, ParserError> {
+    /// Does not consume ";"
+    fn dangl_expr(&mut self) -> Result<Spanned<Stmt>, ParserError> {
         let expr = self.expression()?;
         let end = expr.span.end;
         let start = expr.span.start; 
 
         let node = Stmt::Expr(expr);
+        let span = Span { start, end };
+        Ok(Spanned { node, span })
+    }
+
+    /// ExprStmt ::= Expr ";" ;
+    fn expr_stmt(&mut self) -> Result<Spanned<Stmt>, ParserError> {
+        let stmt = self.dangl_expr()?;
+        let node = stmt.node; 
+        let start = stmt.span.start; 
+        let end = self.consume(&TokenKind::SemiCol)?.pos;
+
         let span = Span { start, end };
         Ok(Spanned { node, span })
     }

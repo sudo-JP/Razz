@@ -47,7 +47,7 @@ fn main() null {
         z: 3, 
     };
 
-    POST /sphere Sphere {
+    POST /hittable Sphere {
         coord: coord,
         radius: 0.5,
         color: color,

@@ -1,3 +1,5 @@
+use crate::ast::SpecificType;
+
 #[derive(Debug, PartialEq)]
 pub enum BinOpKind {
     // Arithmetic
@@ -17,7 +19,7 @@ pub enum BinOpKind {
     Or, 
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum UnOpKind {
     /// !expr
     Not, 
@@ -25,7 +27,7 @@ pub enum UnOpKind {
     Minus, 
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Literal {
     Int(i32),
     Float(f64),
@@ -35,30 +37,19 @@ pub enum Literal {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Endpoint {
-    Sphere, 
+    Hittable, 
     Camera, 
     Background, 
     Image,
     Output,
 }
 
-#[derive(Debug)]
-pub enum SpecificType {
-    Vec3, 
-    Point3,
-    Color, 
-    Background, 
-    Camera, 
-    Output,
-    Sphere, 
-    Image,
-}
 
 /// Argument to function 
 /// func((<name>: <expr>)*)
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Arg {
     pub name: String, 
     pub expr: Expr,
@@ -66,13 +57,13 @@ pub struct Arg {
 
 /// Struct field 
 /// <key>: <value>
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct StructField {
     pub key: String, 
     pub value: Expr,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     // Operations
     // <left> <op> <right>

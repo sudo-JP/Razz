@@ -1,6 +1,7 @@
 use crate::common::Position;
 use std::fmt;
 
+#[derive(Debug)]
 pub struct LexError {
     pub kind: LexErrorKind,
     pub pos: Position,

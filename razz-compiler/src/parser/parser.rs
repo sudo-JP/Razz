@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{Endpoint, SpecificType}, statement::FnDecl, Program, Spanned}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::Endpoint, statement::FnDecl, Program, Spanned, SpecificType}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -113,7 +113,7 @@ impl Parser {
         let token = self.peek();
         let endpoint = match &token.kind {
             TokenKind::EPCamera => Endpoint::Camera,
-            TokenKind::EPSphere => Endpoint::Sphere,
+            TokenKind::EPHittable => Endpoint::Hittable,
             TokenKind::EPBackground => Endpoint::Background,
             TokenKind::EPImage => Endpoint::Image, 
             TokenKind::EPOutput => Endpoint::Output,
@@ -173,6 +173,7 @@ impl Parser {
     /// | "Camera" 
     /// | "Output" 
     /// | "Sphere" 
+    /// | "Material" 
     /// | "Image" ;
     pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
         let ty = match token.kind {
@@ -184,6 +185,9 @@ impl Parser {
             TokenKind::Output => SpecificType::Output,
             TokenKind::Sphere => SpecificType::Sphere, 
             TokenKind::Image => SpecificType::Image,
+            TokenKind::Lambertian => SpecificType::Lambertian,
+            TokenKind::Dielectric => SpecificType::Dielectric, 
+            TokenKind::Metal => SpecificType::Metal,
             _ => { return Err(self.error(token)); }
         }; 
         Ok(ty)

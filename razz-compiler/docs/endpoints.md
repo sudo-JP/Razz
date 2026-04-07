@@ -44,7 +44,8 @@ Output {
 ```
 
 ### POST 
-- `/sphere`: Create a sphere, the argument must be 
+- `/hittable`: Create a hittable object, the argument must be 
+
 ```
 Sphere {
     coord: Vec3; 

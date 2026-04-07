@@ -15,6 +15,7 @@ pub enum CompilerStage {
     Codegen, 
 }
 
+#[derive(Debug)]
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser(Program), 

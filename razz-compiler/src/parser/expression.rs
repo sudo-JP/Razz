@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{Arg, BinOpKind, Expr, SpecificType, StructField, UnOpKind}, Spanned}, common::Span, lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::{Arg, BinOpKind, Expr, StructField, UnOpKind}, Spanned, SpecificType}, common::Span, lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
 use crate::ast::expression::Literal;
 use super::parser::Parser;
 
@@ -262,12 +262,7 @@ impl Parser {
             self.advance();
             // We are in function
             let args = self.args()?;
-            let token = self.peek();
-            let end = token.pos;
-            if self.check(&TokenKind::RParen) {
-                return Err(self.error(token));
-            }
-            self.advance();
+            let end = self.consume(&TokenKind::RParen)?.pos;
             let node = Expr::FunctionCall { name, args };
             let span = Span{start, end};
             return Ok(Spanned{node, span});
@@ -281,7 +276,8 @@ impl Parser {
         // First one have to manually check 
         let curr = self.peek();
         // [ Arg .. ]
-        if matches!(&curr.kind, TokenKind::Ident(_)) {
+        if matches!(&curr.kind, TokenKind::Ident(_)) 
+            && self.peek_next().kind == TokenKind::Colon {
             args.push(self.arg()?);
         } else {
             return Ok(args);
@@ -351,6 +347,9 @@ impl Parser {
             | TokenKind::Camera 
             | TokenKind::Output 
             | TokenKind::Sphere 
+            | TokenKind::Lambertian
+            | TokenKind::Dielectric
+            | TokenKind::Metal
             | TokenKind::Image 
             => self.struct_literal()?,
             _ => { return Err(self.error_at(span, kind)); }
@@ -375,6 +374,9 @@ impl Parser {
 
     /// SpecificType ::= "Vec3" 
     /// | "Point3" 
+    /// | "Lambertian" 
+    /// | "Dielectric" 
+    /// | "Metal" 
     /// | "Color" 
     /// | "Background" 
     /// | "Camera" 

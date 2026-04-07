@@ -44,6 +44,14 @@ pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
 pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
     match stmt {
         Stmt::Assign { expr, .. } => walker.visit_expr(&expr.node),
+        Stmt::AssignObj { target, expr } => {
+            walker.visit_expr(&target.node);
+            walker.visit_expr(&expr.node);
+        },
+        Stmt::CompoundAssignObj { target, expr, .. } => {
+            walker.visit_expr(&target.node);
+            walker.visit_expr(&expr.node);
+        }
         Stmt::While { cond, body } => {
             walker.visit_expr(&cond.node);
             body.node.iter()

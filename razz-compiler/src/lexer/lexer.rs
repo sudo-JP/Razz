@@ -172,7 +172,7 @@ impl Lexer {
     fn match_endpoint(&self, s: &str) -> Option<TokenKind> {
         match s {
             "camera" => Some(TokenKind::EPCamera),
-            "sphere" => Some(TokenKind::EPSphere),
+            "hittable" => Some(TokenKind::EPHittable),
             "background" => Some(TokenKind::EPBackground),
             "image" => Some(TokenKind::EPImage),
             "output" => Some(TokenKind::EPOutput),
@@ -282,6 +282,9 @@ impl Lexer {
             "bool" => self.add_token(TokenKind::Bool),
 
             // Very specific types
+            "Lambertian" => self.add_token(TokenKind::Lambertian),
+            "Metal" => self.add_token(TokenKind::Metal),
+            "Dielectric" => self.add_token(TokenKind::Dielectric),
             "Vec3" => self.add_token(TokenKind::Vec3),
             "Point3" => self.add_token(TokenKind::Point3),
             "Color" => self.add_token(TokenKind::Color),

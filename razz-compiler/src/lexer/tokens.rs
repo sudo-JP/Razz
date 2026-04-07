@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::common::Position;
 
-
+#[derive(Debug)]
 pub struct Token {
     pub kind: TokenKind, 
     pub pos: Position,
@@ -45,8 +45,8 @@ pub enum TokenKind {
     // Endpoints 
     /// /camera
     EPCamera, 
-    /// /sphere
-    EPSphere, 
+    /// /hittable
+    EPHittable, 
     /// /background
     EPBackground, 
     /// /image
@@ -79,6 +79,12 @@ pub enum TokenKind {
     Sphere, 
     /// Image 
     Image,
+    /// Lambertian
+    Lambertian,
+    /// Metal 
+    Metal, 
+    /// Dielectric
+    Dielectric,
     // Operators
     // Arithmetic
     /// `+`

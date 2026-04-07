@@ -17,7 +17,7 @@ A list of tokens Razz Language will have
 
 ## Endpoints
 - EP_CAMERA: `/camera`
-- EP_SPHERE: `/sphere`
+- EP_HITTABLE: `/hittable`
 - EP_BACKGROUND: `/background`
 - EP_IMAGE: `/image`
 - EP_OUTPUT: `/output`
@@ -36,6 +36,9 @@ A list of tokens Razz Language will have
 - BACKGROUND: `Background`
 - CAMERA: `Camera`
 - SPHERE: `Sphere`
+- LAMBERTIAN: `Lambertian`
+- Metal: `Metal`
+- Dielectric: `Dielectric`
 
 ## Operators
 ### Arithemtic 

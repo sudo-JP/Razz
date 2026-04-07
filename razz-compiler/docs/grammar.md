@@ -27,6 +27,7 @@ SpecificType ::= "Vec3"
     | "Color" 
     | "Background" 
     | "Camera" 
+    | "Material" 
     | "Output" 
     | "Sphere" 
     | "Image" ;
@@ -46,7 +47,9 @@ ExprStmt ::= Expr ";" ;
 
 Assign ::= IDENT [ ":" Type ] "=" Expr ";" ;
 
-AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ";" ;
+AssignObj ::= IDENT { "->" IDENT } "=" Expr ";" ;
+
+CompoundAssignObj ::= IDENT { "->" IDENT } CompoundOp Expr ";" ;
 
 While ::= "while" Expr Block  ;
 
@@ -79,7 +82,7 @@ HTTPMethod ::= "POST"
     | "PUT"
     | "PATCH" ;
 
-Endpoint ::= "/sphere"
+Endpoint ::= "/hittable"
     | "/camera"
     | "/background"
     | "/image"
