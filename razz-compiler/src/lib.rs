@@ -4,3 +4,4 @@ pub mod compiler;
 pub mod ast;
 pub mod parser;
 pub mod common;
+pub mod semantic;

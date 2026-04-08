@@ -5,6 +5,8 @@ pub mod statement;
 pub mod traversal;
 pub mod debug;
 
+/// The biggest refactor ever.
+pub type NodeId = u32;
 
 #[derive(Debug)]
 pub struct Spanned<T> {
@@ -19,7 +21,7 @@ impl<T: PartialEq> PartialEq for Spanned<T> {
 }
 
 /// Language types
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Type {
     Int,
     Float,
@@ -29,7 +31,7 @@ pub enum Type {
     SpecificType(SpecificType),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum SpecificType {
     Dielectric, 
     Lambertian, 
