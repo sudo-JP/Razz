@@ -22,17 +22,18 @@ impl<T: PartialEq> PartialEq for Spanned<T> {
 
 /// Language types
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Type {
+pub enum TypeKind {
     Int,
     Float,
     Bool,
     String,
     Null,
-    SpecificType(SpecificType),
+    SpecificType(SpecificTypeKind),
 }
 
+
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum SpecificType {
+pub enum SpecificTypeKind {
     Dielectric, 
     Lambertian, 
     Metal,
@@ -45,6 +46,9 @@ pub enum SpecificType {
     Sphere, 
     Image,
 }
+
+pub type Type = Spanned<TypeKind>;
+pub type SpecificType = Spanned<SpecificTypeKind>;
 
 /// Top-level program node
 #[derive(PartialEq, Debug)]

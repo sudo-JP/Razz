@@ -1,15 +1,19 @@
-use crate::{ast::{expression::Endpoint, statement::FnDecl, Program, Spanned, SpecificType}, common::Span, lexer::tokens::{Token, TokenKind}, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::Endpoint, statement::FnDecl, NodeId, Program, Spanned, SpecificTypeKind}, 
+    common::Span, 
+    lexer::tokens::{Token, TokenKind}, 
+    parser::error::{ParserError, ParserErrorKind}};
 
 pub struct Parser {
     tokens: Vec<Token>,
+    next_id: u32, 
     pub(in crate::parser) parser_errors: Vec<ParserError>,
-    current: usize
+    current: usize,
 }
 
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, current: 0, parser_errors: Vec::new() }
+        Self { tokens, next_id: 0, current: 0, parser_errors: vec![] }
     }
 
     pub fn parse(mut self) -> Result<Program, Vec<ParserError>> {
@@ -99,6 +103,12 @@ impl Parser {
         }
     }
 
+    pub(in crate::parser) fn next_id(&mut self) -> NodeId {
+        let id = self.next_id;
+        self.next_id += 1; 
+        id
+    }
+
     pub(in crate::parser) fn consume_ident(&mut self) -> Result<String, ParserError> {
         let token = self.peek();
         if let TokenKind::Ident(s) = &token.kind {
@@ -175,19 +185,19 @@ impl Parser {
     /// | "Sphere" 
     /// | "Material" 
     /// | "Image" ;
-    pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
+    pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificTypeKind, ParserError> {
         let ty = match token.kind {
-            TokenKind::Vec3 => SpecificType::Vec3,
-            TokenKind::Point3 => SpecificType::Point3,
-            TokenKind::Color => SpecificType::Color,
-            TokenKind::Background => SpecificType::Background,
-            TokenKind::Camera => SpecificType::Camera,
-            TokenKind::Output => SpecificType::Output,
-            TokenKind::Sphere => SpecificType::Sphere, 
-            TokenKind::Image => SpecificType::Image,
-            TokenKind::Lambertian => SpecificType::Lambertian,
-            TokenKind::Dielectric => SpecificType::Dielectric, 
-            TokenKind::Metal => SpecificType::Metal,
+            TokenKind::Vec3 => SpecificTypeKind::Vec3,
+            TokenKind::Point3 => SpecificTypeKind::Point3,
+            TokenKind::Color => SpecificTypeKind::Color,
+            TokenKind::Background => SpecificTypeKind::Background,
+            TokenKind::Camera => SpecificTypeKind::Camera,
+            TokenKind::Output => SpecificTypeKind::Output,
+            TokenKind::Sphere => SpecificTypeKind::Sphere, 
+            TokenKind::Image => SpecificTypeKind::Image,
+            TokenKind::Lambertian => SpecificTypeKind::Lambertian,
+            TokenKind::Dielectric => SpecificTypeKind::Dielectric, 
+            TokenKind::Metal => SpecificTypeKind::Metal,
             _ => { return Err(self.error(token)); }
         }; 
         Ok(ty)

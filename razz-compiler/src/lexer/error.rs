@@ -1,16 +1,17 @@
-use crate::common::Position;
 use std::fmt;
+use crate::common::Span;
 
 #[derive(Debug)]
 pub struct LexError {
     pub kind: LexErrorKind,
-    pub pos: Position,
+    pub span: Span,
 }
 
 // For debugging and test
 impl fmt::Display for LexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ERROR: {:?} Line: {} Col: {}", self.kind, self.pos.line, self.pos.col)
+        write!(f, "ERROR: {:?} Start At Line: {} Col: {}, End At Line: {} Col: {}", self.kind, 
+        self.span.start.line, self.span.start.col, self.span.end.line, self.span.end.col)
     }
 }
 

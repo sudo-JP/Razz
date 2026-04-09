@@ -1,4 +1,11 @@
-use crate::ast::SpecificType;
+use crate::{ast::{NodeId, Spanned, SpecificType}, common::Span};
+
+#[derive(Debug, PartialEq)]
+pub struct Expr {
+    pub id: NodeId,
+    pub kind: ExprKind,
+    pub span: Span,
+}
 
 #[derive(Debug, PartialEq)]
 pub enum BinOpKind {
@@ -38,7 +45,7 @@ pub enum Literal {
 
 
 #[derive(Debug, PartialEq)]
-pub enum Endpoint {
+pub enum EndpointKind {
     Hittable, 
     Camera, 
     Background, 
@@ -51,7 +58,7 @@ pub enum Endpoint {
 /// func((<name>: <expr>)*)
 #[derive(Debug, PartialEq)]
 pub struct Arg {
-    pub name: String, 
+    pub name: Spanned<String>, 
     pub expr: Expr,
 }
 
@@ -59,25 +66,30 @@ pub struct Arg {
 /// <key>: <value>
 #[derive(Debug, PartialEq)]
 pub struct StructField {
-    pub key: String, 
+    pub key: Spanned<String>, 
     pub value: Expr,
 }
 
+/// Aliasing
+pub type BinOp = Spanned<BinOpKind>;
+pub type UnOp = Spanned<UnOpKind>;
+pub type Endpoint = Spanned<EndpointKind>;
+
 #[derive(Debug, PartialEq)]
-pub enum Expr {
+pub enum ExprKind {
     // Operations
     // <left> <op> <right>
     /// 1 + 2 
     BinOp {
         left: Box<Expr>,
-        op: BinOpKind, 
+        op: BinOp, 
         right: Box<Expr>
     },
     /// Unary Operation 
     /// <op><value>
     /// e.g !true
     UnOp {
-        op: UnOpKind,
+        op: UnOp,
         value: Box<Expr>, 
     },
     /// Function Call
@@ -89,7 +101,7 @@ pub enum Expr {
     /// with at most 5 args anyway, only bad perf
     /// when >= 100 args
     FunctionCall {
-        name: String, 
+        name: Spanned<String>, 
         args: Vec<Arg>,
     },
     /// Access JSON
@@ -97,7 +109,7 @@ pub enum Expr {
     /// background->color
     FieldAccess {
         obj: Box<Expr>,
-        key: String,
+        key: Spanned<String>,
     },
     /// Endpoint access
     /// GET <endpoint> 

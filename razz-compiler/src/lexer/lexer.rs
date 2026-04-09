@@ -1,4 +1,4 @@
-use crate::{common::Position, lexer::{error::{LexError, LexErrorKind}, tokens::{Token, TokenKind}}};
+use crate::{common::{Position, Span}, lexer::{error::{LexError, LexErrorKind}, tokens::{Token, TokenKind}}};
 use std::str;
 
 pub struct Lexer {
@@ -10,6 +10,7 @@ pub struct Lexer {
     current: usize, 
 
     line: usize, 
+    start_line: usize, 
     col: usize,
     curr_col: usize,
 }
@@ -25,6 +26,7 @@ impl Lexer {
             start: 0, 
             current: 0, 
             line: 1, 
+            start_line: 1, 
             col: 1,
             curr_col: 1
         }
@@ -34,6 +36,7 @@ impl Lexer {
         while !self.is_at_end() {
             self.start = self.current;
             self.curr_col = self.col;
+            self.start_line = self.line;
             self.scan_token();
         }
 
@@ -50,14 +53,18 @@ impl Lexer {
     // Also ignore tokens when there's error, saving space
     fn add_token(&mut self, kind: TokenKind) {
         if self.lex_errors.len() == 0 {
-            let pos = Position{line: self.line, col: self.curr_col};
-            self.tokens.push(Token{kind, pos});
+            let start = Position{line: self.start_line, col: self.col};
+            let end = Position{line: self.line, col: self.curr_col};
+            let span = Span{start, end};
+            self.tokens.push(Token{kind, span});
         }
     }
 
     fn add_err(&mut self, kind: LexErrorKind) {
-        let pos = Position{line: self.line, col: self.curr_col};
-        self.lex_errors.push(LexError{kind, pos});
+        let start = Position{line: self.start_line, col: self.col};
+        let end = Position{line: self.line, col: self.curr_col};
+        let span = Span{start, end};
+        self.lex_errors.push(LexError{kind, span});
     }
 
     // Advancing to the next char 
@@ -189,7 +196,7 @@ impl Lexer {
         } 
         // Multiple lines comment 
         else if self.expect(b'*') {
-            let pos = Position{line: self.line, col: self.col};
+            let start = Position{line: self.line, col: self.col};
             while (self.peek() != b'*' || self.peak_next() != b'/')
                 && !self.is_at_end() {
                 if self.peek() == b'\n' {
@@ -199,9 +206,11 @@ impl Lexer {
                 self.advance();
             }
             if self.is_at_end() {
+                let end = Position{line: self.line, col: self.col};
+                let span = Span{start, end};
                 self.lex_errors.push(LexError { 
                     kind: LexErrorKind::UnterminatedComment, 
-                    pos,
+                    span,
                 });
                 return;
             }

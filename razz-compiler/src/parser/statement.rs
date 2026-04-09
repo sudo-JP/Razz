@@ -173,29 +173,29 @@ impl Parser {
                 key: ident,
             };
         }
-        let target = Spanned{node, span: Span{start, end}};
-        match self.peek().kind {
-            TokenKind::Assign => {
-                self.advance();
-                let expr = self.expression()?;
-                let span = Span{start, end};
-                Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
-            },
-            TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
-                let op = match self.peek().kind {
-                    TokenKind::AddE => CompoundOp::AddE,
-                    TokenKind::SubE => CompoundOp::SubE,
-                    TokenKind::MultE => CompoundOp::MultE,
-                    TokenKind::DivE => CompoundOp::DivE,
-                    _ => unreachable!(),
-                };
-                self.advance();
-                let expr = self.expression()?;
-                let span = Span{start, end};
-                Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
-            },
-            _ => Err(self.error(self.peek()))
-        }
+    let target = Spanned{node, span: Span{start, end}};
+    match self.peek().kind {
+        TokenKind::Assign => {
+            self.advance();
+            let expr = self.expression()?;
+            let span = Span{start, end};
+            Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
+        },
+        TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
+            let op = match self.peek().kind {
+                TokenKind::AddE => CompoundOp::AddE,
+                TokenKind::SubE => CompoundOp::SubE,
+                TokenKind::MultE => CompoundOp::MultE,
+                TokenKind::DivE => CompoundOp::DivE,
+                _ => unreachable!(),
+            };
+            self.advance();
+            let expr = self.expression()?;
+            let span = Span{start, end};
+            Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
+        },
+        _ => Err(self.error(self.peek()))
+    }
     }
 
     /// Assign ::= IDENT "=" Expr ";" ;

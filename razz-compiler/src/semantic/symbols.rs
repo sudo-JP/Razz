@@ -1,9 +1,9 @@
 use std::collections::HashMap;
-use crate::ast::Type;
+use crate::ast::TypeKind;
 
 
 pub struct SymbolTable {
-    scopes: Vec<HashMap<String, Type>>,
+    scopes: Vec<HashMap<String, TypeKind>>,
 }
 
 impl SymbolTable {
@@ -20,7 +20,10 @@ impl SymbolTable {
             .expect("Symbol Table: Can't pop empty scope");
     }
 
-    pub fn declare_variable(&mut self, name: String, ty: Type) {
+    /// The language allow such instance to exist 
+    /// x = 1; 
+    /// x = "Hello"; 
+    pub fn declare_variable(&mut self, name: String, ty: TypeKind) {
         let last = self.scopes.last_mut()
             .expect("Symbol Table: Empty scope, can't declare variables");
             
@@ -28,7 +31,7 @@ impl SymbolTable {
     }
 
     /// Find first scope that has name
-    pub fn lookup_variable(&self, name: &str) -> Option<Type> {
+    pub fn lookup_variable(&self, name: &str) -> Option<TypeKind> {
         self.scopes
             .iter()
             .rev()

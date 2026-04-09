@@ -1,11 +1,11 @@
 use std::fmt;
 
-use crate::common::Position;
+use crate::common::Span;
 
 #[derive(Debug)]
 pub struct Token {
     pub kind: TokenKind, 
-    pub pos: Position,
+    pub span: Span,
 }
 
 // For debugging and test
@@ -13,7 +13,8 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             TokenKind::Eof => write!(f, "Eof"),
-            _ => write!(f, "{:?} Line: {} Col: {}", self.kind, self.pos.line, self.pos.col),
+            _ => write!(f, "{:?} Start At Line: {} Col: {}, End At Line: {} Col: {}", self.kind, 
+                self.span.start.line, self.span.start.col, self.span.end.line, self.span.end.col),
         }
     }
 }

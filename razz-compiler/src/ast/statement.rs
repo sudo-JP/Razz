@@ -1,22 +1,30 @@
-use crate::ast::{expression::{Endpoint, Expr}, Spanned, Type};
+use crate::{ast::{expression::{Endpoint, Expr}, NodeId, Spanned, Type}, common::Span};
+
+#[derive(Debug, PartialEq)]
+pub struct Stmt {
+    pub id: NodeId,
+    pub kind: StmtKind, 
+    pub span: Span,
+}
 
 /// else if <cond> { <body> }
 #[derive(Debug, PartialEq)]
 pub struct ElseIf {
-    pub cond: Spanned<Expr>, 
-    pub body: Spanned<Vec<Spanned<Stmt>>>,
+    pub id: NodeId, 
+    pub cond: Expr, 
+    pub body: Block,
 }
 
 /// Function parameter 
 #[derive(Debug, PartialEq)]
 pub struct Param {
-    pub name: String, 
+    pub name: Spanned<String>, 
     pub ty: Type,
 }
 
 /// Compound Assignment Operator
 #[derive(Debug, PartialEq)]
-pub enum CompoundOp {
+pub enum CompoundOpKind {
     /// `+=`
     AddE, 
     /// `-=`
@@ -29,7 +37,7 @@ pub enum CompoundOp {
 
 /// HTTP Method for statements
 #[derive(Debug, PartialEq)]
-pub enum HTTPMethod {
+pub enum HTTPMethodKind {
     Post, 
     Put, 
     Patch, 
@@ -39,40 +47,52 @@ pub enum HTTPMethod {
 /// fn <name>((<param>)*) <type> { (<body>)* }
 #[derive(Debug, PartialEq)]
 pub struct FnDecl {
-    pub name: String,
+    pub id: NodeId,
+    pub name: Spanned<String>,
     pub params: Vec<Param>,
     pub return_type: Type, 
-    pub body: Spanned<Vec<Spanned<Stmt>>>,
+    pub body: Block,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Stmt {
+pub struct Block {
+    pub id: NodeId, 
+    pub stmts: Vec<Stmt>, 
+    pub span: Span, 
+}
+
+/// Aliasing
+pub type CompoundOp = Spanned<CompoundOpKind>;
+pub type HTTPMethod = Spanned<HTTPMethodKind>;
+
+#[derive(Debug, PartialEq)]
+pub enum StmtKind {
     /// Variable declartion, e.g: <name> = <expr>
     /// Assignment can be inferred, e.g foo = 5 is an int
     /// It also can be annotated, e.g foo: float = 5 is a float 
     Assign {
         name: String, 
         type_ann: Option<Type>,
-        expr: Spanned<Expr>,
+        expr: Expr,
     },
     /// <target> itself is a chained of a->b->c->etc 
     /// so <target> = <expr>;
     AssignObj {
-        target: Spanned<Expr>, 
-        expr: Spanned<Expr>,
+        target: Expr, 
+        expr: Expr,
     },
     /// <target> itself is a chained of a->b->c->etc 
     /// so <target> (+= | -= | /= | *=) <expr>
     CompoundAssignObj {
-        target: Spanned<Expr>,
+        target: Expr,
         op: CompoundOp,
-        expr: Spanned<Expr>,
+        expr: Expr,
     },
     /// While condition
     /// while <cond> { <body> }
     While {
-        cond: Spanned<Expr>, 
-        body: Spanned<Vec<Spanned<Stmt>>>,
+        cond: Expr, 
+        body: Block,
     }, 
     /// If statement
     /// 0 or more else if 
@@ -81,29 +101,29 @@ pub enum Stmt {
     /// (<else if>)* 
     /// (<else>)?
     If {
-        cond: Spanned<Expr>, 
-        body: Spanned<Vec<Spanned<Stmt>>>,
-        else_ifs: Vec<Spanned<ElseIf>>, 
-        else_body: Option<Spanned<Vec<Spanned<Stmt>>>>,
+        cond: Expr, 
+        body: Block, 
+        else_ifs: Vec<ElseIf>, 
+        else_body: Option<Block>,
     },
     /// For loop statement
     /// Can have multiple expr, separated by comma
     /// for (<decl>)?; (<cond>)?; (<expr>|<expr>,)* { <body> }
     For {
-        decl: Option<Spanned<Box<Stmt>>>, 
-        cond: Option<Spanned<Expr>>, 
-        update: Vec<Spanned<Stmt>>, 
-        body: Spanned<Vec<Spanned<Stmt>>>,
+        decl: Option<Box<Stmt>>, 
+        cond: Option<Expr>, 
+        update: Vec<Stmt>, 
+        body: Block,
     }, 
     /// Return statement, return <expr>
-    Return(Spanned<Expr>),
+    Return(Expr),
     /// Compound assignment operator
     /// <name> <op> <expr> 
     /// e.g foo += (1 * 2)
     CompoundAssign {
-        name: String,
+        name: Spanned<String>,
         op: CompoundOp, 
-        expr: Spanned<Expr>,
+        expr: Expr,
     },
     /// HTTP Request statements 
     /// <method> <endpoint> <body> 
@@ -111,11 +131,11 @@ pub enum Stmt {
     HTTPRequest {
         method: HTTPMethod, 
         endpoint: Endpoint,
-        body: Spanned<Expr>, 
+        body: Expr, 
     },
     /// Expression as a statement 
     /// Expression that returns nothing
     /// This is for bare function call
     /// foo(), where foo() update the camera
-    Expr(Spanned<Expr>),
+    Expr(Expr),
 }
