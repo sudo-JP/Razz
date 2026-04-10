@@ -1,4 +1,4 @@
-use crate::{ast::{expression::Expr, statement::{CompoundOp, ElseIf, FnDecl, HTTPMethod, Param, Stmt}, Spanned, Type}, 
+use crate::{ast::{expression::Expr, statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, HTTPMethodKind, Param, Stmt}, Spanned, Type, TypeKind}, 
     common::Span, lexer::tokens::TokenKind, parser::error::ParserError};
 
 use super::parser::Parser;
@@ -10,7 +10,7 @@ impl Parser {
     /// 
     /// FuncDecl ::= "fn" IDENT "(" Params ")" Type Block ;
     pub(in crate::parser) fn func_decl(&mut self) -> Result<Spanned<FnDecl>, ParserError> {
-        let start = self.consume(&TokenKind::Fn)?.pos;
+        let start = self.consume(&TokenKind::Fn)?.span.start;
         let name = self.consume_ident()?;
 
         self.consume(&TokenKind::LParen)?;
@@ -23,6 +23,7 @@ impl Parser {
         let body = self.block()?;
         let end = body.span.end;
         let func = FnDecl {
+            id: self.next_id(),
             name, 
             params, 
             return_type, 
@@ -74,21 +75,21 @@ impl Parser {
     /// | "Image" ;
     fn consume_type(&mut self) -> Result<Type, ParserError> {
         let ty = match self.peek().kind {
-            TokenKind::Int => Type::Int, 
-            TokenKind::Float => Type::Float, 
-            TokenKind::NullLit => Type::Null, 
-            TokenKind::String => Type::String, 
-            TokenKind::Bool => Type::Bool,
+            TokenKind::Int => TypeKind::Int, 
+            TokenKind::Float => TypeKind::Float, 
+            TokenKind::NullLit => TypeKind::Null, 
+            TokenKind::String => TypeKind::String, 
+            TokenKind::Bool => TypeKind::Bool,
             _ => {
-                Type::SpecificType(self.assert_specific_type(self.peek())?)
+                TypeKind::SpecificType(self.assert_specific_type(self.peek())?.node)
             }
         };
-        self.advance();
-        Ok(ty)
+        let span = self.advance().span;
+        Ok(Type{ node: ty, span })
     }
 
     /// Block ::= "{" { Stmt } "}" ;
-    fn block(&mut self) -> Result<Spanned<Vec<Spanned<Stmt>>>, ParserError> {
+    fn block(&mut self) -> Result<Block, ParserError> {
         let mut stmts: Vec<Spanned<Stmt>> = vec![];
         let start = self.consume(&TokenKind::LBrace)?.pos;
         while !self.is_at_end() && !self.check(&TokenKind::RBrace) {
@@ -173,29 +174,29 @@ impl Parser {
                 key: ident,
             };
         }
-    let target = Spanned{node, span: Span{start, end}};
-    match self.peek().kind {
-        TokenKind::Assign => {
-            self.advance();
-            let expr = self.expression()?;
-            let span = Span{start, end};
-            Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
-        },
-        TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
-            let op = match self.peek().kind {
-                TokenKind::AddE => CompoundOp::AddE,
-                TokenKind::SubE => CompoundOp::SubE,
-                TokenKind::MultE => CompoundOp::MultE,
-                TokenKind::DivE => CompoundOp::DivE,
-                _ => unreachable!(),
-            };
-            self.advance();
-            let expr = self.expression()?;
-            let span = Span{start, end};
-            Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
-        },
-        _ => Err(self.error(self.peek()))
-    }
+        let target = Spanned{node, span: Span{start, end}};
+        match self.peek().kind {
+            TokenKind::Assign => {
+                self.advance();
+                let expr = self.expression()?;
+                let span = Span{start, end};
+                Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
+            },
+            TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
+                let op = match self.peek().kind {
+                    TokenKind::AddE => CompoundOpKind::AddE,
+                    TokenKind::SubE => CompoundOpKind::SubE,
+                    TokenKind::MultE => CompoundOpKind::MultE,
+                    TokenKind::DivE => CompoundOpKind::DivE,
+                    _ => unreachable!(),
+                };
+                self.advance();
+                let expr = self.expression()?;
+                let span = Span{start, end};
+                Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
+            },
+            _ => Err(self.error(self.peek()))
+        }
     }
 
     /// Assign ::= IDENT "=" Expr ";" ;
@@ -404,9 +405,9 @@ impl Parser {
 
     fn http_method(&mut self) -> Result<HTTPMethod, ParserError> {
         let method = match self.peek().kind {
-            TokenKind::Post => HTTPMethod::Post,
-            TokenKind::Put => HTTPMethod::Put,
-            TokenKind::Patch => HTTPMethod::Patch, 
+            TokenKind::Post => HTTPMethodKind::Post,
+            TokenKind::Put => HTTPMethodKind::Put,
+            TokenKind::Patch => HTTPMethodKind::Patch, 
             _ => { return Err(self.error(self.peek())); }
         }; 
         self.advance();

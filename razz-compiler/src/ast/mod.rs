@@ -53,5 +53,6 @@ pub type SpecificType = Spanned<SpecificTypeKind>;
 /// Top-level program node
 #[derive(PartialEq, Debug)]
 pub struct Program {
+    pub id: NodeId,
     pub funcs: Vec<Spanned<FnDecl>>
 }

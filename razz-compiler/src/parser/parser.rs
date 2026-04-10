@@ -1,4 +1,4 @@
-use crate::{ast::{expression::Endpoint, statement::FnDecl, NodeId, Program, Spanned, SpecificTypeKind}, 
+use crate::{ast::{expression::{Endpoint, EndpointKind}, statement::FnDecl, NodeId, Program, Spanned, SpecificType, SpecificTypeKind}, 
     common::Span, 
     lexer::tokens::{Token, TokenKind}, 
     parser::error::{ParserError, ParserErrorKind}};
@@ -37,7 +37,7 @@ impl Parser {
         if !self.parser_errors.is_empty() {
             Err(self.parser_errors)
         } else {
-            Ok(Program { funcs })
+            Ok(Program { id: self.next_id(), funcs })
         }
     }
 
@@ -109,33 +109,35 @@ impl Parser {
         id
     }
 
-    pub(in crate::parser) fn consume_ident(&mut self) -> Result<String, ParserError> {
+    pub(in crate::parser) fn consume_ident(&mut self) -> Result<Spanned<String>, ParserError> {
         let token = self.peek();
+        let span = token.span;
         if let TokenKind::Ident(s) = &token.kind {
             let string = s.to_string();
             self.advance();
-            return Ok(string);
+            return Ok(Spanned{ node: string, span });
         }
         Err(self.error(token))
     }
 
     pub(in crate::parser) fn consume_endpoint(&mut self) -> Result<Endpoint, ParserError> {
         let token = self.peek();
+        let span = token.span;
         let endpoint = match &token.kind {
-            TokenKind::EPCamera => Endpoint::Camera,
-            TokenKind::EPHittable => Endpoint::Hittable,
-            TokenKind::EPBackground => Endpoint::Background,
-            TokenKind::EPImage => Endpoint::Image, 
-            TokenKind::EPOutput => Endpoint::Output,
+            TokenKind::EPCamera => EndpointKind::Camera,
+            TokenKind::EPHittable => EndpointKind::Hittable,
+            TokenKind::EPBackground => EndpointKind::Background,
+            TokenKind::EPImage => EndpointKind::Image, 
+            TokenKind::EPOutput => EndpointKind::Output,
             _ => { return Err(self.error(token)) }
         };
 
         self.advance();
-        Ok(endpoint)
+        Ok(Endpoint{node: endpoint, span})
     }
 
     pub(in crate::parser) fn error(&self, token: &Token) -> ParserError {
-        let span = Span{start: token.pos, end: token.pos}; 
+        let span = token.span;
         let kind = ParserErrorKind::InvalidToken(token.kind.clone());
         ParserError{ span, kind }
     }
@@ -185,7 +187,8 @@ impl Parser {
     /// | "Sphere" 
     /// | "Material" 
     /// | "Image" ;
-    pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificTypeKind, ParserError> {
+    pub(in crate::parser) fn assert_specific_type(&self, token: &Token) -> Result<SpecificType, ParserError> {
+        let span = token.span;
         let ty = match token.kind {
             TokenKind::Vec3 => SpecificTypeKind::Vec3,
             TokenKind::Point3 => SpecificTypeKind::Point3,
@@ -200,7 +203,7 @@ impl Parser {
             TokenKind::Metal => SpecificTypeKind::Metal,
             _ => { return Err(self.error(token)); }
         }; 
-        Ok(ty)
+        Ok(SpecificType{node: ty, span})
     }
 
 }

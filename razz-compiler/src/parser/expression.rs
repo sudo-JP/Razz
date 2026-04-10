@@ -1,4 +1,6 @@
-use crate::{ast::{expression::{Arg, BinOp, BinOpKind, Expr, ExprKind, StructField, UnOpKind}, Spanned, SpecificType}, common::Span, lexer::tokens::TokenKind, parser::error::{ParserError, ParserErrorKind}};
+use crate::{ast::{expression::{Arg, BinOp, BinOpKind, Expr, ExprKind, StructField, UnOp, UnOpKind}, Spanned, SpecificType}, 
+    common::Span, lexer::tokens::TokenKind, 
+    parser::error::{ParserError, ParserErrorKind}};
 use crate::ast::expression::Literal;
 use super::parser::Parser;
 
@@ -188,17 +190,16 @@ impl Parser {
 
     /// factor ::= unary { ("*" | "/") unary } ; 
     fn factor(&mut self) -> Result<Expr, ParserError> {
-        let unary = self.unary()?;
-        let mut node = unary.node; 
+        let mut node = self.unary()?;
         let rules = [
             TokenKind::Mult,
             TokenKind::Div,
         ];
-        let start = unary.span.start;
+        let start = node.span.start;
         let mut end = start;
 
         while self.match_token(&rules) {
-            let op = match self.previous().kind {
+            let op_kind = match self.previous().kind {
                 TokenKind::Mult => BinOpKind::Mult, 
                 TokenKind::Div => BinOpKind::Div, 
                 _ => { 
@@ -206,18 +207,25 @@ impl Parser {
                     return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
+            let op = BinOp{
+                node: op_kind, 
+                span: self.previous().span
+            };
 
             let unary = self.unary()?;
-            let right = Box::new(unary.node);
             end = unary.span.end;
-            node = Expr::BinOp { 
-                left: Box::new(node), 
-                op, 
-                right: right,
-            }
+            let right = Box::new(unary);
+            let left = Box::new(node);
+            
+            let kind = ExprKind::BinOp{left, op, right};
+            let span = Span{start, end};
+            node = Expr{
+                id: self.next_id(),
+                kind, 
+                span,
+            };
         }
-        let span = Span{start, end};
-        Ok(Spanned { node , span })
+        Ok(node)
     } 
 
     /// unary ::= ("!" | "-") unary
@@ -229,9 +237,9 @@ impl Parser {
         ];
 
         if self.match_token(&rules) {
-            let start = self.previous().pos;
+            let start = self.previous().span.start;
             let mut end = start;
-            let op = match self.previous().kind {
+            let un_op_kind = match self.previous().kind {
                 TokenKind::Sub => UnOpKind::Minus, 
                 TokenKind::Not => UnOpKind::Not, 
                 _ => {
@@ -239,13 +247,19 @@ impl Parser {
                     return Err(ParserError{span: Span{start, end}, kind}); 
                 }
             };
-            let unary = self.unary()?;
-            end = unary.span.end;
-            let value = Box::new(unary.node); 
-            let node = Expr::UnOp { op, value };
-
+            let op = UnOp{node: un_op_kind, span: self.previous().span};
+            let mut node = self.unary()?;
+            end = node.span.end;
+            let value = Box::new(node); 
+            let kind = ExprKind::UnOp { op, value };
             let span = Span{start, end};
-            return Ok(Spanned { node, span });
+            node = Expr{
+                id: self.next_id(),
+                kind, 
+                span,
+            };
+
+            return Ok(node);
         }
 
         self.field_access()
@@ -253,41 +267,52 @@ impl Parser {
 
     /// field_access ::= function_call { "->" IDENT } ; 
     fn field_access(&mut self) -> Result<Expr, ParserError> {
-        let func_call = self.function_call()?;
-        let mut node = func_call.node; 
+        let mut node = self.function_call()?;
         let rules = [TokenKind::Arrow];
-        let start = func_call.span.start;
-        let mut end = start;
+        let start = node.span.start;
 
         while self.match_token(&rules) {
             let ident = self.consume_ident()?;
-            end = self.previous().pos;
-            node = Expr::FieldAccess { 
-                obj: Box::new(node), 
+            let end = self.previous().span.end;
+
+            let obj = Box::new(node);
+
+            let kind = ExprKind::FieldAccess { 
+                obj: obj, 
                 key: ident,
             };
+
+            let span = Span{start, end};
+            node = Expr{
+                id: self.next_id(), 
+                kind, 
+                span
+            };
         }
-        let span = Span{start, end};
-        Ok(Spanned { node , span })
+        Ok(node)
     }
 
     /// function_call ::= IDENT "(" [ Arg { "," Arg } ] ")" 
     /// | primary ;
     fn function_call(&mut self) -> Result<Expr, ParserError> {
-        if let TokenKind::Ident(ident) = &self.peek().kind
+        if let TokenKind::Ident(_) = &self.peek().kind
             && self.peek_next().kind == TokenKind::LParen
         {
-            let start = self.peek().pos;
+            let start = self.peek().span.start;
             // Move pass IDENT (
-            let name = ident.to_string();
-            self.advance();
-            self.advance();
+            let name = self.consume_ident()?;
+            self.consume(&TokenKind::LParen)?;
             // We are in function
             let args = self.args()?;
-            let end = self.consume(&TokenKind::RParen)?.pos;
-            let node = Expr::FunctionCall { name, args };
+            let end = self.consume(&TokenKind::RParen)?.span.end;
+            let kind = ExprKind::FunctionCall { name, args };
             let span = Span{start, end};
-            return Ok(Spanned{node, span});
+            let node = Expr{
+                id: self.next_id(), 
+                kind, 
+                span,
+            };
+            return Ok(node);
         }
         self.primary() 
     }
@@ -316,11 +341,11 @@ impl Parser {
 
     /// Used to parse 
     /// IDENT ":" Expr ; 
-    fn parse_named_expr(&mut self) -> Result<(String, Expr), ParserError> {
+    fn parse_named_expr(&mut self) -> Result<(Spanned<String>, Expr), ParserError> {
         let name = self.consume_ident()?;
         self.consume(&TokenKind::Colon)?;
         let expr = self.expression()?;
-        Ok((name, expr.node))
+        Ok((name, expr))
     }
 
     /// Arg ::= IDENT ":" Expr ; 
@@ -344,24 +369,24 @@ impl Parser {
     /// | "(" Expr ")" ;
     fn primary(&mut self) -> Result<Expr, ParserError> {
         let token = self.advance();
-        let start = token.pos;
-        let span = Span{start, end: start};
-        let kind = token.kind.clone();
+        let start = token.span.start;
+        let mut end = start;
+        let tok_kind = token.kind.clone();
 
-        let node = match kind {
-            TokenKind::StringLit(s) => Expr::Constant(Literal::String(s)),
-            TokenKind::IntLit(i) => Expr::Constant(Literal::Int(i)), 
-            TokenKind::FloatLit(f) => Expr::Constant(Literal::Float(f)), 
-            TokenKind::BoolLit(b) => Expr::Constant(Literal::Bool(b)), 
-            TokenKind::NullLit => Expr::Constant(Literal::Null),
+        let kind = match tok_kind {
+            TokenKind::StringLit(s) => ExprKind::Constant(Literal::String(s)),
+            TokenKind::IntLit(i) => ExprKind::Constant(Literal::Int(i)), 
+            TokenKind::FloatLit(f) => ExprKind::Constant(Literal::Float(f)), 
+            TokenKind::BoolLit(b) => ExprKind::Constant(Literal::Bool(b)), 
+            TokenKind::NullLit => ExprKind::Constant(Literal::Null),
 
             TokenKind::Get => self.get_request()?,
             TokenKind::LParen => {
                 let expr = self.expression()?;
-                self.consume(&TokenKind::RParen)?;
-                expr.node
+                end = self.consume(&TokenKind::RParen)?.span.end;
+                expr.kind
             }, 
-            TokenKind::Ident(s) => Expr::Ident(s),
+            TokenKind::Ident(s) => ExprKind::Ident(s),
             TokenKind::Vec3 
             | TokenKind::Point3
             | TokenKind::Color
@@ -374,24 +399,29 @@ impl Parser {
             | TokenKind::Metal
             | TokenKind::Image 
             => self.struct_literal()?,
-            _ => { return Err(self.error_at(span, kind)); }
+            _ => { return Err(self.error_at(Span{start, end}, tok_kind)); }
         };
+        let span = Span{start, end};
 
-        Ok(Spanned{ node, span })
+        Ok(Expr{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// GET_Request ::= "GET" Endpoint ; 
-    fn get_request(&mut self) -> Result<Expr, ParserError> {
-        Ok(Expr::HTTPRequest(self.consume_endpoint()?))
+    fn get_request(&mut self) -> Result<ExprKind, ParserError> {
+        Ok(ExprKind::HTTPRequest(self.consume_endpoint()?))
     }
 
     /// StructLiteral ::= SpecificType "{" StructFields "}" ; 
-    fn struct_literal(&mut self) -> Result<Expr, ParserError> {
+    fn struct_literal(&mut self) -> Result<ExprKind, ParserError> {
         let ty = self.specific_type()?;
         self.consume(&TokenKind::LBrace)?;
         let fields = self.struct_fields()?;
         self.consume(&TokenKind::RBrace)?;
-        Ok(Expr::StructLiteral { ty , fields })
+        Ok(ExprKind::StructLiteral { ty , fields })
     }
 
     /// SpecificType ::= "Vec3" 

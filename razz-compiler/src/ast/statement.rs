@@ -71,7 +71,7 @@ pub enum StmtKind {
     /// Assignment can be inferred, e.g foo = 5 is an int
     /// It also can be annotated, e.g foo: float = 5 is a float 
     Assign {
-        name: String, 
+        name: Spanned<String>, 
         type_ann: Option<Type>,
         expr: Expr,
     },
