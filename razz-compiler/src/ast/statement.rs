@@ -11,6 +11,7 @@ pub struct Stmt {
 #[derive(Debug, PartialEq)]
 pub struct ElseIf {
     pub id: NodeId, 
+    pub span: Span,
     pub cond: Expr, 
     pub body: Block,
 }

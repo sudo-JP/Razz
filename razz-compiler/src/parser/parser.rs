@@ -5,7 +5,7 @@ use crate::{ast::{expression::{Endpoint, EndpointKind}, statement::FnDecl, NodeI
 
 pub struct Parser {
     tokens: Vec<Token>,
-    next_id: u32, 
+    next_id: NodeId, 
     pub(in crate::parser) parser_errors: Vec<ParserError>,
     current: usize,
 }
@@ -95,6 +95,8 @@ impl Parser {
         matches!(self.peek().kind, TokenKind::Eof)
     }
 
+    /// Compare against the token and advance if matches, 
+    /// return error if does not match token
     pub(in crate::parser) fn consume(&mut self, t: &TokenKind) -> Result<&Token, ParserError> {
         if self.check(t) { Ok(self.advance()) }
         else { 
@@ -103,12 +105,14 @@ impl Parser {
         }
     }
 
+    /// Return next node id
     pub(in crate::parser) fn next_id(&mut self) -> NodeId {
         let id = self.next_id;
         self.next_id += 1; 
         id
     }
 
+    /// Similar to consume but return a spanned<string> instead 
     pub(in crate::parser) fn consume_ident(&mut self) -> Result<Spanned<String>, ParserError> {
         let token = self.peek();
         let span = token.span;
@@ -120,6 +124,7 @@ impl Parser {
         Err(self.error(token))
     }
 
+    /// Similar to consume but return endpoint type 
     pub(in crate::parser) fn consume_endpoint(&mut self) -> Result<Endpoint, ParserError> {
         let token = self.peek();
         let span = token.span;
@@ -136,17 +141,20 @@ impl Parser {
         Ok(Endpoint{node: endpoint, span})
     }
 
+    /// Helper to report error 
     pub(in crate::parser) fn error(&self, token: &Token) -> ParserError {
         let span = token.span;
         let kind = ParserErrorKind::InvalidToken(token.kind.clone());
         ParserError{ span, kind }
     }
 
+    /// Helper to report error with specfic span and kind 
     pub(in crate::parser) fn error_at(&self, span: Span, kind: TokenKind) -> ParserError {
         let kind = ParserErrorKind::InvalidToken(kind);
         ParserError{ span, kind }
     }
 
+    /// Synchronize when reading function definition failed
     fn synchronize_fn(&mut self) {
         while !self.is_at_end() {
             if let TokenKind::Fn = self.peek().kind {
@@ -156,6 +164,7 @@ impl Parser {
         }
     }
 
+    /// Synchronize when statement parsing failed
     pub(in crate::parser) fn synchronize_stmt(&mut self) {
         while !self.is_at_end() {
             if let TokenKind::SemiCol = self.previous().kind {

@@ -27,7 +27,7 @@ impl Walkable for ASTDebug {
         let indent = " ".repeat(self.indent);
         println!("{indent}fn {:?}", fn_decl.name);
         self.indent += 2; 
-        fn_decl.body.node.iter()
+        fn_decl.body.stmts.iter()
             .for_each(|s| walk_stmt(self, &s.node));
         self.indent -= 2; 
     }

@@ -1,4 +1,6 @@
-use crate::{ast::{expression::Expr, statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, HTTPMethodKind, Param, Stmt}, Spanned, Type, TypeKind}, 
+use crate::{ast::{expression::{Expr, ExprKind}, 
+    statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, HTTPMethodKind, Param, Stmt, StmtKind}, 
+    Spanned, Type, TypeKind}, 
     common::Span, lexer::tokens::TokenKind, parser::error::ParserError};
 
 use super::parser::Parser;
@@ -90,8 +92,8 @@ impl Parser {
 
     /// Block ::= "{" { Stmt } "}" ;
     fn block(&mut self) -> Result<Block, ParserError> {
-        let mut stmts: Vec<Spanned<Stmt>> = vec![];
-        let start = self.consume(&TokenKind::LBrace)?.pos;
+        let mut stmts: Vec<Stmt> = vec![];
+        let start = self.consume(&TokenKind::LBrace)?.span.start;
         while !self.is_at_end() && !self.check(&TokenKind::RBrace) {
             match self.stmt() {
                 Ok(stmt) => stmts.push(stmt), 
@@ -101,10 +103,10 @@ impl Parser {
                 }
             }
         }
-        let end = self.consume(&TokenKind::RBrace)?.pos; 
+        let end = self.consume(&TokenKind::RBrace)?.span.end; 
 
         let span = Span{start, end};
-        Ok(Spanned {node: stmts, span})
+        Ok(Block { id: self.next_id(), stmts, span })
     }
 
     /// Stmt ::= Assign 
@@ -115,7 +117,7 @@ impl Parser {
     /// | CompoundAssign 
     /// | HTTPRequest 
     /// | ExprStmt ;
-    fn stmt(&mut self) -> Result<Spanned<Stmt>, ParserError> {
+    fn stmt(&mut self) -> Result<Stmt, ParserError> {
         match self.peek().kind {
             TokenKind::Ident(_) => self.stmt_assign(), 
             TokenKind::While => self.parse_while(),
@@ -129,22 +131,26 @@ impl Parser {
         }
     }
 
-    fn stmt_assign(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let assign = self.stmt_ident()?;
-        let start = assign.span.start;
-        let end = self.consume(&TokenKind::SemiCol)?.pos;
-
-        let node = assign.node;
-        let span = Span {start, end};
-
-        Ok(Spanned {node, span})
-    }
-
     /// Assign ::= IDENT [ ":" Type ] "=" Expr ";" ;
     /// ExprStmt ::= Expr ";" ;
     /// AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ";" ;
     /// Where ExprStmt can be IDENT 
-    fn stmt_ident(&mut self) -> Result<Spanned<Stmt>, ParserError> {
+    fn stmt_assign(&mut self) -> Result<Stmt, ParserError> {
+        let assign = self.stmt_ident()?;
+        let start = assign.span.start;
+        let end = self.consume(&TokenKind::SemiCol)?.span.end;
+
+        let span = Span {start, end};
+        let kind = assign.kind;
+
+        Ok(Stmt { id: self.next_id(), kind, span })
+    }
+
+    /// Assign ::= IDENT [ ":" Type ] "=" Expr ;
+    /// ExprStmt ::= Expr ;
+    /// AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ;
+    /// Where ExprStmt can be IDENT 
+    fn stmt_ident(&mut self) -> Result<Stmt, ParserError> {
         // There are a couple cases here, it can be either
         // an assignment, compount assign, or an expr
         match self.peek_next().kind {
@@ -160,40 +166,62 @@ impl Parser {
     }
 
     /// AssignObj ::= IDENT "->" IDENT { "->" IDENT } "=" Expr ";" ;
-    fn assign_object(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let mut node = Expr::Ident(self.consume_ident()?);
-        let start = self.previous().pos; 
+    fn assign_object(&mut self) -> Result<Stmt, ParserError> {
+        let ident = self.consume_ident()?;
+        let node_kind =  ExprKind::Ident(ident.node);
+        let mut target = Expr {
+            id: self.next_id(), 
+            kind: node_kind, 
+            span: ident.span,
+        };
+        let start = ident.span.start; 
         let mut end = start; 
         let rules = [TokenKind::Arrow]; 
 
         while self.match_token(&rules) {
             let ident = self.consume_ident()?;
-            end = self.previous().pos;
-            node = Expr::FieldAccess { 
-                obj: Box::new(node), 
+            end = self.previous().span.end;
+            let node_kind = ExprKind::FieldAccess { 
+                obj: Box::new(target), 
                 key: ident,
             };
+            target = Expr {
+                id: self.next_id(), 
+                kind: node_kind, 
+                span: Span {start, end},
+            };
         }
-        let target = Spanned{node, span: Span{start, end}};
         match self.peek().kind {
             TokenKind::Assign => {
                 self.advance();
                 let expr = self.expression()?;
-                let span = Span{start, end};
-                Ok(Spanned { node: Stmt::AssignObj { target, expr }, span })
+                let kind = StmtKind::AssignObj { target, expr };
+                Ok(Stmt{
+                    id: self.next_id(), 
+                    kind, 
+                    span: Span{ start, end },
+                })
             },
             TokenKind::AddE | TokenKind::SubE | TokenKind::MultE | TokenKind::DivE => {
-                let op = match self.peek().kind {
+                let compound_op_kind = match self.peek().kind {
                     TokenKind::AddE => CompoundOpKind::AddE,
                     TokenKind::SubE => CompoundOpKind::SubE,
                     TokenKind::MultE => CompoundOpKind::MultE,
                     TokenKind::DivE => CompoundOpKind::DivE,
                     _ => unreachable!(),
                 };
-                self.advance();
+                let op_span = self.advance().span;
+                let op = CompoundOp{
+                    node: compound_op_kind,
+                    span: op_span, 
+                };
                 let expr = self.expression()?;
-                let span = Span{start, end};
-                Ok(Spanned { node: Stmt::CompoundAssignObj { target, op, expr }, span })
+                let kind = StmtKind::CompoundAssignObj { target, op, expr };
+                Ok(Stmt{
+                    id: self.next_id(),
+                    kind, 
+                    span: Span{start, end},
+                })
             },
             _ => Err(self.error(self.peek()))
         }
@@ -201,22 +229,26 @@ impl Parser {
 
     /// Assign ::= IDENT "=" Expr ";" ;
     /// when no type 
-    fn assign(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.peek().pos; 
+    fn assign(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.peek().span.start; 
         let name = self.consume_ident()?;
         self.consume(&TokenKind::Assign)?;
         let expr = self.expression()?;
         let end = expr.span.end;
 
         let span = Span { start, end };
-        let node = Stmt::Assign { name, type_ann: None, expr }; 
-        Ok(Spanned { node, span })
+        let kind = StmtKind::Assign { name, type_ann: None, expr }; 
+        Ok(Stmt{
+            id: self.next_id(), 
+            kind,
+            span,
+        })
     }
 
     /// Assign ::= IDENT ":" Type "=" Expr ";" ;
     /// With type annotation
-    fn assign_with_type(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.peek().pos; 
+    fn assign_with_type(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.peek().span.start; 
         let name = self.consume_ident()?;  
         self.consume(&TokenKind::Colon)?;
         let type_ann = Some(self.consume_type()?);
@@ -225,8 +257,12 @@ impl Parser {
 
         let end = expr.span.end;
         let span = Span { start, end };
-        let node = Stmt::Assign { name, type_ann, expr };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::Assign { name, type_ann, expr };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// CompoundOp ::= "+=" 
@@ -235,35 +271,47 @@ impl Parser {
     /// | "/=" ;
     /// 
     /// CompoundAssign ::= IDENT CompoundOp Expr ";" ;
-    fn compount_assign(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.peek().pos; 
+    fn compount_assign(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.peek().span.start; 
         let name = self.consume_ident()?; 
-        let op = match self.peek().kind {
-            TokenKind::AddE => CompoundOp::AddE,
-            TokenKind::SubE => CompoundOp::SubE, 
-            TokenKind::MultE => CompoundOp::MultE, 
-            TokenKind::DivE => CompoundOp::DivE, 
+        let compound_op_kind = match self.peek().kind {
+            TokenKind::AddE => CompoundOpKind::AddE,
+            TokenKind::SubE => CompoundOpKind::SubE, 
+            TokenKind::MultE => CompoundOpKind::MultE, 
+            TokenKind::DivE => CompoundOpKind::DivE, 
             _ => { return Err(self.error(self.peek())); }
         };
-        self.advance();
+        let op_span = self.advance().span;
+        let op = CompoundOp{
+            node: compound_op_kind,
+            span: op_span,
+        };
         let expr = self.expression()?;
         let end = expr.span.end;
         
         let span = Span { start, end };
-        let node = Stmt::CompoundAssign { name, op, expr };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::CompoundAssign { name, op, expr };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span
+        })
     }
 
     /// While ::= "while" Expr Block  ;
-    fn parse_while(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.consume(&TokenKind::While)?.pos;
+    fn parse_while(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.consume(&TokenKind::While)?.span.start;
         let cond = self.expression()?; 
         let body = self.block()?;
         let end = body.span.end;
         
         let span = Span{start, end};
-        let node = Stmt::While { cond, body };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::While { cond, body };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// ElseIf ::= { "else" "if" Expr Block } ;
@@ -271,8 +319,8 @@ impl Parser {
     /// Else ::= [ "else" Block ] ;
     /// 
     /// If ::= "if" Expr Block ElseIF Else ; 
-    fn parse_if(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.consume(&TokenKind::If)?.pos;
+    fn parse_if(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.consume(&TokenKind::If)?.span.start;
         let cond = self.expression()?;
         let body = self.block()?;
 
@@ -288,57 +336,60 @@ impl Parser {
         };
 
         let span = Span {start, end}; 
-        let node = Stmt::If { cond, body, else_ifs, else_body };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::If { cond, body, else_ifs, else_body };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// ElseIf ::= { "else" "if" Expr Block } ;
-    fn parse_else_if(&mut self) -> Result<Vec<Spanned<ElseIf>>, ParserError> {
-        let mut else_ifs: Vec<Spanned<ElseIf>> = vec![];
+    fn parse_else_if(&mut self) -> Result<Vec<ElseIf>, ParserError> {
+        let mut else_ifs: Vec<ElseIf> = vec![];
 
         while self.check(&TokenKind::Else) && 
             let TokenKind::If = self.peek_next().kind {
-                let start = self.consume(&TokenKind::Else)?.pos;
+                let start = self.consume(&TokenKind::Else)?.span.start;
                 self.consume(&TokenKind::If)?;
 
                 let cond = self.expression()?;
                 let body = self.block()?; 
                 let combined_span = Span{start, end: body.span.end};
 
-                let node = ElseIf{cond, body};
-                else_ifs.push(Spanned { node, span: combined_span });
+                let node = ElseIf{
+                    id: self.next_id(),
+                    cond, body,
+                    span: combined_span,
+                };
+                else_ifs.push(node);
         }
         Ok(else_ifs)
     }
 
     /// Else ::= [ "else" Block ] ;
-    fn parse_else(&mut self) -> Result<Option<Spanned<Vec<Spanned<Stmt>>>>, ParserError> {
+    fn parse_else(&mut self) -> Result<Option<Block>, ParserError> {
         if !self.check(&TokenKind::Else) {
             return Ok(None);
         }
-        let start = self.consume(&TokenKind::Else)?.pos;
+        self.consume(&TokenKind::Else)?;
         let block = self.block()?;
-        let end = block.span.end;
 
-        let combined_span = Span{start, end};
-
-        Ok(Some(Spanned { node: block.node, span: combined_span }))
+        Ok(Some(block))
     }
 
     /// ForSet ::= Assign | CompoundAssign | Expr ;
     /// For ::= "for" [ ForSet ] ";" [ Expr ] ";" [ ForSet { ","  ForSet } ] Block ;
-    fn parse_for(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.consume(&TokenKind::For)?.pos;
+    fn parse_for(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.consume(&TokenKind::For)?.span.start;
         // wrap decl in box
         let decl = self.option_for_clause(|this| {
-            let spanned = this.stmt_ident()?;
-            let span = spanned.span;
-            let node = Box::new(spanned.node); 
-            Ok(Spanned { node, span })
+            let stmt = this.stmt_ident()?;
+            Ok(Box::new(stmt))
         })?;
         let cond = self.option_for_clause(|this| Ok(this.expression()?))?;
 
-        let mut update: Vec<Spanned<Stmt>> = vec![];
+        let mut update: Vec<Stmt> = vec![];
         if !self.check(&TokenKind::LBrace) {
             update.push(self.stmt_ident()?);
             let rules = [TokenKind::Comma];
@@ -350,8 +401,12 @@ impl Parser {
         let body = self.block()?;
         let end = body.span.end; 
         let span = Span{start, end};
-        let node = Stmt::For { decl, cond, update, body };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::For { decl, cond, update, body };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// Helper method for parsing for, its a bit confusing 
@@ -370,14 +425,18 @@ impl Parser {
     }
 
     /// Return ::= "return" Expr ";" ;
-    fn parse_return(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.consume(&TokenKind::Return)?.pos;
+    fn parse_return(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.consume(&TokenKind::Return)?.span.start;
         let expr = self.expression()?;
-        let end = self.consume(&TokenKind::SemiCol)?.pos;
+        let end = self.consume(&TokenKind::SemiCol)?.span.end;
 
         let span = Span { start, end };
-        let node = Stmt::Return(expr);
-        Ok(Spanned { node, span })
+        let kind = StmtKind::Return(expr);
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     /// HTTPMethod ::= "POST"
@@ -391,16 +450,20 @@ impl Parser {
     /// | "/output" ;
     ///
     /// HTTPRequest ::= HTTPMethod Endpoint Expr ";" ;
-    fn http_request(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let start = self.peek().pos;
+    fn http_request(&mut self) -> Result<Stmt, ParserError> {
+        let start = self.peek().span.start;
         let method = self.http_method()?;
         let endpoint = self.consume_endpoint()?;
         let body = self.expression()?;
 
-        let end = self.consume(&TokenKind::SemiCol)?.pos;
+        let end = self.consume(&TokenKind::SemiCol)?.span.end;
         let span = Span {start, end};
-        let node = Stmt::HTTPRequest { method, endpoint, body };
-        Ok(Spanned { node, span })
+        let kind = StmtKind::HTTPRequest { method, endpoint, body };
+        Ok(Stmt{
+            id: self.next_id(),
+            kind, 
+            span,
+        })
     }
 
     fn http_method(&mut self) -> Result<HTTPMethod, ParserError> {
@@ -410,30 +473,36 @@ impl Parser {
             TokenKind::Patch => HTTPMethodKind::Patch, 
             _ => { return Err(self.error(self.peek())); }
         }; 
-        self.advance();
-        Ok(method)
+        let span = self.advance().span;
+        Ok(HTTPMethod{
+            node: method, 
+            span,
+        })
     }
 
     /// Does not consume ";"
-    fn dangl_expr(&mut self) -> Result<Spanned<Stmt>, ParserError> {
+    fn dangl_expr(&mut self) -> Result<Stmt, ParserError> {
         let expr = self.expression()?;
         let end = expr.span.end;
         let start = expr.span.start; 
 
-        let node = Stmt::Expr(expr);
+        let kind = StmtKind::Expr(expr);
         let span = Span { start, end };
-        Ok(Spanned { node, span })
+        Ok(Stmt{
+            id: self.next_id(), 
+            kind, 
+            span,
+        })
     }
 
     /// ExprStmt ::= Expr ";" ;
-    fn expr_stmt(&mut self) -> Result<Spanned<Stmt>, ParserError> {
-        let stmt = self.dangl_expr()?;
-        let node = stmt.node; 
+    fn expr_stmt(&mut self) -> Result<Stmt, ParserError> {
+        let mut stmt = self.dangl_expr()?;
         let start = stmt.span.start; 
-        let end = self.consume(&TokenKind::SemiCol)?.pos;
+        let end = self.consume(&TokenKind::SemiCol)?.span.end;
+        stmt.span = Span { start, end };
 
-        let span = Span { start, end };
-        Ok(Spanned { node, span })
+        Ok(stmt)
     }
 
 }
