@@ -81,9 +81,9 @@ pub enum ExprKind {
     // <left> <op> <right>
     /// 1 + 2 
     BinOp {
-        left: Box<Expr>,
+        lhs: Box<Expr>,
         op: BinOp, 
-        right: Box<Expr>
+        rhs: Box<Expr>
     },
     /// Unary Operation 
     /// <op><value>
@@ -111,12 +111,6 @@ pub enum ExprKind {
         obj: Box<Expr>,
         key: Spanned<String>,
     },
-    /// Endpoint access
-    /// GET <endpoint> 
-    /// e.g GET /camera 
-    HTTPRequest(Endpoint),
-    /// Literals
-    Constant(Literal),
     /// <name> { (<field>)* }
     /// Struct { author: "Jason Phan", program: "Razz" }
     /// Fields share the same reason with function
@@ -125,6 +119,12 @@ pub enum ExprKind {
         ty: SpecificType, 
         fields: Vec<StructField>,
     },
+    /// Endpoint access
+    /// GET <endpoint> 
+    /// e.g GET /camera 
+    HTTPRequest(Endpoint),
+    /// Literals
+    Constant(Literal),
     /// Identifer name
     Ident(String),
 }

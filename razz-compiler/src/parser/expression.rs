@@ -25,9 +25,9 @@ impl Parser {
             };
             let logic_and = self.logic_and()?;
             let end = logic_and.span.end;
-            let right = Box::new(logic_and);
-            let left = Box::new(node);
-            let kind = ExprKind::BinOp{left, op, right};
+            let rhs = Box::new(logic_and);
+            let lhs = Box::new(node);
+            let kind = ExprKind::BinOp{lhs, op, rhs};
 
             let span = Span {start, end};
             node = Expr {
@@ -54,9 +54,9 @@ impl Parser {
             };
             let equality = self.equality()?;
             let end = equality.span.end;
-            let right = Box::new(equality);
-            let left = Box::new(node);
-            let kind = ExprKind::BinOp {left, op, right};
+            let rhs = Box::new(equality);
+            let lhs = Box::new(node);
+            let kind = ExprKind::BinOp {lhs, op, rhs};
             let span = Span{start, end};
             node = Expr{ 
                 id: self.next_id(), 
@@ -90,10 +90,10 @@ impl Parser {
             };
             let comparison = self.comparison()?;
             end = comparison.span.end;
-            let right = Box::new(comparison);
-            let left = Box::new(node);
+            let rhs = Box::new(comparison);
+            let lhs = Box::new(node);
             
-            let kind = ExprKind::BinOp{left, op, right};
+            let kind = ExprKind::BinOp{lhs, op, rhs};
 
             let span = Span{start, end};
             node = Expr{
@@ -134,10 +134,10 @@ impl Parser {
             };
             let term = self.term()?;
             end = term.span.end;
-            let left = Box::new(node);
-            let right = Box::new(term);
+            let lhs = Box::new(node);
+            let rhs = Box::new(term);
 
-            let kind = ExprKind::BinOp{left, op, right};
+            let kind = ExprKind::BinOp{lhs, op, rhs};
             let span = Span{start, end};
             node = Expr{
                 id: self.next_id(), 
@@ -174,10 +174,10 @@ impl Parser {
 
             let factor = self.factor()?;
             end = factor.span.end;
-            let right = Box::new(factor);
-            let left = Box::new(node);
+            let rhs = Box::new(factor);
+            let lhs = Box::new(node);
 
-            let kind = ExprKind::BinOp{left, op, right};
+            let kind = ExprKind::BinOp{lhs, op, rhs};
             let span = Span{start, end};
             node = Expr{
                 id: self.next_id(), 
@@ -214,10 +214,10 @@ impl Parser {
 
             let unary = self.unary()?;
             end = unary.span.end;
-            let right = Box::new(unary);
-            let left = Box::new(node);
+            let rhs = Box::new(unary);
+            let lhs = Box::new(node);
             
-            let kind = ExprKind::BinOp{left, op, right};
+            let kind = ExprKind::BinOp{lhs, op, rhs};
             let span = Span{start, end};
             node = Expr{
                 id: self.next_id(),

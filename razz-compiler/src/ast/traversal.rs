@@ -1,15 +1,46 @@
-use crate::ast::{expression::Expr, statement::{FnDecl, Stmt}, Program};
+use crate::ast::{expression::{Arg, BinOp, Endpoint, Expr, ExprKind, Literal, StructField, UnOp}, statement::{FnDecl, StmtKind}, Program, Spanned, SpecificType};
 
 /// Walkable trait, used to traverse the AST tree
 pub trait Walkable {
+    // ====== EXPRRESSION ====== 
     fn visit_expr(&mut self, expr: &Expr) {
         walk_expr(self, expr);
     }
 
-    fn visit_stmt(&mut self, stmt: &Stmt) {
+    fn visit_bin_op(&mut self, _expr: &Expr, lhs: &Expr, _op: &BinOp, rhs: &Expr) {
+        walk_expr(self, lhs);
+        walk_expr(self, rhs);
+    }
+
+    fn visit_un_op(&mut self, _expr: &Expr, _op: &UnOp, value: &Expr) {
+        walk_expr(self, value);
+    }
+
+    fn visit_func_call(&mut self, _expr: &Expr, _name: &Spanned<String>, args: &Vec<Arg>) {
+        args.iter()
+            .for_each(|arg| walk_expr(self, &arg.expr));
+    }
+
+    fn visit_field_access(&mut self, _expr: &Expr, obj: &Expr, _key: &Spanned<String>) {
+        walk_expr(self, obj);
+    }
+
+    fn visit_struct_lit(&mut self, _expr: &Expr, _ty: &SpecificType, fields: &Vec<StructField>) {
+        fields.iter()
+            .for_each(|field| walk_expr(self, &field.value));
+    }
+
+    // EXPR LEAF NODES 
+    fn visit_get_request(&mut self, _expr: &Expr, _endpoint: &Endpoint) {}
+    fn visit_constant(&mut self, _expr: &Expr, _lit: &Literal) {}
+    fn visit_ident(&mut self, _expr: &Expr, _name: &str) {}
+
+    // ====== STATEMENT ====== 
+    fn visit_stmt(&mut self, stmt: &StmtKind) {
         walk_stmt(self, stmt);
     }
 
+    // General programs and fn decl
     fn visit_program(&mut self, prog: &Program) {
         walk_program(self, prog);
     }
@@ -21,43 +52,38 @@ pub trait Walkable {
 
 /// Walk on only expr 
 pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
-    match expr {
-        Expr::BinOp { left, right, .. } => {
-            walker.visit_expr(&left);
-            walker.visit_expr(&right);
-        },
-        Expr::UnOp { value, .. } => walker.visit_expr(&value),
-        Expr::FunctionCall { args, .. } => args.iter()
-            .for_each(|arg| walker.visit_expr(&arg.expr)),
-        Expr::FieldAccess { obj, .. } => walker.visit_expr(&obj),
-        Expr::StructLiteral { fields, .. } => fields.iter()
-            .for_each(|field| walker.visit_expr(&field.value)),
+    match &expr.kind {
+        ExprKind::BinOp { lhs, op, rhs } => walker.visit_bin_op(expr, &lhs, op, &rhs),
+        ExprKind::UnOp { op, value } => walker.visit_un_op(expr, op, &value),
+        ExprKind::FunctionCall { name, args } => walker.visit_func_call(expr, name, args),
+        ExprKind::FieldAccess { obj, key } => walker.visit_field_access(expr, &obj, key),
+        ExprKind::StructLiteral { ty, fields } => walker.visit_struct_lit(expr, ty, fields),
 
-        Expr::HTTPRequest(_) 
-            | Expr::Constant(_)
-            | Expr::Ident(_)
-            => {},
+        // Leaf
+        ExprKind::HTTPRequest(endpoint) => walker.visit_get_request(expr, endpoint),
+        ExprKind::Constant(lit) => walker.visit_constant(expr, lit),
+        ExprKind::Ident(name) => walker.visit_ident(expr, &name),
     }
 }
 
 /// Walk on only stmt 
-pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
-    match stmt {
-        Stmt::Assign { expr, .. } => walker.visit_expr(&expr.node),
-        Stmt::AssignObj { target, expr } => {
+pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &StmtKind) {
+    /*match stmt {
+        StmtKind::Assign { expr, .. } => walker.visit_expr(&expr.node),
+        StmtKind::AssignObj { target, expr } => {
             walker.visit_expr(&target.node);
             walker.visit_expr(&expr.node);
         },
-        Stmt::CompoundAssignObj { target, expr, .. } => {
+        StmtKind::CompoundAssignObj { target, expr, .. } => {
             walker.visit_expr(&target.node);
             walker.visit_expr(&expr.node);
         }
-        Stmt::While { cond, body } => {
+        StmtKind::While { cond, body } => {
             walker.visit_expr(&cond.node);
             body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
         }
-        Stmt::If { cond, body, else_ifs, else_body } => {
+        StmtKind::If { cond, body, else_ifs, else_body } => {
             walker.visit_expr(&cond.node);
             body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
@@ -72,7 +98,7 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
                     .for_each(|instr| walker.visit_stmt(&instr.node));
             }
         }, 
-        Stmt::For { decl, cond, update , body } => {
+        StmtKind::For { decl, cond, update , body } => {
             if let Some(decl) = decl {
                 walker.visit_stmt(&decl.node);
             }
@@ -84,11 +110,11 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
             body.node.iter()
                 .for_each(|instr| walker.visit_stmt(&instr.node));
         },
-        Stmt::Return(e) => walker.visit_expr(&e.node),
-        Stmt::CompoundAssign { expr, .. } => walker.visit_expr(&expr.node),
-        Stmt::HTTPRequest { body, .. } => walker.visit_expr(&body.node),
-        Stmt::Expr(e) => walker.visit_expr(&e.node),
-    }
+        StmtKind::Return(e) => walker.visit_expr(&e.node),
+        StmtKind::CompoundAssign { expr, .. } => walker.visit_expr(&expr.node),
+        StmtKind::HTTPRequest { body, .. } => walker.visit_expr(&body.node),
+        StmtKind::Expr(e) => walker.visit_expr(&e.node),
+    }*/
 }
 
 pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
@@ -97,6 +123,6 @@ pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
 }
 
 pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {
-    func.body.node.iter()
-        .for_each(|stmt| walker.visit_stmt(&stmt.node));
+    /*func.body.node.iter()
+        .for_each(|stmt| walker.visit_stmt(&stmt.node));*/
 }

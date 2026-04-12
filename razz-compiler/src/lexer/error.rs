@@ -10,7 +10,7 @@ pub struct LexError {
 // For debugging and test
 impl fmt::Display for LexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ERROR: {:?} Start At Line: {} Col: {}, End At Line: {} Col: {}", self.kind, 
+        write!(f, "ERROR: {:?} Start Line: {} Col: {}, End Line: {} Col: {}", self.kind, 
         self.span.start.line, self.span.start.col, self.span.end.line, self.span.end.col)
     }
 }

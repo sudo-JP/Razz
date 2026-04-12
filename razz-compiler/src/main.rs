@@ -19,8 +19,8 @@ fn main() -> io::Result<()> {
         Err(CompilerError::Lexer(err_toks)) => {
             is_err = true;
             for e in err_toks {
-                eprintln!("{}: {:?} Line: {} Col: {}", 
-                    "error".red().bold(), e.kind, e.pos.line, e.pos.col);
+                eprintln!("{}: {:?} Start Line: {} Col: {}, End Line: {} Col: {}", "error".red().bold(),
+                e.kind, e.span.start.line, e.span.start.col, e.span.end.line, e.span.end.col)
             }
         }
 

@@ -7,7 +7,7 @@ pub struct ASTDebug {
 
 
 impl Walkable for ASTDebug {
-    fn visit_expr(&mut self, expr: &Expr) {
+    /*fn visit_expr(&mut self, expr: &Expr) {
         let indent = " ".repeat(self.indent);
         println!("{indent}{:?}", expr);
         self.indent += 2; 
@@ -37,5 +37,5 @@ impl Walkable for ASTDebug {
         self.indent += 2; 
         prog.funcs.iter().for_each(|s| walk_fn_decl(self, &s.node));
         self.indent -= 2; 
-    }
+    }*/
 }

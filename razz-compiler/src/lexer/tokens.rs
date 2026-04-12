@@ -13,7 +13,7 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             TokenKind::Eof => write!(f, "Eof"),
-            _ => write!(f, "{:?} Start At Line: {} Col: {}, End At Line: {} Col: {}", self.kind, 
+            _ => write!(f, "{:?} Start Line: {} Col: {}, End Line: {} Col: {}", self.kind, 
                 self.span.start.line, self.span.start.col, self.span.end.line, self.span.end.col),
         }
     }
