@@ -198,7 +198,7 @@ impl Lexer {
         } 
         // Multiple lines comment 
         else if self.expect(b'*') {
-            let start = Position{line: self.curr_line, col: self.col};
+            let start = Position{line: self.line, col: self.col};
             while (self.peek() != b'*' || self.peak_next() != b'/')
                 && !self.is_at_end() {
                 if self.peek() == b'\n' {
@@ -208,7 +208,7 @@ impl Lexer {
                 self.advance();
             }
             if self.is_at_end() {
-                let end = Position{line: self.curr_line, col: self.col};
+                let end = Position{line: self.curr_line, col: self.curr_col};
                 let span = Span{start, end};
                 self.lex_errors.push(LexError { 
                     kind: LexErrorKind::UnterminatedComment, 

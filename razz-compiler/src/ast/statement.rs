@@ -76,6 +76,14 @@ pub enum StmtKind {
         type_ann: Option<Type>,
         expr: Expr,
     },
+    /// Compound assignment operator
+    /// <name> <op> <expr> 
+    /// e.g foo += (1 * 2)
+    CompoundAssign {
+        name: Spanned<String>,
+        op: CompoundOp, 
+        expr: Expr,
+    },
     /// <target> itself is a chained of a->b->c->etc 
     /// so <target> = <expr>;
     AssignObj {
@@ -95,6 +103,15 @@ pub enum StmtKind {
         cond: Expr, 
         body: Block,
     }, 
+    /// For loop statement
+    /// Can have multiple expr, separated by comma
+    /// for (<decl>)?; (<cond>)?; (<expr>|<expr>,)* { <body> }
+    For {
+        decl: Option<Box<Stmt>>, 
+        cond: Option<Expr>, 
+        update: Vec<Stmt>, 
+        body: Block,
+    }, 
     /// If statement
     /// 0 or more else if 
     /// 0 or 1 else 
@@ -107,25 +124,8 @@ pub enum StmtKind {
         else_ifs: Vec<ElseIf>, 
         else_body: Option<Block>,
     },
-    /// For loop statement
-    /// Can have multiple expr, separated by comma
-    /// for (<decl>)?; (<cond>)?; (<expr>|<expr>,)* { <body> }
-    For {
-        decl: Option<Box<Stmt>>, 
-        cond: Option<Expr>, 
-        update: Vec<Stmt>, 
-        body: Block,
-    }, 
     /// Return statement, return <expr>
     Return(Expr),
-    /// Compound assignment operator
-    /// <name> <op> <expr> 
-    /// e.g foo += (1 * 2)
-    CompoundAssign {
-        name: Spanned<String>,
-        op: CompoundOp, 
-        expr: Expr,
-    },
     /// HTTP Request statements 
     /// <method> <endpoint> <body> 
     /// PATCH /camera { xFrom: 1 }
