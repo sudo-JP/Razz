@@ -1,10 +1,11 @@
-ERROR: InvalidChar('@') Line: 2 Col: 9
-ERROR: InvalidNumber Line: 3 Col: 9
-ERROR: UnterminatedString Line: 4 Col: 9
-ERROR: InvalidEndpoint("unknown") Line: 5 Col: 9
-ERROR: InvalidChar('#') Line: 6 Col: 9
-ERROR: InvalidNumber Line: 7 Col: 9
-ERROR: InvalidEndpoint("camerax") Line: 8 Col: 9
-ERROR: InvalidChar('$') Line: 9 Col: 9
-ERROR: UnterminatedString Line: 10 Col: 9
-ERROR: InvalidChar('`') Line: 11 Col: 9
+ERROR: InvalidChar('@') Start Line: 2 Col: 9, End Line: 2 Col: 10
+ERROR: InvalidNumber Start Line: 3 Col: 9, End Line: 3 Col: 11
+ERROR: UnterminatedString Start Line: 4 Col: 9, End Line: 5 Col: 1
+ERROR: InvalidEndpoint("unknown") Start Line: 5 Col: 9, End Line: 5 Col: 17
+ERROR: InvalidChar('#') Start Line: 6 Col: 9, End Line: 6 Col: 10
+ERROR: InvalidNumber Start Line: 7 Col: 9, End Line: 7 Col: 14
+ERROR: InvalidEndpoint("camerax") Start Line: 8 Col: 9, End Line: 8 Col: 17
+ERROR: InvalidChar('$') Start Line: 9 Col: 9, End Line: 9 Col: 10
+ERROR: UnterminatedString Start Line: 10 Col: 9, End Line: 11 Col: 1
+ERROR: InvalidChar('`') Start Line: 11 Col: 9, End Line: 11 Col: 10
+ERROR: InvalidChar('`') Start Line: 11 Col: 18, End Line: 11 Col: 19

@@ -1,18 +1,18 @@
-Add Line: 1 Col: 1
-AddE Line: 1 Col: 3
-Sub Line: 1 Col: 6
-SubE Line: 1 Col: 8
-Mult Line: 1 Col: 11
-MultE Line: 1 Col: 13
-Eq Line: 2 Col: 1
-Neq Line: 2 Col: 4
-Gt Line: 2 Col: 7
-Ge Line: 2 Col: 9
-Lt Line: 2 Col: 12
-Le Line: 2 Col: 14
-And Line: 3 Col: 1
-Or Line: 3 Col: 4
-Not Line: 3 Col: 7
-Assign Line: 4 Col: 1
-Arrow Line: 4 Col: 3
+Add Start Line: 1 Col: 1, End Line: 1 Col: 2
+AddE Start Line: 1 Col: 3, End Line: 1 Col: 5
+Sub Start Line: 1 Col: 6, End Line: 1 Col: 7
+SubE Start Line: 1 Col: 8, End Line: 1 Col: 10
+Mult Start Line: 1 Col: 11, End Line: 1 Col: 12
+MultE Start Line: 1 Col: 13, End Line: 1 Col: 15
+Eq Start Line: 2 Col: 1, End Line: 2 Col: 3
+Neq Start Line: 2 Col: 4, End Line: 2 Col: 6
+Gt Start Line: 2 Col: 7, End Line: 2 Col: 8
+Ge Start Line: 2 Col: 9, End Line: 2 Col: 11
+Lt Start Line: 2 Col: 12, End Line: 2 Col: 13
+Le Start Line: 2 Col: 14, End Line: 2 Col: 16
+And Start Line: 3 Col: 1, End Line: 3 Col: 3
+Or Start Line: 3 Col: 4, End Line: 3 Col: 6
+Not Start Line: 3 Col: 7, End Line: 3 Col: 8
+Assign Start Line: 4 Col: 1, End Line: 4 Col: 2
+Arrow Start Line: 4 Col: 3, End Line: 4 Col: 5
 Eof

@@ -10,7 +10,7 @@ use crate::parser::parser::Parser;
 pub enum CompilerStage {
     Lexer, 
     Parser, 
-    TypeCheck, 
+    SemanticAnalysis, 
     IR, 
     Codegen, 
 }
@@ -19,7 +19,7 @@ pub enum CompilerStage {
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser(Program), 
-    TypeCheck, 
+    SemanticAnalysis,
     IR,
     Codegen,
 }

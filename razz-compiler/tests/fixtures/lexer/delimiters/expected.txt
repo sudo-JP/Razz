@@ -1,7 +1,7 @@
-LBrace Line: 1 Col: 1
-LParen Line: 2 Col: 5 
-RParen Line: 2 Col: 6
-Colon Line: 2 Col: 8 
-SemiCol Line: 2 Col: 9
-RBrace Line: 3 Col: 1
-Eof 
+LBrace Start Line: 1 Col: 1, End Line: 1 Col: 2
+LParen Start Line: 2 Col: 5, End Line: 2 Col: 6
+RParen Start Line: 2 Col: 6, End Line: 2 Col: 7
+Colon Start Line: 2 Col: 8, End Line: 2 Col: 9
+SemiCol Start Line: 2 Col: 9, End Line: 2 Col: 10
+RBrace Start Line: 3 Col: 1, End Line: 3 Col: 2
+Eof

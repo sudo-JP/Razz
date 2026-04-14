@@ -1,89 +1,89 @@
-Fn Line: 1 Col: 1
-Ident("test") Line: 1 Col: 4
-LParen Line: 1 Col: 8
-Ident("a") Line: 1 Col: 9
-Colon Line: 1 Col: 10
-Int Line: 1 Col: 12
-Comma Line: 1 Col: 15
-Ident("b") Line: 1 Col: 17
-Colon Line: 1 Col: 18
-Float Line: 1 Col: 20
-RParen Line: 1 Col: 25
-Int Line: 1 Col: 27
-LBrace Line: 1 Col: 31
-Ident("x") Line: 2 Col: 5
-Assign Line: 2 Col: 7
-Ident("a") Line: 2 Col: 9
-Add Line: 2 Col: 11
-Ident("b") Line: 2 Col: 13
-Mult Line: 2 Col: 15
-IntLit(2) Line: 2 Col: 17
-Sub Line: 2 Col: 19
-IntLit(1) Line: 2 Col: 21
-SemiCol Line: 2 Col: 22
-Ident("y") Line: 3 Col: 5
-AddE Line: 3 Col: 7
-IntLit(10) Line: 3 Col: 10
-SemiCol Line: 3 Col: 12
-Ident("z") Line: 4 Col: 5
-Arrow Line: 4 Col: 6
-Ident("x") Line: 4 Col: 8
-SemiCol Line: 4 Col: 9
-Ident("eq_check") Line: 5 Col: 5
-Assign Line: 5 Col: 14
-Ident("a") Line: 5 Col: 16
-Eq Line: 5 Col: 18
-Ident("b") Line: 5 Col: 21
-SemiCol Line: 5 Col: 22
-Ident("cmp") Line: 6 Col: 5
-Assign Line: 6 Col: 9
-Ident("a") Line: 6 Col: 11
-Ge Line: 6 Col: 13
-IntLit(5) Line: 6 Col: 16
-SemiCol Line: 6 Col: 17
-Ident("val") Line: 7 Col: 5
-Assign Line: 7 Col: 9
-Ident("a") Line: 7 Col: 11
-Lt Line: 7 Col: 13
-Ident("b") Line: 7 Col: 15
-And Line: 7 Col: 17
-Ident("a") Line: 7 Col: 20
-Neq Line: 7 Col: 22
-IntLit(0) Line: 7 Col: 25
-Or Line: 7 Col: 27
-Not Line: 7 Col: 30
-Ident("b") Line: 7 Col: 31
-SemiCol Line: 7 Col: 32
-Ident("cam") Line: 8 Col: 5
-Assign Line: 8 Col: 9
-Get Line: 8 Col: 11
-EPCamera Line: 8 Col: 15
-SemiCol Line: 8 Col: 22
-Ident("background") Line: 9 Col: 5
-Assign Line: 9 Col: 16
-Patch Line: 9 Col: 18
-EPBackground Line: 9 Col: 24
-SemiCol Line: 9 Col: 35
-Ident("out") Line: 10 Col: 5
-Assign Line: 10 Col: 9
-Put Line: 10 Col: 11
-EPOutput Line: 10 Col: 15
-SemiCol Line: 10 Col: 22
-Ident("str1") Line: 11 Col: 5
-Assign Line: 11 Col: 10
-StringLit("hello\nworld") Line: 12 Col: 12
-SemiCol Line: 12 Col: 8
-Ident("str2") Line: 13 Col: 5
-Assign Line: 13 Col: 10
-StringLit("") Line: 13 Col: 12
-SemiCol Line: 13 Col: 14
-Ident("int_lit") Line: 14 Col: 5
-Assign Line: 14 Col: 13
-IntLit(123) Line: 14 Col: 15
-SemiCol Line: 14 Col: 18
-Ident("float_lit") Line: 15 Col: 5
-Assign Line: 15 Col: 15
-FloatLit(3.14) Line: 15 Col: 17
-SemiCol Line: 15 Col: 21
-RBrace Line: 16 Col: 1
+Fn Start Line: 1 Col: 1, End Line: 1 Col: 3
+Ident("test") Start Line: 1 Col: 4, End Line: 1 Col: 8
+LParen Start Line: 1 Col: 8, End Line: 1 Col: 9
+Ident("a") Start Line: 1 Col: 9, End Line: 1 Col: 10
+Colon Start Line: 1 Col: 10, End Line: 1 Col: 11
+Int Start Line: 1 Col: 12, End Line: 1 Col: 15
+Comma Start Line: 1 Col: 15, End Line: 1 Col: 16
+Ident("b") Start Line: 1 Col: 17, End Line: 1 Col: 18
+Colon Start Line: 1 Col: 18, End Line: 1 Col: 19
+Float Start Line: 1 Col: 20, End Line: 1 Col: 25
+RParen Start Line: 1 Col: 25, End Line: 1 Col: 26
+Int Start Line: 1 Col: 27, End Line: 1 Col: 30
+LBrace Start Line: 1 Col: 31, End Line: 1 Col: 32
+Ident("x") Start Line: 2 Col: 5, End Line: 2 Col: 6
+Assign Start Line: 2 Col: 7, End Line: 2 Col: 8
+Ident("a") Start Line: 2 Col: 9, End Line: 2 Col: 10
+Add Start Line: 2 Col: 11, End Line: 2 Col: 12
+Ident("b") Start Line: 2 Col: 13, End Line: 2 Col: 14
+Mult Start Line: 2 Col: 15, End Line: 2 Col: 16
+IntLit(2) Start Line: 2 Col: 17, End Line: 2 Col: 18
+Sub Start Line: 2 Col: 19, End Line: 2 Col: 20
+IntLit(1) Start Line: 2 Col: 21, End Line: 2 Col: 22
+SemiCol Start Line: 2 Col: 22, End Line: 2 Col: 23
+Ident("y") Start Line: 3 Col: 5, End Line: 3 Col: 6
+AddE Start Line: 3 Col: 7, End Line: 3 Col: 9
+IntLit(10) Start Line: 3 Col: 10, End Line: 3 Col: 12
+SemiCol Start Line: 3 Col: 12, End Line: 3 Col: 13
+Ident("z") Start Line: 4 Col: 5, End Line: 4 Col: 6
+Arrow Start Line: 4 Col: 6, End Line: 4 Col: 8
+Ident("x") Start Line: 4 Col: 8, End Line: 4 Col: 9
+SemiCol Start Line: 4 Col: 9, End Line: 4 Col: 10
+Ident("eq_check") Start Line: 5 Col: 5, End Line: 5 Col: 13
+Assign Start Line: 5 Col: 14, End Line: 5 Col: 15
+Ident("a") Start Line: 5 Col: 16, End Line: 5 Col: 17
+Eq Start Line: 5 Col: 18, End Line: 5 Col: 20
+Ident("b") Start Line: 5 Col: 21, End Line: 5 Col: 22
+SemiCol Start Line: 5 Col: 22, End Line: 5 Col: 23
+Ident("cmp") Start Line: 6 Col: 5, End Line: 6 Col: 8
+Assign Start Line: 6 Col: 9, End Line: 6 Col: 10
+Ident("a") Start Line: 6 Col: 11, End Line: 6 Col: 12
+Ge Start Line: 6 Col: 13, End Line: 6 Col: 15
+IntLit(5) Start Line: 6 Col: 16, End Line: 6 Col: 17
+SemiCol Start Line: 6 Col: 17, End Line: 6 Col: 18
+Ident("val") Start Line: 7 Col: 5, End Line: 7 Col: 8
+Assign Start Line: 7 Col: 9, End Line: 7 Col: 10
+Ident("a") Start Line: 7 Col: 11, End Line: 7 Col: 12
+Lt Start Line: 7 Col: 13, End Line: 7 Col: 14
+Ident("b") Start Line: 7 Col: 15, End Line: 7 Col: 16
+And Start Line: 7 Col: 17, End Line: 7 Col: 19
+Ident("a") Start Line: 7 Col: 20, End Line: 7 Col: 21
+Neq Start Line: 7 Col: 22, End Line: 7 Col: 24
+IntLit(0) Start Line: 7 Col: 25, End Line: 7 Col: 26
+Or Start Line: 7 Col: 27, End Line: 7 Col: 29
+Not Start Line: 7 Col: 30, End Line: 7 Col: 31
+Ident("b") Start Line: 7 Col: 31, End Line: 7 Col: 32
+SemiCol Start Line: 7 Col: 32, End Line: 7 Col: 33
+Ident("cam") Start Line: 8 Col: 5, End Line: 8 Col: 8
+Assign Start Line: 8 Col: 9, End Line: 8 Col: 10
+Get Start Line: 8 Col: 11, End Line: 8 Col: 14
+EPCamera Start Line: 8 Col: 15, End Line: 8 Col: 22
+SemiCol Start Line: 8 Col: 22, End Line: 8 Col: 23
+Ident("background") Start Line: 9 Col: 5, End Line: 9 Col: 15
+Assign Start Line: 9 Col: 16, End Line: 9 Col: 17
+Patch Start Line: 9 Col: 18, End Line: 9 Col: 23
+EPBackground Start Line: 9 Col: 24, End Line: 9 Col: 35
+SemiCol Start Line: 9 Col: 35, End Line: 9 Col: 36
+Ident("out") Start Line: 10 Col: 5, End Line: 10 Col: 8
+Assign Start Line: 10 Col: 9, End Line: 10 Col: 10
+Put Start Line: 10 Col: 11, End Line: 10 Col: 14
+EPOutput Start Line: 10 Col: 15, End Line: 10 Col: 22
+SemiCol Start Line: 10 Col: 22, End Line: 10 Col: 23
+Ident("str1") Start Line: 11 Col: 5, End Line: 11 Col: 9
+Assign Start Line: 11 Col: 10, End Line: 11 Col: 11
+StringLit("hello\nworld") Start Line: 11 Col: 12, End Line: 12 Col: 7
+SemiCol Start Line: 12 Col: 7, End Line: 12 Col: 8
+Ident("str2") Start Line: 13 Col: 5, End Line: 13 Col: 9
+Assign Start Line: 13 Col: 10, End Line: 13 Col: 11
+StringLit("") Start Line: 13 Col: 12, End Line: 13 Col: 14
+SemiCol Start Line: 13 Col: 14, End Line: 13 Col: 15
+Ident("int_lit") Start Line: 14 Col: 5, End Line: 14 Col: 12
+Assign Start Line: 14 Col: 13, End Line: 14 Col: 14
+IntLit(123) Start Line: 14 Col: 15, End Line: 14 Col: 18
+SemiCol Start Line: 14 Col: 18, End Line: 14 Col: 19
+Ident("float_lit") Start Line: 15 Col: 5, End Line: 15 Col: 14
+Assign Start Line: 15 Col: 15, End Line: 15 Col: 16
+FloatLit(3.14) Start Line: 15 Col: 17, End Line: 15 Col: 21
+SemiCol Start Line: 15 Col: 21, End Line: 15 Col: 22
+RBrace Start Line: 16 Col: 1, End Line: 16 Col: 2
 Eof

@@ -1,16 +1,16 @@
-Get Line: 1 Col: 1
-EPCamera Line: 1 Col: 5
-SemiCol Line: 1 Col: 12
-Post Line: 2 Col: 1
-EPHittable Line: 2 Col: 6
-SemiCol Line: 2 Col: 15
-Put Line: 3 Col: 1
-EPBackground Line: 3 Col: 5
-SemiCol Line: 3 Col: 16
-Patch Line: 4 Col: 1
-EPImage Line: 4 Col: 7
-SemiCol Line: 4 Col: 13
-Get Line: 5 Col: 1
-EPOutput Line: 5 Col: 5
-SemiCol Line: 5 Col: 12
+Get Start Line: 1 Col: 1, End Line: 1 Col: 4
+EPCamera Start Line: 1 Col: 5, End Line: 1 Col: 12
+SemiCol Start Line: 1 Col: 12, End Line: 1 Col: 13
+Post Start Line: 2 Col: 1, End Line: 2 Col: 5
+EPHittable Start Line: 2 Col: 6, End Line: 2 Col: 15
+SemiCol Start Line: 2 Col: 15, End Line: 2 Col: 16
+Put Start Line: 3 Col: 1, End Line: 3 Col: 4
+EPBackground Start Line: 3 Col: 5, End Line: 3 Col: 16
+SemiCol Start Line: 3 Col: 16, End Line: 3 Col: 17
+Patch Start Line: 4 Col: 1, End Line: 4 Col: 6
+EPImage Start Line: 4 Col: 7, End Line: 4 Col: 13
+SemiCol Start Line: 4 Col: 13, End Line: 4 Col: 14
+Get Start Line: 5 Col: 1, End Line: 5 Col: 4
+EPOutput Start Line: 5 Col: 5, End Line: 5 Col: 12
+SemiCol Start Line: 5 Col: 12, End Line: 5 Col: 13
 Eof

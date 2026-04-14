@@ -9,8 +9,6 @@ pub struct Lexer {
     start: usize, 
     current: usize, 
 
-    // Current means the current line/col we scaning on
-    // line and col are the one that actually move ahead 
     curr_line: usize, 
     line: usize, 
     col: usize,
@@ -37,7 +35,7 @@ impl Lexer {
     pub fn lex(mut self) -> Result<Vec<Token>, Vec<LexError>> {
         while !self.is_at_end() {
             self.start = self.current;
-            self.curr_col = self.col;
+            self.col = self.curr_col;
             self.line = self.curr_line;
             self.scan_token();
         }
@@ -55,8 +53,8 @@ impl Lexer {
     // Also ignore tokens when there's error, saving space
     fn add_token(&mut self, kind: TokenKind) {
         if self.lex_errors.len() == 0 {
-            let end = Position{line: self.line, col: self.col};
-            let start = Position{line: self.curr_line, col: self.curr_col};
+            let start = Position{line: self.line, col: self.col};
+            let end = Position{line: self.curr_line, col: self.curr_col};
             let span = Span{start, end};
             self.tokens.push(Token{kind, span});
         }
@@ -73,7 +71,7 @@ impl Lexer {
     fn advance(&mut self) -> u8 {
         let c = self.chars[self.current];
         self.current += 1; 
-        self.col += 1;
+        self.curr_col += 1;
         c
     }
 
@@ -87,7 +85,7 @@ impl Lexer {
         if c != expected { return false; }
 
         self.current += 1; 
-        self.col += 1; 
+        self.curr_col += 1; 
         return true; 
     }
 
@@ -109,15 +107,23 @@ impl Lexer {
         while self.peek() != b'"' && !self.is_at_end() {
             if self.peek() == b'\n' {
                 self.curr_line += 1; 
-                self.col = 1;
+                self.curr_col = 0; // immediately advance after, so...
             }
+
             self.advance();
         }
 
+        // Without hardcode 1, we already pass the end after consuming
         if self.is_at_end() {
-            self.add_err(LexErrorKind::UnterminatedString);
-            return; 
+            let start = Position{line: self.line, col: self.col};
+            let end = Position{line: self.curr_line, col: 1};
+            self.lex_errors.push(LexError {
+                kind: LexErrorKind::UnterminatedString,
+                span: Span {start, end}
+            });
+            return;
         }
+
 
         // close "
         self.advance();
@@ -203,12 +209,12 @@ impl Lexer {
                 && !self.is_at_end() {
                 if self.peek() == b'\n' {
                     self.curr_line += 1; 
-                    self.col = 1;
+                    self.curr_col = 0; 
                 }
                 self.advance();
             }
             if self.is_at_end() {
-                let end = Position{line: self.curr_line, col: self.curr_col};
+                let end = Position{line: self.curr_line, col: 1};
                 let span = Span{start, end};
                 self.lex_errors.push(LexError { 
                     kind: LexErrorKind::UnterminatedComment, 
@@ -371,7 +377,7 @@ impl Lexer {
             b'/' => self.handle_slash(),
 
             // WHITESPACES 
-            b'\n' => { self.col = 1; self.curr_line += 1; }
+            b'\n' => { self.curr_col = 1; self.curr_line += 1; }
             b' ' | b'\r' | b'\t' => {}
             _ => { 
                 if c.is_ascii_digit() {

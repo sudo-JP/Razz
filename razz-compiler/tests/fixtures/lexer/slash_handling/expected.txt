@@ -1,8 +1,8 @@
-EPCamera Line: 1 Col: 1
-EPHittable Line: 2 Col: 1
-EPBackground Line: 3 Col: 1
-EPImage Line: 4 Col: 1
-EPOutput Line: 5 Col: 1
-Div Line: 7 Col: 1
-DivE Line: 8 Col: 2
+EPCamera Start Line: 1 Col: 1, End Line: 1 Col: 8
+EPHittable Start Line: 2 Col: 1, End Line: 2 Col: 10
+EPBackground Start Line: 3 Col: 1, End Line: 3 Col: 12
+EPImage Start Line: 4 Col: 1, End Line: 4 Col: 7
+EPOutput Start Line: 5 Col: 1, End Line: 5 Col: 8
+Div Start Line: 7 Col: 1, End Line: 7 Col: 2
+DivE Start Line: 8 Col: 2, End Line: 8 Col: 4
 Eof

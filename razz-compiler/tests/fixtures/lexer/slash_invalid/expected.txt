@@ -1,3 +1,3 @@
-ERROR: InvalidEndpoint("camerax") Line: 1 Col: 1
-ERROR: InvalidEndpoint("unknown") Line: 2 Col: 1
-ERROR: UnterminatedComment Line: 3 Col: 3
+ERROR: InvalidEndpoint("camerax") Start Line: 1 Col: 1, End Line: 1 Col: 9
+ERROR: InvalidEndpoint("unknown") Start Line: 2 Col: 1, End Line: 2 Col: 9
+ERROR: UnterminatedComment Start Line: 3 Col: 1, End Line: 5 Col: 1

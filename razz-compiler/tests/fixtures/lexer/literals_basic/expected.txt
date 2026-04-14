@@ -1,6 +1,6 @@
-IntLit(123) Line: 1 Col: 1
-FloatLit(12.3) Line: 2 Col: 1
-StringLit("this is a string") Line: 3 Col: 1
-StringLit("multi\nline\nstring") Line: 6 Col: 1
-StringLit("") Line: 7 Col: 1
+IntLit(123) Start Line: 1 Col: 1, End Line: 1 Col: 4
+FloatLit(12.3) Start Line: 2 Col: 1, End Line: 2 Col: 5
+StringLit("this is a string") Start Line: 3 Col: 1, End Line: 3 Col: 19
+StringLit("multi\nline\nstring") Start Line: 4 Col: 1, End Line: 6 Col: 8
+StringLit("") Start Line: 7 Col: 1, End Line: 7 Col: 3
 Eof
