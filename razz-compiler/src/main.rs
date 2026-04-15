@@ -27,7 +27,11 @@ fn main() -> io::Result<()> {
         Ok(CompilerOutput::Parser(_prog)) => {
         }
 
-        Err(CompilerError::Parser(_e)) => {
+        Err(CompilerError::Parser(err)) => {
+            is_err = true;
+            for e in err {
+                eprintln!("{}: {:?}", "error".red().bold(), e);
+            }
         }
 
         // Add more when the compiler grows 

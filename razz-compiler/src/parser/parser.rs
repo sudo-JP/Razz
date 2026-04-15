@@ -101,7 +101,12 @@ impl Parser {
         if self.check(t) { Ok(self.advance()) }
         else { 
             let token = self.peek();
-            Err(self.error(token)) 
+            let span = token.span;
+            let kind = ParserErrorKind::ExpectedToken{
+                expected: t.clone(), 
+                got: token.kind.clone(),
+            };
+            Err(ParserError{ span, kind })
         }
     }
 
@@ -174,6 +179,7 @@ impl Parser {
             // Valid token to fall back to 
             match self.peek().kind {
                 TokenKind::Fn 
+                | TokenKind::RBrace
                 | TokenKind::For 
                 | TokenKind::If
                 | TokenKind::While 
