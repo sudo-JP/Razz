@@ -7,7 +7,7 @@ pub struct Expr {
     pub span: Span,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BinOpKind {
     // Arithmetic
     Add, 
@@ -44,7 +44,7 @@ pub enum Literal {
 }
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EndpointKind {
     Hittable, 
     Camera, 

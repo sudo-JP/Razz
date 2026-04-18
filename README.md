@@ -18,6 +18,7 @@ I understand most of the part in Ray Tracing In One Weekend. Three quarter of th
 
 ## Video 
 ### Arduino 
+(ignore my dusty laptop)
 https://github.com/user-attachments/assets/beb13901-d2f5-4c20-9113-03e83370cab0
 
 ## Run 
