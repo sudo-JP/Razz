@@ -4,6 +4,7 @@ use std::mem;
 use crate::ast::expression::{BinOp, BinOpKind, Endpoint, EndpointKind};
 use crate::ast::traversal::walk_expr;
 use crate::ast::SpecificTypeKind;
+use crate::semantic::rules::BINOP_MAP;
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
     traversal::{walk_program, Walkable}, NodeId, Program, TypeKind}, 
     semantic::{error::SemanticError, symbols::SymbolTable}};
@@ -81,6 +82,54 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             }
         };
         let ty = TypeKind::SpecificType(spec_ty);
+        self.type_table.insert(expr.id, ty);
+    }
+
+    // Operational 
+    /// Type check bin op, allowed `+` on String 
+    /// Other operations must be 
+    /// int <op> int, 
+    /// or float <op> float, no casting
+    fn visit_bin_op(&mut self, expr: &Expr, lhs: &Expr, op: &BinOp, rhs: &Expr) {
+        walk_expr(self, lhs);
+        walk_expr(self, rhs);
+
+        let Some(lhs_ty) = self.type_table.get(&lhs.id) else {
+            return;
+        };
+
+        let Some(rhs_ty) = self.type_table.get(&rhs.id) else {
+            return;
+        };
+
+        // Check if two sides are the same 
+        if mem::discriminant(lhs_ty) != mem::discriminant(rhs_ty) {
+            self.sem_errors.push(SemanticError::TypeMismatch{
+                expected: *lhs_ty, 
+                got: *rhs_ty,
+                span: expr.span,
+            });
+            return;
+        }
+        let binop_set = BINOP_MAP.get(&op.node)
+            .expect("BIN OP have to go through all operations");
+
+        if let None = binop_set.get(lhs_ty) {
+            self.sem_errors.push(SemanticError::InvalidBinOp{ 
+                ty: *lhs_ty, op: op.node,
+            });
+            return;
+        }
+
+        let ty =  match &op.node {
+            BinOpKind::Eq
+            | BinOpKind::Neq 
+            | BinOpKind::Lt 
+            | BinOpKind::Le
+            | BinOpKind::Gt 
+            | BinOpKind::Ge => TypeKind::Bool, 
+            _ => *lhs_ty,
+        };
         self.type_table.insert(expr.id, ty);
     }
 

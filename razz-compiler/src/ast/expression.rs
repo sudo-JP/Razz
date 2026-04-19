@@ -7,7 +7,7 @@ pub struct Expr {
     pub span: Span,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
 pub enum BinOpKind {
     // Arithmetic
     Add, 

@@ -1,4 +1,4 @@
 pub mod parser;
-pub mod expression;
-pub mod statement;
+pub(crate) mod expression;
+pub(crate) mod statement;
 pub mod error;

@@ -21,7 +21,7 @@ impl<T: PartialEq> PartialEq for Spanned<T> {
 }
 
 /// Language types
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
 pub enum TypeKind {
     Int,
     Float,
@@ -32,7 +32,7 @@ pub enum TypeKind {
 }
 
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
 pub enum SpecificTypeKind {
     Dielectric, 
     Lambertian, 

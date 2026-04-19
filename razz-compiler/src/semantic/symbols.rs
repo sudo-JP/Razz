@@ -8,7 +8,7 @@ pub struct SymbolTable {
 
 impl SymbolTable {
     pub fn new() -> Self {
-        Self { scopes: vec![HashMap::new()] }
+        Self { scopes: vec![] }
     }
 
     pub fn push_scope(&mut self) {
