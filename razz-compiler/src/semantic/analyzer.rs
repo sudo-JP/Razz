@@ -1,9 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
-use crate::ast::expression::{BinOp, BinOpKind, Endpoint, EndpointKind};
-use crate::ast::traversal::walk_expr;
-use crate::ast::SpecificTypeKind;
+use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
+    traversal::{walk_expr},
+    SpecificTypeKind};
+
+use crate::common::Span;
+use crate::semantic::error::SemanticErrorKind;
 use crate::semantic::rules::BINOP_MAP;
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
     traversal::{walk_program, Walkable}, NodeId, Program, TypeKind}, 
@@ -41,6 +44,10 @@ impl<'ast> SemanticAnalyzer<'ast> {
         if self.sem_errors.len() > 0 { Err(mem::take(&mut self.sem_errors)) }
         else { Ok(mem::take(&mut self.multability)) }
     }
+
+    fn error(&mut self, kind: SemanticErrorKind, span: Span) {
+        self.sem_errors.push(SemanticError{kind, span});
+    }
 }
 
 /// Walk the AST tree, declaring types along each node
@@ -62,7 +69,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
     /// Check for ident 
     fn visit_ident(&mut self, expr: &Expr, name: &str) {
         let Some(ty) = self.symbol_table.lookup_variable(name) else {
-            self.sem_errors.push(SemanticError::UndeclaredVariable(name.to_string()));
+            self.error(SemanticErrorKind::UndeclaredVariable(name.to_string()), expr.span);
             return;
         };
         self.type_table.insert(expr.id, ty);
@@ -77,7 +84,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             EndpointKind::Background => SpecificTypeKind::Background, 
             EndpointKind::Output => SpecificTypeKind::Output, 
             ep => {
-                self.sem_errors.push(SemanticError::InvalidGetRequest(*ep));
+                self.error(SemanticErrorKind::InvalidGetRequest(*ep), expr.span);
                 return;
             }
         };
@@ -104,20 +111,19 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
         // Check if two sides are the same 
         if mem::discriminant(lhs_ty) != mem::discriminant(rhs_ty) {
-            self.sem_errors.push(SemanticError::TypeMismatch{
+            self.error(SemanticErrorKind::TypeMismatch{
                 expected: *lhs_ty, 
                 got: *rhs_ty,
-                span: expr.span,
-            });
+            }, expr.span);
             return;
         }
         let binop_set = BINOP_MAP.get(&op.node)
             .expect("BIN OP have to go through all operations");
 
         if let None = binop_set.get(lhs_ty) {
-            self.sem_errors.push(SemanticError::InvalidBinOp{ 
+            self.error(SemanticErrorKind::InvalidBinOp{ 
                 ty: *lhs_ty, op: op.node,
-            });
+            }, expr.span);
             return;
         }
 

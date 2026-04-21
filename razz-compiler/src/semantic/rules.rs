@@ -29,11 +29,11 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
     allowed_div.insert(TypeKind::Int);
     allowed_div.insert(TypeKind::Float);
 
-    // ====== CONDITIONALS ====== 
-    let mut allowed_cond = HashSet::new();
-    allowed_cond.insert(TypeKind::Int);
-    allowed_cond.insert(TypeKind::Float);
-    allowed_cond.insert(TypeKind::Bool);
+
+    // ====== INEQUALITY ====== 
+    let mut allowed_ineq = HashSet::new();
+    allowed_ineq.insert(TypeKind::Int);
+    allowed_ineq.insert(TypeKind::Float);
 
     let mut allowed_bool = HashSet::new();
     allowed_bool.insert(TypeKind::Bool);
@@ -46,14 +46,14 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
     
     // Its fine to clone here, its const 
     // + I already clone on basically other parts
-    m.insert(BinOpKind::Eq, allowed_cond.clone());
-    m.insert(BinOpKind::Neq, allowed_cond.clone());
-    m.insert(BinOpKind::Lt, allowed_cond.clone());
-    m.insert(BinOpKind::Le, allowed_cond.clone());
-    m.insert(BinOpKind::Gt, allowed_cond.clone());
-    m.insert(BinOpKind::Ge, allowed_cond.clone());
+    m.insert(BinOpKind::Lt, allowed_ineq.clone());
+    m.insert(BinOpKind::Le, allowed_ineq.clone());
+    m.insert(BinOpKind::Gt, allowed_ineq.clone());
+    m.insert(BinOpKind::Ge, allowed_ineq.clone());
 
     m.insert(BinOpKind::And, allowed_bool.clone());
     m.insert(BinOpKind::Or, allowed_bool.clone());
+    m.insert(BinOpKind::Eq, allowed_bool.clone());
+    m.insert(BinOpKind::Neq, allowed_bool.clone());
     m
 });

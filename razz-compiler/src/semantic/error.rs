@@ -1,9 +1,13 @@
 use crate::{ast::{expression::{BinOpKind, EndpointKind}, TypeKind}, common::Span};
 
-// TODO: Add SemanticError Struct with span instead
+#[derive(Debug)]
+pub struct SemanticError {
+    pub kind: SemanticErrorKind, 
+    pub span: Span,
+}
 
 #[derive(Debug)]
-pub enum SemanticError {
+pub enum SemanticErrorKind {
     UndeclaredVariable(String),
     InvalidGetRequest(EndpointKind),
     InvalidBinOp{
@@ -13,6 +17,5 @@ pub enum SemanticError {
     TypeMismatch{
         expected: TypeKind, 
         got: TypeKind, 
-        span: Span,
     },
 }
