@@ -26,7 +26,7 @@ pub enum BinOpKind {
     Or, 
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum UnOpKind {
     /// !expr
     Not, 

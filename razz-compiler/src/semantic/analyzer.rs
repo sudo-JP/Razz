@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
+use crate::ast::expression::{Arg, UnOp, UnOpKind};
+use crate::ast::Spanned;
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
     traversal::{walk_expr},
     SpecificTypeKind};
@@ -139,4 +141,80 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         self.type_table.insert(expr.id, ty);
     }
 
+    /// Allowed -int, -float, !bool 
+    fn visit_un_op(&mut self, expr: &Expr, op: &UnOp, value: &Expr) {
+        walk_expr(self, expr);
+
+        let Some(value) = self.type_table.get(&value.id) else {
+            return;
+        };
+
+        let is_valid = match &op.node {
+            UnOpKind::Not => matches!(value, TypeKind::Bool),
+            UnOpKind::Minus => matches!(value, TypeKind::Int),
+        };
+
+        if !is_valid {
+            self.error(
+                SemanticErrorKind::InvalidUnOp { ty: *value, op: op.node }, 
+                expr.span
+            );
+            return;
+        }
+        self.type_table.insert(expr.id, *value);
+    }
+
+
+    /// Type check expr function call
+    fn visit_func_call(&mut self, expr: &Expr, name: &Spanned<String>, args: &[Arg]) {
+        // Look up function
+        let Some(look_up_func) = self.fn_table.get(&name.node.as_str()) else {
+            self.error(SemanticErrorKind::UndefinedFunction(name.node.to_string()), expr.span);
+            return;
+        };
+
+        let return_ty = look_up_func.return_type.node;
+
+        // Compare len
+        if args.len() != look_up_func.params.len() {
+            self.error(SemanticErrorKind::WrongArgCount{
+                expected: look_up_func.params.len(), got: args.len()
+            }, expr.span);
+            return;
+        }
+
+        // Construct map to match
+        let mut map: HashMap<&str, TypeKind> = HashMap::with_capacity(look_up_func.params.len());
+        for param in &look_up_func.params {
+            map.insert(&param.name.node.as_str(), param.ty.node);
+        }
+
+        // Check for duplicate arg
+        let mut duplicate_set: HashSet<&str> = HashSet::with_capacity(args.len());
+        for arg in args {
+            if !duplicate_set.insert(&arg.name.node.as_str()) {
+                self.error(SemanticErrorKind::DuplicateArg(arg.name.node.to_string()), arg.name.span);
+            }
+
+            if let Some(ty) = map.get(&arg.name.node.as_str()) {
+                self.visit_expr(&arg.expr);
+                let Some(arg_ty) = self.type_table.get(&arg.expr.id) else {
+                    return;
+                };
+
+                if arg_ty != ty {
+                    self.error(SemanticErrorKind::ArgTypeMismatch{ 
+                        name: arg.name.node.to_string(), 
+                        expected: *ty, 
+                        got: *arg_ty, 
+                    }, 
+                    arg.expr.span);
+                }
+            } else {
+                self.error(SemanticErrorKind::UnknownArg(arg.name.node.to_string()), arg.name.span);
+            }
+        }
+
+        self.type_table.insert(expr.id, return_ty);
+    }
 }

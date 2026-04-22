@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind}, TypeKind}, common::Span};
+use crate::{ast::{expression::{Arg, BinOpKind, EndpointKind, UnOpKind}, TypeKind}, common::Span};
 
 #[derive(Debug)]
 pub struct SemanticError {
@@ -18,4 +18,20 @@ pub enum SemanticErrorKind {
         expected: TypeKind, 
         got: TypeKind, 
     },
+    InvalidUnOp{
+        ty: TypeKind, 
+        op: UnOpKind,
+    },
+    UndefinedFunction(String),
+    WrongArgCount{
+        expected: usize, 
+        got: usize,
+    }, 
+    UnknownArg(String),      
+    ArgTypeMismatch{ 
+        name: String, 
+        expected: TypeKind, 
+        got: TypeKind,
+    },
+    DuplicateArg(String),
 }
