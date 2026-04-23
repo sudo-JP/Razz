@@ -9,7 +9,7 @@ use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
 
 use crate::common::Span;
 use crate::semantic::error::SemanticErrorKind;
-use crate::semantic::rules::BINOP_MAP;
+use crate::semantic::rules::{BINOP_MAP, FIELD_ACCESS_MAP};
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
     traversal::{walk_program, Walkable}, NodeId, Program, TypeKind}, 
     semantic::{error::SemanticError, symbols::SymbolTable}};
@@ -194,6 +194,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         for arg in args {
             if !duplicate_set.insert(&arg.name.node.as_str()) {
                 self.error(SemanticErrorKind::DuplicateArg(arg.name.node.to_string()), arg.name.span);
+                continue;
             }
 
             if let Some(ty) = map.get(&arg.name.node.as_str()) {
@@ -216,5 +217,28 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         }
 
         self.type_table.insert(expr.id, return_ty);
+    }
+
+    fn visit_field_access(&mut self, expr: &Expr, obj: &Expr, key: &Spanned<String>) {
+        walk_expr(self, obj);
+        let Some(obj_ty) = self.type_table.get(&obj.id) else {
+            return;
+        };
+
+        if !matches!(obj_ty, TypeKind::SpecificType(_)) {
+            self.error(SemanticErrorKind::InvalidFieldAccess(*obj_ty), expr.span);
+            return; 
+        }
+
+        let fields = FIELD_ACCESS_MAP.get(obj_ty)
+            .expect("Map has to cover all the specific type field");
+
+        let Some(field_ty) = fields.get(key.node.as_str()) else {
+            self.error(SemanticErrorKind::InvalidFieldAccessKey(key.node.to_string()), key.span);
+            return;
+        };
+
+        self.type_table.insert(expr.id, *field_ty);
+
     }
 }

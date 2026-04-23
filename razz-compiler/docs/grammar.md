@@ -22,6 +22,9 @@ Type ::= "int"
     | "null" 
     | SpecificType ;
 
+OutputType ::= "Arduino" 
+    | "PPM" ; 
+
 SpecificType ::= "Vec3" 
     | "Point3" 
     | "Color" 
@@ -30,7 +33,8 @@ SpecificType ::= "Vec3"
     | "Material" 
     | "Output" 
     | "Sphere" 
-    | "Image" ;
+    | "Image" 
+    | OutputType ;
 
 Block ::= "{" { Stmt } "}" ;
 

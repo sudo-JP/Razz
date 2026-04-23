@@ -6,7 +6,7 @@ fn main() null {
     // This is a comment, -> means access the json object 
     // Type can be inferred 
     cam = GET /camera;
-    cam->xFrom = 5; 
+    cam->vfov = 5.0; 
     // Adjust camera angle 
     PATCH /camera Camera cam;
 

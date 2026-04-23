@@ -32,6 +32,7 @@ pub enum TypeKind {
 }
 
 
+
 #[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
 pub enum SpecificTypeKind {
     Dielectric, 
@@ -42,9 +43,10 @@ pub enum SpecificTypeKind {
     Color, 
     Background, 
     Camera, 
-    Output,
     Sphere, 
     Image,
+    Output,
+    OutputType,
 }
 
 pub type Type = Spanned<TypeKind>;

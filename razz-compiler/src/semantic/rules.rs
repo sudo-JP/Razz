@@ -1,8 +1,37 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
+use similar::DiffableStr;
+
 use crate::ast::expression::BinOpKind;
-use crate::ast::TypeKind;
+use crate::ast::{SpecificTypeKind, TypeKind};
+
+pub static FIELD_ACCESS_MAP: LazyLock<HashMap<TypeKind, HashMap<&str, TypeKind>>> = LazyLock::new(|| {
+    let mut m = HashMap::new();
+
+    let mut camera: HashMap<&str, TypeKind> = HashMap::new();
+    camera.insert("lookfrom", TypeKind::SpecificType(SpecificTypeKind::Point3));
+    camera.insert("lookat", TypeKind::SpecificType(SpecificTypeKind::Point3));
+    camera.insert("vfov", TypeKind::Float);
+    camera.insert("vup", TypeKind::SpecificType(SpecificTypeKind::Vec3));
+    camera.insert("focus_dist", TypeKind::Float);
+    camera.insert("defocus_angle", TypeKind::Float);
+    
+    let mut image: HashMap<&str, TypeKind> = HashMap::new();
+    image.insert("width", TypeKind::Int);
+    image.insert("height", TypeKind::Int);
+
+    let mut background: HashMap<&str, TypeKind> = HashMap::new();
+    background.insert("top", TypeKind::SpecificType(SpecificTypeKind::Vec3));
+    background.insert("bottom", TypeKind::SpecificType(SpecificTypeKind::Vec3));
+
+    let mut output: HashMap<&str, TypeKind> = HashMap::new();
+    output.insert("type", TypeKind::SpecificType(SpecificTypeKind::OutputType));
+    output.insert("file", TypeKind::String);
+
+    m.insert(TypeKind::SpecificType(SpecificTypeKind::Camera), camera);
+    m
+});
 
 pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock::new(|| {
     let mut m = HashMap::new();
@@ -12,7 +41,7 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
     let mut allowed_add = HashSet::new();
     allowed_add.insert(TypeKind::Int);
     allowed_add.insert(TypeKind::Float);
-    allowed_add.insert(TypeKind::String);
+    allowed_add.insert(TypeKind::String); 
 
     // Allowed `-` operations
     let mut allowed_sub = HashSet::new();

@@ -216,6 +216,8 @@ impl Parser {
             TokenKind::Lambertian => SpecificTypeKind::Lambertian,
             TokenKind::Dielectric => SpecificTypeKind::Dielectric, 
             TokenKind::Metal => SpecificTypeKind::Metal,
+            TokenKind::Arduino
+            | TokenKind::PPM => SpecificTypeKind::OutputType,
             _ => { return Err(self.error(token)); }
         }; 
         Ok(SpecificType{node: ty, span})
