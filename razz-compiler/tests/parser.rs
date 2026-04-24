@@ -165,7 +165,7 @@ fn get(endpoint: EndpointKind) -> Expr {
 
 fn assign(name: &str, type_ann: Option<TypeKind>, value: Expr) -> Stmt {
     stmt(StmtKind::Assign {
-        name: sp(name.to_string()),
+        target: ident(name),
         type_ann: type_ann.map(sp),
         expr: value,
     })
@@ -173,18 +173,22 @@ fn assign(name: &str, type_ann: Option<TypeKind>, value: Expr) -> Stmt {
 
 fn compound_assign(name: &str, op: CompoundOpKind, value: Expr) -> Stmt {
     stmt(StmtKind::CompoundAssign {
-        name: sp(name.to_string()),
+        target: ident(name),
         op: sp(op),
         expr: value,
     })
 }
 
 fn assign_obj(target: Expr, value: Expr) -> Stmt {
-    stmt(StmtKind::AssignObj { target, expr: value })
+    stmt(StmtKind::Assign {
+        target,
+        type_ann: None,
+        expr: value,
+    })
 }
 
 fn compound_assign_obj(target: Expr, op: CompoundOpKind, value: Expr) -> Stmt {
-    stmt(StmtKind::CompoundAssignObj {
+    stmt(StmtKind::CompoundAssign {
         target,
         op: sp(op),
         expr: value,
@@ -339,28 +343,19 @@ fn strip_ids_and_spans_stmt(stmt: &mut Stmt) {
     stmt.span = zero_span();
     match &mut stmt.kind {
         StmtKind::Assign {
-            name,
+            target,
             type_ann,
             expr,
         } => {
-            name.span = zero_span();
+            strip_ids_and_spans_expr(target);
             if let Some(ty) = type_ann {
                 ty.span = zero_span();
             }
             strip_ids_and_spans_expr(expr);
         }
-        StmtKind::CompoundAssign { name, op, expr } => {
-            name.span = zero_span();
-            op.span = zero_span();
-            strip_ids_and_spans_expr(expr);
-        }
-        StmtKind::AssignObj { target, expr } => {
+        StmtKind::CompoundAssign { target, op, expr } => {
             strip_ids_and_spans_expr(target);
-            strip_ids_and_spans_expr(expr);
-        }
-        StmtKind::CompoundAssignObj { target, op, expr } => {
             op.span = zero_span();
-            strip_ids_and_spans_expr(target);
             strip_ids_and_spans_expr(expr);
         }
         StmtKind::While { cond, body } => {
@@ -670,6 +665,21 @@ fn field_access_expr() {
         ],
     )]);
     assert_ok_fixture("tests/fixtures/parser/field_access_expr", expected);
+}
+
+#[test]
+fn struct_access() {
+    let expected = program(vec![func(
+        "main",
+        vec![],
+        TypeKind::Null,
+        vec![
+            expr_stmt(access(ident("foo"), "bar")),
+            assign_obj(access(ident("foo"), "bar"), int_lit(1)),
+            compound_assign_obj(access(ident("foo"), "bar"), CompoundOpKind::AddE, int_lit(2)),
+        ],
+    )]);
+    assert_ok_fixture("tests/fixtures/parser/struct_access", expected);
 }
 
 #[test]

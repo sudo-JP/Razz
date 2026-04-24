@@ -72,7 +72,7 @@ pub enum StmtKind {
     /// Assignment can be inferred, e.g foo = 5 is an int
     /// It also can be annotated, e.g foo: float = 5 is a float 
     Assign {
-        name: Spanned<String>, 
+        target: Expr,
         type_ann: Option<Type>,
         expr: Expr,
     },
@@ -80,21 +80,8 @@ pub enum StmtKind {
     /// <name> <op> <expr> 
     /// e.g foo += (1 * 2)
     CompoundAssign {
-        name: Spanned<String>,
-        op: CompoundOp, 
-        expr: Expr,
-    },
-    /// <target> itself is a chained of a->b->c->etc 
-    /// so <target> = <expr>;
-    AssignObj {
-        target: Expr, 
-        expr: Expr,
-    },
-    /// <target> itself is a chained of a->b->c->etc 
-    /// so <target> (+= | -= | /= | *=) <expr>
-    CompoundAssignObj {
         target: Expr,
-        op: CompoundOp,
+        op: CompoundOp, 
         expr: Expr,
     },
     /// While condition

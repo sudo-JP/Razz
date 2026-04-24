@@ -1,0 +1,5 @@
+fn main() null {
+    foo->bar;
+    foo->bar = 1;
+    foo->bar += 2;
+}

@@ -40,11 +40,11 @@ pub trait Walkable {
         walk_stmt(self, stmt);
     }
 
-    fn visit_assign(&mut self, _stmt: &Stmt, _name: &Spanned<String>, _ty: &Option<Type>, expr: &Expr) {
+    fn visit_assign(&mut self, _stmt: &Stmt, _target: &Expr, _ty: &Option<Type>, expr: &Expr) {
         walk_expr(self, expr);
     }
 
-    fn visit_compound_assign(&mut self, _stmt: &Stmt, _name: &Spanned<String>, _op: &CompoundOp, expr: &Expr) {
+    fn visit_compound_assign(&mut self, _stmt: &Stmt, _target: &Expr, _op: &CompoundOp, expr: &Expr) {
         walk_expr(self, expr);
     }
 
@@ -145,10 +145,8 @@ pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
 /// Walk on only stmt 
 pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
     match &stmt.kind {
-        StmtKind::Assign { name, type_ann, expr } => walker.visit_assign(stmt, name, type_ann, expr),
-        StmtKind::CompoundAssign { name, op, expr } => walker.visit_compound_assign(stmt, name, op, expr),
-        StmtKind::AssignObj { target, expr } => walker.visit_assign_obj(stmt, target, expr),
-        StmtKind::CompoundAssignObj { target, op, expr } => walker.visit_compound_assign_obj(stmt, target, op, expr),
+        StmtKind::Assign { target, type_ann, expr } => walker.visit_assign(stmt, target, type_ann, expr),
+        StmtKind::CompoundAssign { target, op, expr } => walker.visit_compound_assign(stmt, target, op, expr),
 
         StmtKind::While { cond, body } => walker.visit_while(stmt, cond, body),
         StmtKind::For { decl, cond, update , body } => walker.visit_for(stmt, decl, cond, update, body),
