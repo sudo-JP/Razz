@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
-use similar::DiffableStr;
 
 use crate::ast::expression::BinOpKind;
 use crate::ast::{SpecificTypeKind, TypeKind};

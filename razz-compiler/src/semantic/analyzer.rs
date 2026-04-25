@@ -1,8 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
-use crate::ast::expression::{Arg, UnOp, UnOpKind};
-use crate::ast::Spanned;
+use crate::ast::expression::{Arg, ExprKind, UnOp, UnOpKind};
+use crate::ast::statement::Stmt;
+use crate::ast::traversal::walk_fn_decl;
+use crate::ast::{Spanned, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
     traversal::{walk_expr},
     SpecificTypeKind};
@@ -219,6 +221,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         self.type_table.insert(expr.id, return_ty);
     }
 
+    /// Declaring type for field_access retrieval
     fn visit_field_access(&mut self, expr: &Expr, obj: &Expr, key: &Spanned<String>) {
         walk_expr(self, obj);
         let Some(obj_ty) = self.type_table.get(&obj.id) else {
@@ -240,5 +243,44 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
         self.type_table.insert(expr.id, *field_ty);
 
+    }
+
+    fn visit_assign(&mut self, stmt: &Stmt, target: &Expr, ty: &Option<Type>, expr: &Expr) {
+        walk_expr(self, expr);
+        let Some(&expr_ty) = self.type_table.get(&expr.id) else {
+            return; 
+        };
+        match &target.kind {
+            ExprKind::FieldAccess { obj, .. } => {
+                if let Some(type_ann) = ty {
+                    self.error(SemanticErrorKind::InvalidTypeAnnotation(type_ann.node), stmt.span);
+                    return;
+                }
+                walk_expr(self, &obj);
+                let Some(target) = self.type_table.get(&obj.id) else {
+                    return;
+                };
+                if *target != expr_ty {
+                    self.error(SemanticErrorKind::TypeMismatch{ expected: *target, got: expr_ty }, stmt.span);
+                }
+            }, 
+            ExprKind::Ident(target) => {
+                if let Some(type_ann) = ty 
+                && type_ann.node != expr_ty {
+                    self.error(SemanticErrorKind::InvalidTypeAnnotation(type_ann.node), stmt.span);
+                    return; 
+                }
+                // WARN: this maybe slow because we allocating string each time, use arena
+                // allocator in the future
+                self.symbol_table.declare_variable(target.to_string(), expr_ty);
+            }, 
+            _ => unreachable!("Expect to be Ident or FieldAccess")
+        }
+    }
+
+    fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
+        self.symbol_table.push_scope();
+        walk_fn_decl(self, fn_decl);
+        self.symbol_table.pop_scope();
     }
 }

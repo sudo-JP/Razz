@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{Arg, BinOpKind, EndpointKind, UnOpKind}, TypeKind}, common::Span};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, UnOpKind}, TypeKind}, common::Span};
 
 #[derive(Debug)]
 pub struct SemanticError {
@@ -36,4 +36,5 @@ pub enum SemanticErrorKind {
     InvalidFieldAccess(TypeKind),
     InvalidFieldAccessKey(String),
     DuplicateArg(String),
+    InvalidTypeAnnotation(TypeKind),
 }

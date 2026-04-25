@@ -321,10 +321,8 @@ impl Parser {
     fn args(&mut self) -> Result<Vec<Arg>, ParserError> {
         let mut args: Vec<Arg> = vec![];
         // First one have to manually check 
-        let curr = self.peek();
         // [ Arg .. ]
-        if matches!(&curr.kind, TokenKind::Ident(_)) 
-            && self.peek_next().kind == TokenKind::Colon {
+        if matches!(&self.peek().kind, TokenKind::Ident(_)) {
             args.push(self.arg()?);
         } else {
             return Ok(args);
