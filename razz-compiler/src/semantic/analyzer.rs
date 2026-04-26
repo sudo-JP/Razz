@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 use crate::ast::expression::{Arg, ExprKind, UnOp, UnOpKind};
-use crate::ast::statement::Stmt;
-use crate::ast::traversal::walk_fn_decl;
+use crate::ast::statement::{Block, ElseIf, Stmt};
+use crate::ast::traversal::{walk_block, walk_fn_decl, walk_stmt};
 use crate::ast::{Spanned, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
     traversal::{walk_expr},
@@ -280,7 +280,79 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
         self.symbol_table.push_scope();
+        for param in &fn_decl.params {
+            self.symbol_table.declare_variable(param.name.node.to_string(), param.ty.node);
+        }
         walk_fn_decl(self, fn_decl);
         self.symbol_table.pop_scope();
+    }
+
+    fn visit_block(&mut self, block: &Block) {
+        self.symbol_table.push_scope();
+        walk_block(self, block);
+        self.symbol_table.pop_scope();
+    }
+
+    /// Condition on for loop must be boolean
+    fn visit_for(&mut self, _stmt: &Stmt, decl: &Option<Box<Stmt>>, cond: &Option<Expr>, update: &[Stmt], body: &Block) {
+        if let Some(d) = decl {
+            walk_stmt(self, &d);
+        }
+
+        if let Some(c) = cond {
+            walk_expr(self, c);
+            let Some(cond_ty) = self.type_table.get(&c.id) else {
+                return;
+            };
+            if !matches!(cond_ty, TypeKind::Bool) {
+                self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), c.span);
+            }
+        }
+
+        update.iter()
+            .for_each(|upd| walk_stmt(self, upd));
+
+        walk_block(self, body);
+    }
+
+    /// Condition on while loop must be boolean
+    fn visit_while(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block) {
+        walk_expr(self, cond);
+        let Some(cond_ty) = self.type_table.get(&cond.id) else {
+            return;
+        };
+        if !matches!(cond_ty, TypeKind::Bool) {
+            self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
+        }
+
+        walk_block(self, body);
+    }
+
+    fn visit_if(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block, else_ifs: &[ElseIf], else_body: &Option<Block>) {
+        walk_expr(self, cond);
+        let Some(cond_ty) = self.type_table.get(&cond.id) else {
+            return;
+        };
+        if !matches!(cond_ty, TypeKind::Bool) {
+            self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
+        }
+        walk_block(self, body);
+
+        for elif in else_ifs {
+            walk_expr(self, &elif.cond);
+
+            let Some(cond_ty) = self.type_table.get(&elif.id) else {
+                return;
+            };
+            if !matches!(cond_ty, TypeKind::Bool) {
+                self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
+            }
+
+            walk_block(self, &elif.body);
+        }
+
+        if let Some(block) = else_body {
+            walk_block(self, block);
+        }
     }
 }

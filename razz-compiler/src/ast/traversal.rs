@@ -60,29 +60,20 @@ pub trait Walkable {
 
     fn visit_while(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block) {
         walk_expr(self, cond);
-        body.stmts
-            .iter()
-            .for_each(|s| walk_stmt(self, s));
+        walk_block(self, body);
     }
 
     fn visit_if(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block, else_ifs: &[ElseIf], else_body: &Option<Block>) {
         walk_expr(self, cond);
-        body.stmts
-            .iter()
-            .for_each(|s| walk_stmt(self, s));
+        walk_block(self, body);
 
         for elif in else_ifs {
             walk_expr(self, &elif.cond);
-            elif.body.stmts
-                .iter()
-                .for_each(|s| walk_stmt(self, s));
+            walk_block(self, &elif.body);
         }
 
         if let Some(block) = else_body {
-            block.stmts
-                .iter()
-                .for_each(|s| walk_stmt(self, s));
-
+            walk_block(self, block);
         }
     }
 
@@ -98,9 +89,7 @@ pub trait Walkable {
         update.iter()
             .for_each(|upd| walk_stmt(self, upd));
 
-        body.stmts
-            .iter()
-            .for_each(|s| walk_stmt(self, s));
+        walk_block(self, body);
     }
 
     fn visit_return(&mut self, _stmt: &Stmt, expr: &Expr) {
@@ -122,6 +111,10 @@ pub trait Walkable {
 
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
         walk_fn_decl(self, fn_decl);
+    }
+
+    fn visit_block(&mut self, block: &Block) {
+        walk_block(self, block);
     }
 }
 
@@ -160,6 +153,12 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
     }
 }
 
+pub fn walk_block<W: Walkable + ?Sized>(walker: &mut W, block: &Block) {
+    block.stmts
+        .iter()
+        .for_each(|s| walker.visit_stmt(s));
+}
+
 pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
     walker.visit_program(prog);
     prog.funcs
@@ -168,7 +167,5 @@ pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
 }
 
 pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {
-    func.body.stmts
-        .iter()
-        .for_each(|stmt| walker.visit_stmt(stmt));
+    walker.visit_block(&func.body);
 }

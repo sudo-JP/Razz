@@ -37,4 +37,5 @@ pub enum SemanticErrorKind {
     InvalidFieldAccessKey(String),
     DuplicateArg(String),
     InvalidTypeAnnotation(TypeKind),
+    InvalidConditionType(TypeKind),
 }
