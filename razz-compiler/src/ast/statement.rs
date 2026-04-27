@@ -37,7 +37,7 @@ pub enum CompoundOpKind {
 }
 
 /// HTTP Method for statements
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub enum HTTPMethodKind {
     Post, 
     Put, 

@@ -2,8 +2,22 @@ use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
 
-use crate::ast::expression::BinOpKind;
+use crate::ast::expression::{BinOpKind, EndpointKind};
+use crate::ast::statement::HTTPMethodKind;
 use crate::ast::{SpecificTypeKind, TypeKind};
+
+pub static ENDPOINT_MAP: LazyLock<HashMap<HTTPMethodKind, HashMap<EndpointKind, HashSet<SpecificTypeKind>>>> = LazyLock::new(|| {
+    let mut m = HashMap::new(); 
+
+    // POST 
+    let mut post: HashMap<EndpointKind, HashSet<SpecificTypeKind>> = HashMap::new();
+    let mut hittable_post: HashSet<SpecificTypeKind> = HashSet::new();
+    hittable_post.insert(SpecificTypeKind::Sphere);
+    post.insert(EndpointKind::Hittable, hittable_post);
+
+    m.insert(HTTPMethodKind::Post, post);
+    m
+});
 
 pub static FIELD_ACCESS_MAP: LazyLock<HashMap<TypeKind, HashMap<&str, TypeKind>>> = LazyLock::new(|| {
     let mut m = HashMap::new();
@@ -28,7 +42,16 @@ pub static FIELD_ACCESS_MAP: LazyLock<HashMap<TypeKind, HashMap<&str, TypeKind>>
     output.insert("type", TypeKind::SpecificType(SpecificTypeKind::OutputType));
     output.insert("file", TypeKind::String);
 
+    let mut sphere: HashMap<&str, TypeKind> = HashMap::new();
+    sphere.insert("coord", TypeKind::SpecificType(SpecificTypeKind::Vec3));
+    sphere.insert("radius", TypeKind::Float);
+    sphere.insert("material", TypeKind::SpecificType(SpecificTypeKind::Material));
+
     m.insert(TypeKind::SpecificType(SpecificTypeKind::Camera), camera);
+    m.insert(TypeKind::SpecificType(SpecificTypeKind::Image), image);
+    m.insert(TypeKind::SpecificType(SpecificTypeKind::Background), background);
+    m.insert(TypeKind::SpecificType(SpecificTypeKind::Output), output);
+    m.insert(TypeKind::SpecificType(SpecificTypeKind::Sphere), sphere);
     m
 });
 

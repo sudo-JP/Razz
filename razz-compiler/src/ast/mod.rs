@@ -31,6 +31,14 @@ pub enum TypeKind {
     SpecificType(SpecificTypeKind),
 }
 
+impl TypeKind {
+    pub fn satisfies(&self, expected: &TypeKind) -> bool {
+        match (self, expected) {
+            (TypeKind::SpecificType(got), TypeKind::SpecificType(exp)) => got.satisfies(exp),
+            _ => self == expected,
+        }
+    }
+}
 
 
 #[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
@@ -46,7 +54,27 @@ pub enum SpecificTypeKind {
     Sphere, 
     Image,
     Output,
+    Arduino, 
+    PPM,
+
+    // Union types 
     OutputType,
+    Material,
+}
+
+impl SpecificTypeKind {
+    pub fn satisfies(&self, expected: &Self) -> bool {
+        match expected {
+            Self::Material => matches!(self,
+                Self::Dielectric 
+                | Self::Lambertian
+                | Self::Metal),
+            Self::OutputType => matches!(self,
+                Self::Arduino 
+                | Self::PPM),
+            other => self == other,
+        }
+    }
 }
 
 pub type Type = Spanned<TypeKind>;

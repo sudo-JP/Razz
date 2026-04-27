@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
-use crate::ast::expression::{Arg, ExprKind, UnOp, UnOpKind};
-use crate::ast::statement::{Block, ElseIf, Stmt};
+use crate::ast::expression::{Arg, ExprKind, StructField, UnOp, UnOpKind};
+use crate::ast::statement::{Block, ElseIf, HTTPMethod, Stmt};
 use crate::ast::traversal::{walk_block, walk_fn_decl, walk_stmt};
-use crate::ast::{Spanned, Type};
+use crate::ast::{Spanned, SpecificType, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
     traversal::{walk_expr},
     SpecificTypeKind};
@@ -23,6 +23,7 @@ pub struct SemanticAnalyzer<'ast> {
     symbol_table: SymbolTable,
     fn_table: HashMap<&'ast str, &'ast FnDecl>,
     sem_errors: Vec<SemanticError>,
+    curr_return_ty: Option<TypeKind>,
 }
 
 impl<'ast> SemanticAnalyzer<'ast> {
@@ -33,6 +34,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
             symbol_table: SymbolTable::new(), 
             fn_table: HashMap::new(),
             sem_errors: vec![],
+            curr_return_ty: None,
         }
     }
 
@@ -260,19 +262,21 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                 let Some(target) = self.type_table.get(&obj.id) else {
                     return;
                 };
-                if *target != expr_ty {
+                if target.satisfies(&expr_ty) {
                     self.error(SemanticErrorKind::TypeMismatch{ expected: *target, got: expr_ty }, stmt.span);
                 }
             }, 
-            ExprKind::Ident(target) => {
+            ExprKind::Ident(tar) => {
                 if let Some(type_ann) = ty 
                 && type_ann.node != expr_ty {
                     self.error(SemanticErrorKind::InvalidTypeAnnotation(type_ann.node), stmt.span);
                     return; 
                 }
-                // WARN: this maybe slow because we allocating string each time, use arena
-                // allocator in the future
-                self.symbol_table.declare_variable(target.to_string(), expr_ty);
+                if let Some(ty) = self.symbol_table.lookup_current_scope(&tar) 
+                && ty == expr_ty {
+                    self.multability.insert(target.id);
+                }
+                self.symbol_table.declare_variable(tar.to_string(), expr_ty);
             }, 
             _ => unreachable!("Expect to be Ident or FieldAccess")
         }
@@ -283,7 +287,9 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         for param in &fn_decl.params {
             self.symbol_table.declare_variable(param.name.node.to_string(), param.ty.node);
         }
+        self.curr_return_ty = Some(fn_decl.return_type.node);
         walk_fn_decl(self, fn_decl);
+        self.curr_return_ty = None;
         self.symbol_table.pop_scope();
     }
 
@@ -354,5 +360,30 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         if let Some(block) = else_body {
             walk_block(self, block);
         }
+    }
+
+    fn visit_return(&mut self, stmt: &Stmt, expr: &Expr) {
+        walk_expr(self, expr);
+        let Some(expr_ty) = self.type_table.get(&expr.id) else {
+            return;
+        };
+        let curr_ret_ty = self.curr_return_ty
+            .expect("Must declare return type before visiting here");
+
+        if *expr_ty != curr_ret_ty {
+            self.error(SemanticErrorKind::TypeMismatch { expected: curr_ret_ty, got: *expr_ty }, stmt.span);
+        }
+    }
+
+    fn visit_compound_assign(&mut self, _stmt: &Stmt, _target: &Expr, _op: &crate::ast::statement::CompoundOp, expr: &Expr) {
+        todo!()
+    }
+
+    fn visit_http_request(&mut self, _stmt: &Stmt, _method: &HTTPMethod, _endpoint: &Endpoint, body: &Expr) {
+        todo!()
+    }
+
+    fn visit_struct_lit(&mut self, _expr: &Expr, _ty: &SpecificType, fields: &[StructField]) {
+        todo!()
     }
 }

@@ -48,16 +48,6 @@ pub trait Walkable {
         walk_expr(self, expr);
     }
 
-    fn visit_assign_obj(&mut self, _stmt: &Stmt, target: &Expr, expr: &Expr) {
-        walk_expr(self, target);
-        walk_expr(self, expr);
-    }
-
-    fn visit_compound_assign_obj(&mut self, _stmt: &Stmt, target: &Expr, _op: &CompoundOp, expr: &Expr) {
-        walk_expr(self, target);
-        walk_expr(self, expr);
-    }
-
     fn visit_while(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block) {
         walk_expr(self, cond);
         walk_block(self, body);

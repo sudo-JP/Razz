@@ -23,3 +23,6 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
     - Oh this one was terrible to do. I had to convert returning a `Spanned<Stmt>` to returning new `Stmt` structs, same with expression. Then I need to assign each node an ID, this is because semantic analysis needs to construct a table to say what node to have each type. This is not like python where I can return whatever, the trait itself doesn't allow return, only traversing. So constructing a hashmap to tell the type cleaning introduces recursion-like feel. 
     - I also had to refactor `AssignObject` down to just `Assign`, took some work too. 
     - My parser uses LL(2) parsing, although it definitely could be reduced down to LL(1). It works right now so I'm not going to touch it for a good while. I'll come back to write Pratt Parser for expression. 
+- Semantic Analysis: 
+    - Symbol table takes in owned String, it requires allocation each time. I tried to use lifetime specifier but it didn't work because there's more ownership stuff. I might use arena allocator or something like that later on, or find a better way to elegantly resolve this issue. 
+    - Type union is annoying as hell. I'm talking about how Sphere's material can be Dielectrics, Metal, or Lambertian, etc. Made a "phantom" Material enum so we can match on it with `impl satisfied()`.

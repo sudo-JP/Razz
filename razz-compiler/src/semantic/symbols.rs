@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use crate::ast::TypeKind;
 
 
+// WARN: this maybe slow because we allocating string each time, use arena
+// allocator in the future
 pub struct SymbolTable {
     scopes: Vec<HashMap<String, TypeKind>>,
 }
@@ -36,5 +38,13 @@ impl SymbolTable {
             .iter()
             .rev()
             .find_map(|scope| scope.get(name).copied())
+    }
+
+    pub fn lookup_current_scope(&self, name: &str) -> Option<TypeKind> {
+        self.scopes
+            .last()
+            .expect("Scope not pushed properly")
+            .get(name)
+            .copied()
     }
 }

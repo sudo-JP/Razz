@@ -44,7 +44,7 @@ pub enum Literal {
 }
 
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
 pub enum EndpointKind {
     Hittable, 
     Camera, 
