@@ -15,7 +15,49 @@ pub static ENDPOINT_MAP: LazyLock<HashMap<HTTPMethodKind, HashMap<EndpointKind, 
     hittable_post.insert(SpecificTypeKind::Sphere);
     post.insert(EndpointKind::Hittable, hittable_post);
 
+    // PUT
+    let mut put: HashMap<EndpointKind, HashSet<SpecificTypeKind>> = HashMap::new();
+
+    let mut camera_put: HashSet<SpecificTypeKind> = HashSet::new();
+    camera_put.insert(SpecificTypeKind::Camera);
+
+    let mut bg_put: HashSet<SpecificTypeKind> = HashSet::new();
+    bg_put.insert(SpecificTypeKind::Background);
+
+    let mut img_put: HashSet<SpecificTypeKind> = HashSet::new();
+    img_put.insert(SpecificTypeKind::Image);
+
+    let mut out_put: HashSet<SpecificTypeKind> = HashSet::new();
+    out_put.insert(SpecificTypeKind::Output);
+    
+    put.insert(EndpointKind::Camera, camera_put);
+    put.insert(EndpointKind::Background, bg_put);
+    put.insert(EndpointKind::Image, img_put);
+    put.insert(EndpointKind::Output, out_put);
+
+    // PATCH 
+    let mut patch: HashMap<EndpointKind, HashSet<SpecificTypeKind>> = HashMap::new();
+
+    let mut camera_patch: HashSet<SpecificTypeKind> = HashSet::new();
+    camera_patch.insert(SpecificTypeKind::Camera);
+
+    let mut bg_patch: HashSet<SpecificTypeKind> = HashSet::new();
+    bg_patch.insert(SpecificTypeKind::Background);
+
+    let mut img_patch: HashSet<SpecificTypeKind> = HashSet::new();
+    img_patch.insert(SpecificTypeKind::Image);
+
+    let mut out_patch: HashSet<SpecificTypeKind> = HashSet::new();
+    out_patch.insert(SpecificTypeKind::Output);
+
+    patch.insert(EndpointKind::Camera, camera_patch);
+    patch.insert(EndpointKind::Background, bg_patch);
+    patch.insert(EndpointKind::Image, img_patch);
+    patch.insert(EndpointKind::Output, out_patch);
+
     m.insert(HTTPMethodKind::Post, post);
+    m.insert(HTTPMethodKind::Put, put);
+    m.insert(HTTPMethodKind::Patch, patch);
     m
 });
 

@@ -24,7 +24,7 @@ pub struct Param {
 }
 
 /// Compound Assignment Operator
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CompoundOpKind {
     /// `+=`
     AddE, 

@@ -1,3 +1,5 @@
+//! Lexer tests
+//! Most of the tests are written by AI, I code review over it 
 #[cfg(test)]
 mod common;
 

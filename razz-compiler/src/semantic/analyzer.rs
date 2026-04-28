@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 use crate::ast::expression::{Arg, ExprKind, StructField, UnOp, UnOpKind};
-use crate::ast::statement::{Block, ElseIf, HTTPMethod, Stmt};
+use crate::ast::statement::{Block, CompoundOp, ElseIf, HTTPMethod, Stmt};
 use crate::ast::traversal::{walk_block, walk_fn_decl, walk_stmt};
 use crate::ast::{Spanned, SpecificType, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
@@ -259,26 +259,72 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                     return;
                 }
                 walk_expr(self, &obj);
-                let Some(target) = self.type_table.get(&obj.id) else {
+                let Some(t) = self.type_table.get(&obj.id) else {
                     return;
                 };
-                if target.satisfies(&expr_ty) {
-                    self.error(SemanticErrorKind::TypeMismatch{ expected: *target, got: expr_ty }, stmt.span);
+                if t.satisfies(&expr_ty) {
+                    self.error(SemanticErrorKind::TypeMismatch{ expected: *t, got: expr_ty }, stmt.span);
                 }
             }, 
-            ExprKind::Ident(tar) => {
+            ExprKind::Ident(t) => {
                 if let Some(type_ann) = ty 
                 && type_ann.node != expr_ty {
                     self.error(SemanticErrorKind::InvalidTypeAnnotation(type_ann.node), stmt.span);
                     return; 
                 }
-                if let Some(ty) = self.symbol_table.lookup_current_scope(&tar) 
+                if let Some(ty) = self.symbol_table.lookup_current_scope(&t) 
                 && ty == expr_ty {
                     self.multability.insert(target.id);
                 }
-                self.symbol_table.declare_variable(tar.to_string(), expr_ty);
+                self.symbol_table.declare_variable(t.to_string(), expr_ty);
             }, 
-            _ => unreachable!("Expect to be Ident or FieldAccess")
+            _ => unreachable!("Expect to be Ident or FieldAccess"),
+        }
+    }
+
+    /// Only allowed int, float to compound assign
+    fn visit_compound_assign(&mut self, stmt: &Stmt, target: &Expr, op: &CompoundOp, expr: &Expr) {
+        walk_expr(self, expr);
+        let Some(&expr_ty) = self.type_table.get(&expr.id) else {
+            return; 
+        };
+
+
+        match &target.kind {
+            ExprKind::FieldAccess { obj, .. } => {
+                walk_expr(self, &obj);
+                let Some(t) = self.type_table.get(&obj.id) else {
+                    return;
+                };
+                if !matches!(t, 
+                    TypeKind::Int
+                    | TypeKind::Float) {
+                    self.error(SemanticErrorKind::InvalidBinaryAssign{ on: *t, with: op.node }, stmt.span);
+                    return;
+                }
+                if t.satisfies(&expr_ty) {
+                    self.error(SemanticErrorKind::TypeMismatch{ expected: *t, got: expr_ty }, stmt.span);
+                    return;
+                }
+            },
+            ExprKind::Ident(t) => {
+                let Some(t_ty) = self.symbol_table.lookup_current_scope(&t) else {
+                    self.error(SemanticErrorKind::UndeclaredVariable(t.to_string()), target.span);
+                    return;
+                };
+                if !matches!(t_ty, 
+                    TypeKind::Int
+                    | TypeKind::Float) {
+                    self.error(SemanticErrorKind::InvalidBinaryAssign{ on: t_ty, with: op.node }, stmt.span);
+                    return;
+                }
+                if !t_ty.satisfies(&expr_ty) {
+                    self.error(SemanticErrorKind::TypeMismatch{ expected: t_ty, got: expr_ty }, stmt.span);
+                    return;
+                }
+                self.multability.insert(target.id);
+            }, 
+            _ => unreachable!("Expect to be Ident or FieldAccess"),
         }
     }
 
@@ -375,9 +421,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         }
     }
 
-    fn visit_compound_assign(&mut self, _stmt: &Stmt, _target: &Expr, _op: &crate::ast::statement::CompoundOp, expr: &Expr) {
-        todo!()
-    }
+
 
     fn visit_http_request(&mut self, _stmt: &Stmt, _method: &HTTPMethod, _endpoint: &Endpoint, body: &Expr) {
         todo!()
