@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind, UnOpKind}, statement::CompoundOpKind, TypeKind}, common::Span};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, ExprKind, UnOpKind}, statement::CompoundOpKind, TypeKind}, common::Span};
 
 #[derive(Debug)]
 pub struct SemanticError {
@@ -41,5 +41,10 @@ pub enum SemanticErrorKind {
     InvalidBinaryAssign{
         on: TypeKind, 
         with: CompoundOpKind,
-    }
+    },
+    InvalidEndpoint(EndpointKind),
+    InvalidRequestBody(TypeKind),
+    ExpectedStructLiteral,
+    InvalidKey(String),
+    MissingField(String),
 }

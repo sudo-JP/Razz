@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 use crate::ast::expression::{Arg, ExprKind, StructField, UnOp, UnOpKind};
-use crate::ast::statement::{Block, CompoundOp, ElseIf, HTTPMethod, Stmt};
+use crate::ast::statement::{Block, CompoundOp, ElseIf, HTTPMethod, HTTPMethodKind, Stmt};
 use crate::ast::traversal::{walk_block, walk_fn_decl, walk_stmt};
 use crate::ast::{Spanned, SpecificType, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
@@ -11,7 +11,7 @@ use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
 
 use crate::common::Span;
 use crate::semantic::error::SemanticErrorKind;
-use crate::semantic::rules::{BINOP_MAP, FIELD_ACCESS_MAP};
+use crate::semantic::rules::{BINOP_MAP, ENDPOINT_MAP, FIELD_ACCESS_MAP};
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
     traversal::{walk_program, Walkable}, NodeId, Program, TypeKind}, 
     semantic::{error::SemanticError, symbols::SymbolTable}};
@@ -230,12 +230,12 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             return;
         };
 
-        if !matches!(obj_ty, TypeKind::SpecificType(_)) {
+        let TypeKind::SpecificType(structure) = *obj_ty else {
             self.error(SemanticErrorKind::InvalidFieldAccess(*obj_ty), expr.span);
             return; 
-        }
+        };
 
-        let fields = FIELD_ACCESS_MAP.get(obj_ty)
+        let fields = FIELD_ACCESS_MAP.get(&structure)
             .expect("Map has to cover all the specific type field");
 
         let Some(field_ty) = fields.get(key.node.as_str()) else {
@@ -422,9 +422,81 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
     }
 
 
+    fn visit_http_request(&mut self, _stmt: &Stmt, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
+        walk_expr(self, body);
+        let Some(expr_ty) = self.type_table.get(&body.id) else {
+            return;
+        };
+        let ExprKind::StructLiteral{ fields, .. } = &body.kind else {
+            self.error(SemanticErrorKind::ExpectedStructLiteral, body.span);
+            return;
+        };
 
-    fn visit_http_request(&mut self, _stmt: &Stmt, _method: &HTTPMethod, _endpoint: &Endpoint, body: &Expr) {
-        todo!()
+        let TypeKind::SpecificType(sp_ty) = expr_ty else {
+            self.error(SemanticErrorKind::InvalidRequestBody(*expr_ty), body.span);
+            return;
+        };
+        let valid_body = ENDPOINT_MAP.get(&method.node)
+            .expect("Endpoint map has to cover all methods");
+
+        let Some(valid_ty) = valid_body.get(&endpoint.node) else {
+            self.error(SemanticErrorKind::InvalidEndpoint(endpoint.node), endpoint.span);
+            return;
+        };
+        // check here
+        if let None = valid_ty.get(sp_ty) {
+            self.error(SemanticErrorKind::InvalidRequestBody(*expr_ty), body.span);
+            return;
+        }
+
+        let err = "Field map has to cover all specific types";
+        match &method.node {
+            HTTPMethodKind::Post 
+            | HTTPMethodKind::Put => {
+                let valid_fields: Vec<_> = FIELD_ACCESS_MAP.get(sp_ty)
+                    .expect(err)
+                    .into_iter()
+                    .collect();
+
+                let mut visited: HashMap<&str, (&Spanned<String>, TypeKind)> = HashMap::new();
+                for f in fields {
+                    let Some(&ty) = self.type_table.get(&f.value.id) else { continue; };
+                    visited.insert(f.key.node.as_str(), (&f.key, ty));
+                }
+
+                for (key, val) in valid_fields {
+                    match visited.remove(key) {
+                        None => self.error(SemanticErrorKind::MissingField(key.to_string()), body.span), 
+                        Some((s, ty)) => {
+                            if !ty.satisfies(val) {
+                                self.error(SemanticErrorKind::TypeMismatch{ expected: *val, got: ty }, s.span);
+                            }
+                        }
+                    };
+                }
+                
+                // Haha...
+                for (_, (s, _)) in visited {
+                    self.error(SemanticErrorKind::InvalidKey(s.node.to_string()), s.span);
+                }
+            }
+            HTTPMethodKind::Patch => {
+                let mut valid_fields_map = FIELD_ACCESS_MAP.get(sp_ty)
+                    .expect(err)
+                    .clone();
+                for field in fields {
+                    match valid_fields_map.remove(field.key.node.as_str()) {
+                        None => self.error(SemanticErrorKind::InvalidKey(field.key.node.to_string()), field.key.span), 
+                        Some(expected_ty) => {
+                            let Some(&ty) = self.type_table.get(&field.value.id) else { continue; };
+                            if !ty.satisfies(&expected_ty) {
+                                self.error(SemanticErrorKind::TypeMismatch { expected: expected_ty, got: ty }, field.value.span);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn visit_struct_lit(&mut self, _expr: &Expr, _ty: &SpecificType, fields: &[StructField]) {

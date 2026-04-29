@@ -61,7 +61,7 @@ pub static ENDPOINT_MAP: LazyLock<HashMap<HTTPMethodKind, HashMap<EndpointKind, 
     m
 });
 
-pub static FIELD_ACCESS_MAP: LazyLock<HashMap<TypeKind, HashMap<&str, TypeKind>>> = LazyLock::new(|| {
+pub static FIELD_ACCESS_MAP: LazyLock<HashMap<SpecificTypeKind, HashMap<&str, TypeKind>>> = LazyLock::new(|| {
     let mut m = HashMap::new();
 
     let mut camera: HashMap<&str, TypeKind> = HashMap::new();
@@ -89,11 +89,11 @@ pub static FIELD_ACCESS_MAP: LazyLock<HashMap<TypeKind, HashMap<&str, TypeKind>>
     sphere.insert("radius", TypeKind::Float);
     sphere.insert("material", TypeKind::SpecificType(SpecificTypeKind::Material));
 
-    m.insert(TypeKind::SpecificType(SpecificTypeKind::Camera), camera);
-    m.insert(TypeKind::SpecificType(SpecificTypeKind::Image), image);
-    m.insert(TypeKind::SpecificType(SpecificTypeKind::Background), background);
-    m.insert(TypeKind::SpecificType(SpecificTypeKind::Output), output);
-    m.insert(TypeKind::SpecificType(SpecificTypeKind::Sphere), sphere);
+    m.insert(SpecificTypeKind::Camera, camera);
+    m.insert(SpecificTypeKind::Image, image);
+    m.insert(SpecificTypeKind::Background, background);
+    m.insert(SpecificTypeKind::Output, output);
+    m.insert(SpecificTypeKind::Sphere, sphere);
     m
 });
 
