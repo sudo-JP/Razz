@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind, ExprKind, UnOpKind}, statement::CompoundOpKind, TypeKind}, common::Span};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, UnOpKind}, statement::CompoundOpKind, TypeKind}, common::Span};
 
 #[derive(Debug)]
 pub struct SemanticError {

@@ -1,10 +1,13 @@
+use std::collections::HashSet;
+
 use clap::ValueEnum;
-use crate::ast::Program;
+use crate::ast::{NodeId, Program};
 use crate::compiler::error::CompilerError;
 use crate::lexer::tokens::Token;
 
 use crate::lexer::lexer::Lexer;
 use crate::parser::parser::Parser;
+use crate::semantic::analyzer::SemanticAnalyzer;
 
 #[derive(ValueEnum, Clone, PartialEq)]
 pub enum CompilerStage {
@@ -19,7 +22,7 @@ pub enum CompilerStage {
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser(Program), 
-    SemanticAnalysis,
+    SemanticAnalysis(HashSet<NodeId>),
     IR,
     Codegen,
 }
@@ -51,6 +54,15 @@ impl Compiler {
 
         if matches!(self.flag, CompilerStage::Parser) {
             return Ok(CompilerOutput::Parser(prog));
+        }
+
+        // ============= SEMANTIC ANALYSIS ============= 
+        let mut analyzer = SemanticAnalyzer::new();
+        let mutable_set = analyzer.check(&prog)
+            .map_err(CompilerError::SemanticAnalysis)?;
+
+        if matches!(self.flag, CompilerStage::SemanticAnalysis) {
+            return Ok(CompilerOutput::SemanticAnalysis(mutable_set));
         }
 
         Ok(CompilerOutput::Codegen)

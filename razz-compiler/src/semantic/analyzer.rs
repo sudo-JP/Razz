@@ -38,6 +38,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
         }
     }
 
+    /// Type check the program
     pub fn check(&mut self, prog: &'ast Program) -> Result<HashSet<NodeId>, Vec<SemanticError>> {
         prog.funcs
             .iter()
@@ -53,6 +54,24 @@ impl<'ast> SemanticAnalyzer<'ast> {
 
     fn error(&mut self, kind: SemanticErrorKind, span: Span) {
         self.sem_errors.push(SemanticError{kind, span});
+    }
+
+    /// Helper for validating fields 
+    fn validate_fields(&mut self, fields: &[StructField], sp_ty: &SpecificTypeKind) {
+        let mut valid_fields_map = FIELD_ACCESS_MAP.get(sp_ty)
+            .expect( "Field map has to cover all specific types")
+            .clone();
+        for field in fields {
+            match valid_fields_map.remove(field.key.node.as_str()) {
+                None => self.error(SemanticErrorKind::InvalidKey(field.key.node.to_string()), field.key.span), 
+                Some(expected_ty) => {
+                    let Some(&ty) = self.type_table.get(&field.value.id) else { continue; };
+                    if !ty.satisfies(&expected_ty) {
+                        self.error(SemanticErrorKind::TypeMismatch { expected: expected_ty, got: ty }, field.value.span);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -339,6 +358,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         self.symbol_table.pop_scope();
     }
 
+    /// Declare new scope
     fn visit_block(&mut self, block: &Block) {
         self.symbol_table.push_scope();
         walk_block(self, block);
@@ -424,7 +444,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
     fn visit_http_request(&mut self, _stmt: &Stmt, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
         walk_expr(self, body);
-        let Some(expr_ty) = self.type_table.get(&body.id) else {
+        let Some(&expr_ty) = self.type_table.get(&body.id) else {
             return;
         };
         let ExprKind::StructLiteral{ fields, .. } = &body.kind else {
@@ -433,7 +453,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         };
 
         let TypeKind::SpecificType(sp_ty) = expr_ty else {
-            self.error(SemanticErrorKind::InvalidRequestBody(*expr_ty), body.span);
+            self.error(SemanticErrorKind::InvalidRequestBody(expr_ty), body.span);
             return;
         };
         let valid_body = ENDPOINT_MAP.get(&method.node)
@@ -444,8 +464,8 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             return;
         };
         // check here
-        if let None = valid_ty.get(sp_ty) {
-            self.error(SemanticErrorKind::InvalidRequestBody(*expr_ty), body.span);
+        if let None = valid_ty.get(&sp_ty) {
+            self.error(SemanticErrorKind::InvalidRequestBody(expr_ty), body.span);
             return;
         }
 
@@ -453,7 +473,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         match &method.node {
             HTTPMethodKind::Post 
             | HTTPMethodKind::Put => {
-                let valid_fields: Vec<_> = FIELD_ACCESS_MAP.get(sp_ty)
+                let valid_fields: Vec<_> = FIELD_ACCESS_MAP.get(&sp_ty)
                     .expect(err)
                     .into_iter()
                     .collect();
@@ -481,25 +501,16 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                 }
             }
             HTTPMethodKind::Patch => {
-                let mut valid_fields_map = FIELD_ACCESS_MAP.get(sp_ty)
-                    .expect(err)
-                    .clone();
-                for field in fields {
-                    match valid_fields_map.remove(field.key.node.as_str()) {
-                        None => self.error(SemanticErrorKind::InvalidKey(field.key.node.to_string()), field.key.span), 
-                        Some(expected_ty) => {
-                            let Some(&ty) = self.type_table.get(&field.value.id) else { continue; };
-                            if !ty.satisfies(&expected_ty) {
-                                self.error(SemanticErrorKind::TypeMismatch { expected: expected_ty, got: ty }, field.value.span);
-                            }
-                        }
-                    }
-                }
+                self.validate_fields(fields, &sp_ty);
             }
         }
     }
 
-    fn visit_struct_lit(&mut self, _expr: &Expr, _ty: &SpecificType, fields: &[StructField]) {
-        todo!()
+    fn visit_struct_lit(&mut self, expr: &Expr, ty: &SpecificType, fields: &[StructField]) {
+        for field in fields {
+            walk_expr(self, &field.value);
+        }
+        self.validate_fields(fields, &ty.node);
+        self.type_table.insert(expr.id, TypeKind::SpecificType(ty.node));
     }
 }
