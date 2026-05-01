@@ -1,0 +1,5 @@
+fn while_ret(flag: bool) int {
+    while flag {
+        return 1;
+    }
+}

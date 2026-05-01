@@ -1,0 +1,5 @@
+fn main() null {
+    cam = GET /camera;
+    bad = cam->banana;
+    return null;
+}

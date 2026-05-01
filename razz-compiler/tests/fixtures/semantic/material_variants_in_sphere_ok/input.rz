@@ -1,0 +1,24 @@
+fn main() null {
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.0, y: 2.0, z: 3.0 },
+        radius: 0.5,
+        material: Lambertian { albedo: Color { r: 255, g: 0, b: 0 } },
+    };
+
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.0, y: 1.0, z: 2.0 },
+        radius: 1.0,
+        material: Metal {
+            albedo: Color { r: 200, g: 200, b: 200 },
+            fuzz: 0.1,
+        },
+    };
+
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.0, y: 0.0, z: 1.0 },
+        radius: 1.5,
+        material: Dielectric { refractionIdx: 1.5 },
+    };
+
+    return null;
+}

@@ -1,0 +1,5 @@
+fn main() null {
+    x = 1;
+    x = x + 2;
+    return null;
+}

@@ -1,0 +1,4 @@
+fn main() null {
+    PUT /image Image { width: 1920, height: 1080 };
+    return null;
+}

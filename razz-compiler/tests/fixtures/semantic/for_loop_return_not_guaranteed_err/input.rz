@@ -1,0 +1,5 @@
+fn for_ret() int {
+    for i = 0; i < 3; i += 1 {
+        return 1;
+    }
+}

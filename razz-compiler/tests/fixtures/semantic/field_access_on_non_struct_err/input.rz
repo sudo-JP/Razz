@@ -1,0 +1,5 @@
+fn main() null {
+    x = 1;
+    bad = x->width;
+    return null;
+}

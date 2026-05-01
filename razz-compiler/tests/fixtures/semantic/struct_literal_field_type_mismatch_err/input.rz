@@ -1,0 +1,4 @@
+fn main() null {
+    img = Image { width: 640, height: 480.5 };
+    return null;
+}

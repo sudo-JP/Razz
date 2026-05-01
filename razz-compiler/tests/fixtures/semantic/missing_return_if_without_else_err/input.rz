@@ -1,0 +1,6 @@
+fn no_else(flag: bool) int {
+    if flag {
+        return 1;
+    }
+    x = 0;
+}

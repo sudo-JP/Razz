@@ -1,0 +1,11 @@
+fn main() null {
+    POST /camera Camera {
+        lookfrom: Point3 { x: 0.0, y: 0.0, z: 0.0 },
+        lookat: Point3 { x: 0.0, y: 0.0, z: -1.0 },
+        vfov: 90.0,
+        vup: Vec3 { x: 0.0, y: 1.0, z: 0.0 },
+        focus_dist: 1.0,
+        defocus_angle: 0.0,
+    };
+    return null;
+}

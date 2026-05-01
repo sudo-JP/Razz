@@ -1,0 +1,4 @@
+fn create(coord: Vec3, mat: Lambertian) null {
+    POST /hittable Sphere { coord: coord, material: mat };
+    return null;
+}

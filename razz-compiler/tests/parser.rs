@@ -4,12 +4,9 @@
 use std::collections::HashSet;
 
 use razz_compiler::ast::{
-    expression::{Arg, BinOpKind, EndpointKind, Expr, ExprKind, Literal, StructField, UnOpKind},
-    statement::{
+    expression::{Arg, BinOpKind, EndpointKind, Expr, ExprKind, Literal, StructField, UnOpKind}, statement::{
         Block, CompoundOpKind, ElseIf, FnDecl, HTTPMethodKind, Param, Stmt, StmtKind,
-    },
-    traversal::{walk_expr, walk_stmt, Walkable},
-    NodeId, Program, SpecificTypeKind, Spanned, TypeKind,
+    }, traversal::{walk_expr, walk_fn_decl, walk_stmt, Walkable}, NodeId, Program, Spanned, SpecificTypeKind, TypeKind
 };
 use razz_compiler::common::{Position, Span};
 use razz_compiler::compiler::{
@@ -84,6 +81,7 @@ fn param(name: &str, ty: TypeKind) -> Param {
     Param {
         name: sp(name.to_string()),
         ty: sp(ty),
+        id: 0,
     }
 }
 
@@ -292,6 +290,13 @@ impl Walkable for IdCollector {
             self.collect_block(b);
         }
     }
+
+    fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
+        for param in &fn_decl.params {
+            self.insert(param.id, "Param");
+        }
+        walk_fn_decl(self, fn_decl);
+    }
 }
 
 fn assert_distinct_node_ids(program: &Program) {
@@ -429,6 +434,7 @@ fn strip_ids_and_spans_program(program: &mut Program) {
         func.node.id = 0;
         func.node.name.span = zero_span();
         for p in &mut func.node.params {
+            p.id = 0;
             p.name.span = zero_span();
             p.ty.span = zero_span();
         }

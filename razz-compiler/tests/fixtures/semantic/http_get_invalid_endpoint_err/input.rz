@@ -1,0 +1,4 @@
+fn main() null {
+    bad = GET /hittable;
+    return null;
+}

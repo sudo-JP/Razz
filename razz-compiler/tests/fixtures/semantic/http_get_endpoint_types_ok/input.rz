@@ -1,0 +1,7 @@
+fn main() null {
+    cam: Camera = GET /camera;
+    img: Image = GET /image;
+    bg: Background = GET /background;
+    out: Output = GET /output;
+    return null;
+}

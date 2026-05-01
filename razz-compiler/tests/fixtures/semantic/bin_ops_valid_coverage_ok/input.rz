@@ -1,0 +1,19 @@
+fn main() null {
+    a = 1 + 2;
+    b = 3 - 1;
+    c = 2 * 4;
+    d = 8 / 2;
+
+    e = 1 < 2;
+    f = 1 <= 2;
+    g = 2 > 1;
+    h = 2 >= 1;
+
+    i = true == false;
+    j = true != false;
+    k = true && false;
+    l = true || false;
+
+    m = "ra" + "zz";
+    return null;
+}

@@ -1,0 +1,21 @@
+fn main() null {
+    flag = true;
+
+    if flag {
+        a = 1;
+    } else {
+        a = 2;
+    }
+
+    while flag {
+        flag = false;
+    }
+
+    for i = 0; i < 3; i += 1 {
+        if i < 2 {
+            b = i;
+        }
+    }
+
+    return null;
+}

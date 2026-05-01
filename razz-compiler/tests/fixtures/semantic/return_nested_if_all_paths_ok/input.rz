@@ -1,0 +1,11 @@
+fn nested(a: bool, b: bool) int {
+    if a {
+        if b {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else {
+        return 3;
+    }
+}

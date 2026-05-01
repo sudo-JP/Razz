@@ -1,0 +1,5 @@
+fn main() null {
+    total = 1;
+    total += 5;
+    return null;
+}

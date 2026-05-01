@@ -1,0 +1,7 @@
+fn missing_branch(flag: bool) int {
+    if flag {
+        return 1;
+    } else {
+        y = 2;
+    }
+}

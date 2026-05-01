@@ -1,0 +1,4 @@
+fn main() null {
+    PATCH /image GET /image;
+    return null;
+}

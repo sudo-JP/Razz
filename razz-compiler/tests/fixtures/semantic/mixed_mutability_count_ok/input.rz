@@ -1,0 +1,11 @@
+fn main() null {
+    x = 1;
+    y = 10;
+    z = 100;
+
+    x = x + 1;
+    y += 2;
+    y /= 2;
+
+    return null;
+}

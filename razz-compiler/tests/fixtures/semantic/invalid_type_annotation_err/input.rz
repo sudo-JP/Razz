@@ -1,0 +1,4 @@
+fn main() null {
+    x: float = 1;
+    return null;
+}

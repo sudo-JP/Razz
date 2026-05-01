@@ -1,0 +1,6 @@
+fn main() null {
+    while 123 {
+        x = 1;
+    }
+    return null;
+}

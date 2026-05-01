@@ -1,0 +1,5 @@
+fn main() null {
+    a = !1;
+    b = -true;
+    return null;
+}

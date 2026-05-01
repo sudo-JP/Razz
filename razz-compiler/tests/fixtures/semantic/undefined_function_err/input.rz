@@ -1,0 +1,4 @@
+fn main() null {
+    x = nope();
+    return null;
+}

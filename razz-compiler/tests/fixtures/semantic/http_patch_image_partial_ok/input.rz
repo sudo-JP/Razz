@@ -1,0 +1,4 @@
+fn main() null {
+    PATCH /image Image { width: 800 };
+    return null;
+}
