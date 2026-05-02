@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use crate::ast::TypeKind;
+use crate::ast::{NodeId, TypeKind};
 
 
 // WARN: this maybe slow because we allocating string each time, use arena
 // allocator in the future
 pub struct SymbolTable {
-    scopes: Vec<HashMap<String, TypeKind>>,
+    scopes: Vec<HashMap<String, (TypeKind, NodeId)>>,
 }
 
 impl SymbolTable {
@@ -25,22 +25,22 @@ impl SymbolTable {
     /// The language allow such instance to exist 
     /// x = 1; 
     /// x = "Hello"; 
-    pub fn declare_variable(&mut self, name: String, ty: TypeKind) {
+    pub fn declare_variable(&mut self, name: String, ty: TypeKind, id: NodeId) {
         let last = self.scopes.last_mut()
             .expect("Symbol Table: Empty scope, can't declare variables");
             
-        last.insert(name, ty);
+        last.insert(name, (ty, id));
     }
 
     /// Find first scope that has name
-    pub fn lookup_variable(&self, name: &str) -> Option<TypeKind> {
+    pub fn lookup_variable(&self, name: &str) -> Option<(TypeKind, NodeId)> {
         self.scopes
             .iter()
             .rev()
             .find_map(|scope| scope.get(name).copied())
     }
 
-    pub fn lookup_current_scope(&self, name: &str) -> Option<TypeKind> {
+    pub fn lookup_current_scope(&self, name: &str) -> Option<(TypeKind, NodeId)> {
         self.scopes
             .last()
             .expect("Scope not pushed properly")

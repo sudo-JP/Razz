@@ -26,3 +26,6 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - Semantic Analysis: 
     - Symbol table takes in owned String, it requires allocation each time. I tried to use lifetime specifier but it didn't work because there's more ownership stuff. I might use arena allocator or something like that later on, or find a better way to elegantly resolve this issue. 
     - Type union is annoying as hell. I'm talking about how Sphere's material can be Dielectrics, Metal, or Lambertian, etc. Made a "phantom" Material enum so we can match on it with `impl satisfied()`.
+
+## AI Usage 
+I asks AI to help me write tests for me, code review and fix my own bugs when tests failed. I tried to tell the AI to treat it like black box.

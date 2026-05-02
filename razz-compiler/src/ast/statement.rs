@@ -19,6 +19,7 @@ pub struct ElseIf {
 /// Function parameter 
 #[derive(Debug, PartialEq)]
 pub struct Param {
+    pub id: NodeId,
     pub name: Spanned<String>, 
     pub ty: Type,
 }

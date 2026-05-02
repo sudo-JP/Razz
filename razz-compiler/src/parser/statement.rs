@@ -56,7 +56,7 @@ impl Parser {
         let name = self.consume_ident()?;
         self.consume(&TokenKind::Colon)?;
         let ty = self.consume_type()?;
-        Ok(Param { name, ty })
+        Ok(Param { name, ty, id: self.next_id()})
     }
 
 

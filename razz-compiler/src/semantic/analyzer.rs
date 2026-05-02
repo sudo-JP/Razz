@@ -93,7 +93,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
     /// Check for ident 
     fn visit_ident(&mut self, expr: &Expr, name: &str) {
-        let Some(ty) = self.symbol_table.lookup_variable(name) else {
+        let Some((ty, _)) = self.symbol_table.lookup_variable(name) else {
             self.error(SemanticErrorKind::UndeclaredVariable(name.to_string()), expr.span);
             return;
         };
@@ -166,7 +166,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
     /// Allowed -int, -float, !bool 
     fn visit_un_op(&mut self, expr: &Expr, op: &UnOp, value: &Expr) {
-        walk_expr(self, expr);
+        walk_expr(self, value);
 
         let Some(value) = self.type_table.get(&value.id) else {
             return;
@@ -174,7 +174,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
         let is_valid = match &op.node {
             UnOpKind::Not => matches!(value, TypeKind::Bool),
-            UnOpKind::Minus => matches!(value, TypeKind::Int),
+            UnOpKind::Minus => matches!(value, TypeKind::Int | TypeKind::Float),
         };
 
         if !is_valid {
@@ -291,11 +291,11 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                     self.error(SemanticErrorKind::InvalidTypeAnnotation(type_ann.node), stmt.span);
                     return; 
                 }
-                if let Some(ty) = self.symbol_table.lookup_current_scope(&t) 
+                if let Some((ty, id)) = self.symbol_table.lookup_current_scope(&t) 
                 && ty == expr_ty {
-                    self.multability.insert(target.id);
+                    self.multability.insert(id);
                 }
-                self.symbol_table.declare_variable(t.to_string(), expr_ty);
+                self.symbol_table.declare_variable(t.to_string(), expr_ty, expr.id);
             }, 
             _ => unreachable!("Expect to be Ident or FieldAccess"),
         }
@@ -327,7 +327,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                 }
             },
             ExprKind::Ident(t) => {
-                let Some(t_ty) = self.symbol_table.lookup_current_scope(&t) else {
+                let Some((t_ty, id)) = self.symbol_table.lookup_current_scope(&t) else {
                     self.error(SemanticErrorKind::UndeclaredVariable(t.to_string()), target.span);
                     return;
                 };
@@ -341,7 +341,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
                     self.error(SemanticErrorKind::TypeMismatch{ expected: t_ty, got: expr_ty }, stmt.span);
                     return;
                 }
-                self.multability.insert(target.id);
+                self.multability.insert(id);
             }, 
             _ => unreachable!("Expect to be Ident or FieldAccess"),
         }
@@ -350,12 +350,13 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
         self.symbol_table.push_scope();
         for param in &fn_decl.params {
-            self.symbol_table.declare_variable(param.name.node.to_string(), param.ty.node);
+            self.symbol_table.declare_variable(param.name.node.to_string(), param.ty.node, param.id);
         }
         self.curr_return_ty = Some(fn_decl.return_type.node);
         walk_fn_decl(self, fn_decl);
         self.curr_return_ty = None;
         self.symbol_table.pop_scope();
+        //self.error(SemanticErrorKind::MissingReturn, fn_decl.body.span);
     }
 
     /// Declare new scope

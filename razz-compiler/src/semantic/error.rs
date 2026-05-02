@@ -47,4 +47,5 @@ pub enum SemanticErrorKind {
     ExpectedStructLiteral,
     InvalidKey(String),
     MissingField(String),
+    MissingReturn,
 }

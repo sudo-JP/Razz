@@ -150,7 +150,6 @@ pub fn walk_block<W: Walkable + ?Sized>(walker: &mut W, block: &Block) {
 }
 
 pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
-    walker.visit_program(prog);
     prog.funcs
         .iter()
         .for_each(|f| walker.visit_fn_decl(&f.node));

@@ -89,11 +89,38 @@ pub static FIELD_ACCESS_MAP: LazyLock<HashMap<SpecificTypeKind, HashMap<&str, Ty
     sphere.insert("radius", TypeKind::Float);
     sphere.insert("material", TypeKind::SpecificType(SpecificTypeKind::Material));
 
+    let mut vec3: HashMap<&str, TypeKind> = HashMap::new(); 
+    vec3.insert("x", TypeKind::Float);
+    vec3.insert("y", TypeKind::Float);
+    vec3.insert("z", TypeKind::Float);
+
+    let mut color: HashMap<&str, TypeKind> = HashMap::new();
+    color.insert("r", TypeKind::Int);
+    color.insert("g", TypeKind::Int);
+    color.insert("b", TypeKind::Int);
+
+    let mut lambertian: HashMap<&str, TypeKind> = HashMap::new();
+    lambertian.insert("albedo", TypeKind::SpecificType(SpecificTypeKind::Color));
+
+    let mut dielectric: HashMap<&str, TypeKind> = HashMap::new();
+    dielectric.insert("refractionIdx", TypeKind::Float);
+
+    let mut metal: HashMap<&str, TypeKind> = HashMap::new();
+    metal.insert("albedo", TypeKind::SpecificType(SpecificTypeKind::Color));
+    metal.insert("fuzz", TypeKind::Float);
+
+
     m.insert(SpecificTypeKind::Camera, camera);
     m.insert(SpecificTypeKind::Image, image);
     m.insert(SpecificTypeKind::Background, background);
     m.insert(SpecificTypeKind::Output, output);
     m.insert(SpecificTypeKind::Sphere, sphere);
+    m.insert(SpecificTypeKind::Vec3, vec3.clone());
+    m.insert(SpecificTypeKind::Point3, vec3);
+    m.insert(SpecificTypeKind::Color, color);
+    m.insert(SpecificTypeKind::Lambertian, lambertian);
+    m.insert(SpecificTypeKind::Dielectric, dielectric);
+    m.insert(SpecificTypeKind::Metal, metal);
     m
 });
 
