@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 use crate::ast::expression::{Arg, ExprKind, StructField, UnOp, UnOpKind};
-use crate::ast::statement::{Block, CompoundOp, ElseIf, HTTPMethod, HTTPMethodKind, Stmt};
+use crate::ast::statement::{Block, CompoundOp, ElseIf, HTTPMethod, HTTPMethodKind, Stmt, StmtKind};
 use crate::ast::traversal::{walk_block, walk_fn_decl, walk_stmt};
 use crate::ast::{Spanned, SpecificType, Type};
 use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
@@ -71,6 +71,34 @@ impl<'ast> SemanticAnalyzer<'ast> {
                     }
                 }
             }
+        }
+    }
+
+    /// Check if a block has a return statement
+    fn block_returns(&self, block: &Block) -> bool {
+        block.stmts
+            .last()
+            .map_or(false, |stmt| self.stmt_returns(stmt))
+    }
+
+    /// A block has a return if the last statement 
+    /// is either a return (base case), or 
+    /// an if statement (recursive case). 
+    /// The if has to have an else which should also contains 
+    /// a return to guaranteed returning
+    fn stmt_returns(&self, stmt: &Stmt) -> bool {
+        match &stmt.kind {
+            StmtKind::Return(_) => true, 
+            StmtKind::If { body, else_ifs, else_body, .. } => {
+                self.block_returns(body) &&
+                else_ifs
+                    .iter()
+                    .all(|elif| self.block_returns(&elif.body)) &&
+                else_body
+                    .as_ref()
+                    .map_or(false, |body| self.block_returns(&body))
+            }
+            _ => false,
         }
     }
 }
@@ -356,7 +384,22 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         walk_fn_decl(self, fn_decl);
         self.curr_return_ty = None;
         self.symbol_table.pop_scope();
-        //self.error(SemanticErrorKind::MissingReturn, fn_decl.body.span);
+        if !self.block_returns(&fn_decl.body) {
+            self.error(SemanticErrorKind::MissingReturn, fn_decl.body.span);
+        }
+    }
+
+    fn visit_return(&mut self, stmt: &Stmt, expr: &Expr) {
+        walk_expr(self, expr);
+        let Some(expr_ty) = self.type_table.get(&expr.id) else {
+            return;
+        };
+        let curr_ret_ty = self.curr_return_ty
+            .expect("Must declare return type before visiting here");
+
+        if *expr_ty != curr_ret_ty {
+            self.error(SemanticErrorKind::TypeMismatch { expected: curr_ret_ty, got: *expr_ty }, stmt.span);
+        }
     }
 
     /// Declare new scope
@@ -429,18 +472,6 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
         }
     }
 
-    fn visit_return(&mut self, stmt: &Stmt, expr: &Expr) {
-        walk_expr(self, expr);
-        let Some(expr_ty) = self.type_table.get(&expr.id) else {
-            return;
-        };
-        let curr_ret_ty = self.curr_return_ty
-            .expect("Must declare return type before visiting here");
-
-        if *expr_ty != curr_ret_ty {
-            self.error(SemanticErrorKind::TypeMismatch { expected: curr_ret_ty, got: *expr_ty }, stmt.span);
-        }
-    }
 
 
     fn visit_http_request(&mut self, _stmt: &Stmt, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {

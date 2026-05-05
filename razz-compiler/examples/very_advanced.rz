@@ -63,4 +63,5 @@ fn main() null {
         type: Arduino,
         file: "test.ppm" // Ignored? 
     }; 
+    return null;
 }
