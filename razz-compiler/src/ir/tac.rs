@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, Literal}, TypeKind}, ir::basic_block::BlockId};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, TypeKind}, ir::basic_block::BlockId};
 
 type TempId = u32;
 
@@ -24,13 +24,76 @@ pub enum TACOperand {
     Const(Literal),
 }
 
+pub struct FieldInit {
+    pub name: String,
+    pub value: TACOperand,
+}
 
-
+/// Three address code instruction 
+/// At most three address
 pub enum TACInstruction {
+    /// Binary Op
+    /// <target> = <left> <op> <right>
     BinOp{
         target: Dest, 
         left: TACOperand,
         op: BinOpKind,
         right: TACOperand, 
-    }
+    }, 
+    /// Unary Op
+    /// <target> = <op> <value>
+    UnOp{
+        target: Dest, 
+        op: UnOpKind,
+        value: TACOperand, 
+    },
+    /// Function call 
+    /// <target> = <func>(foo: 1, bar: 2)
+    /// <func>(foo: 1, bar: 2)
+    Call{
+        target: Option<Dest>, 
+        args: Vec<TACOperand>,
+        func: String,
+    },
+    /// Field Load
+    /// <target> = <obj>-><key>
+    FieldLoad{
+        target: Dest, 
+        obj: TACOperand, 
+        key: String, 
+    },
+    /// Field Store
+    /// <obj>-><key> = <value>
+    FieldStore{
+        obj: TACOperand, 
+        key: String, 
+        value: TACOperand,
+    },
+    /// Copy, simple assignment 
+    /// <target> = <value>
+    Copy{
+        target: Dest, 
+        value: TACOperand,
+    }, 
+    /// Construct for struct
+    /// t1 = Color { r: t0, g: 5, b: t2 }
+    /// <target> = <ty> { (<name>: <operand>)* }.
+    Construct{
+        target: Dest, 
+        ty: TypeKind,
+        name_ty: Vec<FieldInit>,
+    },
+    /// HTTP GET 
+    /// <target> = GET <ep>
+    HTTPGet{
+        target: Dest, 
+        ep: EndpointKind,
+    },
+    /// HTTP Write type 
+    /// POST <ep> <value>
+    HTTPWrite{
+        method: HTTPMethodKind,
+        ep: EndpointKind, 
+        value: TACOperand,
+    },
 }
