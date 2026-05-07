@@ -1,7 +1,7 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use clap::ValueEnum;
-use crate::ast::{NodeId, Program};
+use crate::ast::{NodeId, Program, TypeKind};
 use crate::compiler::error::CompilerError;
 use crate::lexer::tokens::Token;
 
@@ -22,7 +22,7 @@ pub enum CompilerStage {
 pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser(Program), 
-    SemanticAnalysis(HashSet<NodeId>),
+    SemanticAnalysis(HashSet<NodeId>, HashMap<NodeId, TypeKind>),
     IR,
     Codegen,
 }
@@ -58,11 +58,11 @@ impl Compiler {
 
         // ============= SEMANTIC ANALYSIS ============= 
         let mut analyzer = SemanticAnalyzer::new();
-        let mutable_set = analyzer.check(&prog)
+        let (mutable_set, type_table) = analyzer.check(&prog)
             .map_err(CompilerError::SemanticAnalysis)?;
 
         if matches!(self.flag, CompilerStage::SemanticAnalysis) {
-            return Ok(CompilerOutput::SemanticAnalysis(mutable_set));
+            return Ok(CompilerOutput::SemanticAnalysis(mutable_set, type_table));
         }
 
         Ok(CompilerOutput::Codegen)

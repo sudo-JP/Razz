@@ -39,7 +39,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
     }
 
     /// Type check the program
-    pub fn check(&mut self, prog: &'ast Program) -> Result<HashSet<NodeId>, Vec<SemanticError>> {
+    pub fn check(&mut self, prog: &'ast Program) -> Result<(HashSet<NodeId>, HashMap<NodeId, TypeKind>), Vec<SemanticError>> {
         prog.funcs
             .iter()
             .for_each(|f| {
@@ -49,7 +49,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
         walk_program(self, prog);
 
         if self.sem_errors.len() > 0 { Err(mem::take(&mut self.sem_errors)) }
-        else { Ok(mem::take(&mut self.multability)) }
+        else { Ok((mem::take(&mut self.multability), mem::take(&mut self.type_table))) }
     }
 
     fn error(&mut self, kind: SemanticErrorKind, span: Span) {

@@ -1,9 +1,9 @@
 //! Semantic analysis tests
 //! Keep tests black-box: assert intended language behavior, not implementation details.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
-use razz_compiler::ast::NodeId;
+use razz_compiler::ast::{NodeId, TypeKind};
 use razz_compiler::compiler::{
     compiler::{Compiler, CompilerOutput, CompilerStage},
     error::CompilerError,
@@ -14,10 +14,10 @@ use razz_compiler::semantic::error::{SemanticError, SemanticErrorKind};
 mod common;
 use common::load_fixture;
 
-fn run_semantic(input: &str) -> Result<HashSet<NodeId>, Vec<SemanticError>> {
+fn run_semantic(input: &str) -> Result<(HashSet<NodeId>, HashMap<NodeId, TypeKind>), Vec<SemanticError>> {
     let compiler = Compiler::new(CompilerStage::SemanticAnalysis);
     match compiler.compiles(input) {
-        Ok(CompilerOutput::SemanticAnalysis(mutable_set)) => Ok(mutable_set),
+        Ok(CompilerOutput::SemanticAnalysis(mutable_set, type_table)) => Ok((mutable_set, type_table)),
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::SemanticAnalysis(errors)) => Err(errors),
         Err(CompilerError::Lexer(errors)) => panic!("Unexpected lexer error: {:?}", errors),
@@ -34,14 +34,14 @@ fn fixture_input(path: &str) -> String {
 #[test]
 fn simple_addition_ok_and_immutable() {
     let input = fixture_input("tests/fixtures/semantic/simple_addition_ok");
-    let mutable_set = run_semantic(&input).expect("Semantic analysis should pass");
+    let (mutable_set, _) = run_semantic(&input).expect("Semantic analysis should pass");
     assert!(mutable_set.is_empty(), "Simple addition should not mark mutability");
 }
 
 #[test]
 fn string_addition_ok_and_immutable() {
     let input = fixture_input("tests/fixtures/semantic/string_addition_ok");
-    let mutable_set = run_semantic(&input).expect("Semantic analysis should pass");
+    let (mutable_set, _) = run_semantic(&input).expect("Semantic analysis should pass");
     assert!(
         mutable_set.is_empty(),
         "String addition without reassignment should stay immutable",
@@ -51,7 +51,7 @@ fn string_addition_ok_and_immutable() {
 #[test]
 fn reassignment_marks_mutable() {
     let input = fixture_input("tests/fixtures/semantic/reassignment_mutability_ok");
-    let mutable_set = run_semantic(&input).expect("Semantic analysis should pass");
+    let (mutable_set, _) = run_semantic(&input).expect("Semantic analysis should pass");
     assert!(
         !mutable_set.is_empty(),
         "Reassignment should mark at least one mutable variable",
@@ -61,7 +61,7 @@ fn reassignment_marks_mutable() {
 #[test]
 fn compound_assign_marks_mutable() {
     let input = fixture_input("tests/fixtures/semantic/compound_assign_mutability_ok");
-    let mutable_set = run_semantic(&input).expect("Semantic analysis should pass");
+    let (mutable_set, _) = run_semantic(&input).expect("Semantic analysis should pass");
     assert!(
         !mutable_set.is_empty(),
         "Compound assignment should mark at least one mutable variable",
@@ -71,7 +71,7 @@ fn compound_assign_marks_mutable() {
 #[test]
 fn mixed_reassignment_and_compound_assign_count_mutables() {
     let input = fixture_input("tests/fixtures/semantic/mixed_mutability_count_ok");
-    let mutable_set = run_semantic(&input).expect("Semantic analysis should pass");
+    let (mutable_set, _) = run_semantic(&input).expect("Semantic analysis should pass");
     assert_eq!(
         mutable_set.len(),
         2,

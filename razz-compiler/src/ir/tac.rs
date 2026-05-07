@@ -1,6 +1,5 @@
 use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, TypeKind}, ir::basic_block::BlockId};
 
-type TempId = u32;
 
 pub enum TACTerminator {
     Return(Option<TACOperand>), 
@@ -11,12 +10,14 @@ pub enum TACTerminator {
     },
 }
 
+pub type TempId = u32;
+pub type Dest = Temp;
+
 pub struct Temp {
     pub id: TempId, 
     pub ty: TypeKind,
 }
 
-type Dest = Temp;
 
 pub enum TACOperand {
     Temp(Temp), 
@@ -81,7 +82,7 @@ pub enum TACInstruction {
     Construct{
         target: Dest, 
         ty: TypeKind,
-        name_ty: Vec<FieldInit>,
+        fields: Vec<FieldInit>,
     },
     /// HTTP GET 
     /// <target> = GET <ep>
