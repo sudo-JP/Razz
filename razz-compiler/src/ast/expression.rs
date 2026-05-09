@@ -34,7 +34,7 @@ pub enum UnOpKind {
     Minus, 
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Literal {
     Int(i32),
     Float(f64),

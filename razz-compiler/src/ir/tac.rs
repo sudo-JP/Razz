@@ -13,6 +13,7 @@ pub enum TACTerminator {
 pub type TempId = u32;
 pub type Dest = Temp;
 
+#[derive(Clone, Copy)]
 pub struct Temp {
     pub id: TempId, 
     pub ty: TypeKind,
@@ -35,7 +36,7 @@ pub struct FieldInit {
 pub enum TACInstruction {
     /// Binary Op
     /// <target> = <left> <op> <right>
-    BinOp{
+    BinOp {
         target: Dest, 
         left: TACOperand,
         op: BinOpKind,
@@ -43,7 +44,7 @@ pub enum TACInstruction {
     }, 
     /// Unary Op
     /// <target> = <op> <value>
-    UnOp{
+    UnOp {
         target: Dest, 
         op: UnOpKind,
         value: TACOperand, 
@@ -51,48 +52,48 @@ pub enum TACInstruction {
     /// Function call 
     /// <target> = <func>(foo: 1, bar: 2)
     /// <func>(foo: 1, bar: 2)
-    Call{
+    Call {
         target: Option<Dest>, 
         args: Vec<TACOperand>,
         func: String,
     },
     /// Field Load
     /// <target> = <obj>-><key>
-    FieldLoad{
+    FieldLoad {
         target: Dest, 
         obj: TACOperand, 
         key: String, 
     },
     /// Field Store
     /// <obj>-><key> = <value>
-    FieldStore{
+    FieldStore {
         obj: TACOperand, 
         key: String, 
         value: TACOperand,
     },
     /// Copy, simple assignment 
     /// <target> = <value>
-    Copy{
+    Copy {
         target: Dest, 
         value: TACOperand,
     }, 
     /// Construct for struct
     /// t1 = Color { r: t0, g: 5, b: t2 }
     /// <target> = <ty> { (<name>: <operand>)* }.
-    Construct{
+    Construct {
         target: Dest, 
         ty: TypeKind,
         fields: Vec<FieldInit>,
     },
     /// HTTP GET 
     /// <target> = GET <ep>
-    HTTPGet{
+    HTTPGet {
         target: Dest, 
         ep: EndpointKind,
     },
     /// HTTP Write type 
     /// POST <ep> <value>
-    HTTPWrite{
+    HTTPWrite {
         method: HTTPMethodKind,
         ep: EndpointKind, 
         value: TACOperand,
