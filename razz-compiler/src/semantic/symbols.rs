@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::ast::{NodeId, TypeKind};
 
 
-// WARN: this maybe slow because we allocating string each time, use arena
+// PERF: this maybe slow because we allocating string each time, use arena
 // allocator in the future
 pub struct SymbolTable {
     scopes: Vec<HashMap<String, (TypeKind, NodeId)>>,

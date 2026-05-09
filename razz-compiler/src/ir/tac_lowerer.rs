@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{ast::{expression::{Expr, ExprKind, Literal}, NodeId, TypeKind}, ir::{basic_block::BasicBlock, tac::{TACInstruction, TACOperand, TACTerminator, Temp}}};
+use crate::{ast::{expression::{Endpoint, Expr, ExprKind}, statement::{Block, CompoundOp, ElseIf, HTTPMethod, Stmt, StmtKind}, NodeId, Type, TypeKind}, ir::{basic_block::BasicBlock, tac::{FieldInit, TACInstruction, TACOperand, TACTerminator, Temp}}};
 
 pub struct TACLowerer {
     temp_counter: u32, 
@@ -59,10 +59,64 @@ impl TACLowerer {
                 self.emit(TACInstruction::Call { target: Some(temp), args: args_opr, func: name.node.to_string() });
                 TACOperand::Temp(temp)
             },
+            ExprKind::FieldAccess { obj, key } => {
+                let temp = self.expr_temp(expr);
+                let obj_opr = self.lower_expr(&obj);
+                self.emit(TACInstruction::FieldLoad { target: temp, obj: obj_opr, key: key.node.to_string() });
+                TACOperand::Temp(temp)
+            },
+            ExprKind::StructLiteral { ty, fields } => {
+                let temp = self.expr_temp(expr);
+                let field_init_vec = fields.iter()
+                    .map(|field| {
+                        FieldInit{
+                            name: field.key.node.to_string(), 
+                            value: self.lower_expr(&field.value),
+                        }
+                    })
+                    .collect();
+                self.emit(TACInstruction::Construct { target: temp, ty: ty.node, fields: field_init_vec });
+                TACOperand::Temp(temp)
+            },
+            ExprKind::HTTPRequest(ep) => {
+                let temp = self.expr_temp(expr);
+                self.emit(TACInstruction::HTTPGet { target: temp, ep: ep.node });
+                TACOperand::Temp(temp)
+            },
             ExprKind::Constant(lit) => TACOperand::Const(lit.clone()),
             ExprKind::Ident(var) => TACOperand::Var(var.to_string()),
-            _ => unreachable!()
         }
+    }
+
+    fn lower_stmt(&mut self, stmt: &Stmt) {
+        match &stmt.kind {
+            StmtKind::Assign { target, expr, .. } => self.lower_assign(target, expr),
+            StmtKind::CompoundAssign { target, op, expr } => self.lower_compound_assign(target, op, expr),
+            StmtKind::While { cond, body } => self.lower_while(cond, body),
+            StmtKind::For { decl, cond, update, body } => self.lower_for(decl, cond, update, body),
+            StmtKind::If { cond, body, else_ifs, else_body } => self.lower_if(cond, body, else_ifs, else_body),
+            StmtKind::HTTPRequest { method, endpoint, body } => self.lower_http_req(method, endpoint, body),
+            StmtKind::Return(expr) => todo!(), 
+            StmtKind::Expr(expr) => todo!(),
+        }
+    }
+
+    fn lower_assign(&mut self, target: &Expr, expr: &Expr) {
+    }
+
+    fn lower_compound_assign(&mut self, target: &Expr, op: &CompoundOp, expr: &Expr) {
+    }
+
+    fn lower_while(&mut self, cond: &Expr, body: &Block) {
+    }
+
+    fn lower_for(&mut self, decl: &Option<Box<Stmt>>, cond: &Option<Expr>, update: &[Stmt], body: &Block) {
+    }
+
+    fn lower_if(&mut self, cond: &Expr, body: &Block, else_ifs: &[ElseIf], else_body: &Option<Block>) {
+    }
+
+    fn lower_http_req(&mut self, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
     }
 
 }

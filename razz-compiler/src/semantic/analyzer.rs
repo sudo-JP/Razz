@@ -87,6 +87,10 @@ impl<'ast> SemanticAnalyzer<'ast> {
     /// The if has to have an else which should also contains 
     /// a return to guaranteed returning
     fn stmt_returns(&self, stmt: &Stmt) -> bool {
+
+        // PERF: Vec<bool> can be optimize, instead of storing 
+        // Vec<bool>, we can do an implementation such that its a bitmap, 
+        // i.e 0x0 for 4 elements bool
         match &stmt.kind {
             StmtKind::Return(_) => true, 
             StmtKind::If { body, else_ifs, else_body, .. } => {

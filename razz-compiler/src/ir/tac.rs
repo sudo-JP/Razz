@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, TypeKind}, ir::basic_block::BlockId};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, ir::basic_block::BlockId};
 
 
 pub enum TACTerminator {
@@ -82,7 +82,7 @@ pub enum TACInstruction {
     /// <target> = <ty> { (<name>: <operand>)* }.
     Construct {
         target: Dest, 
-        ty: TypeKind,
+        ty: SpecificTypeKind,
         fields: Vec<FieldInit>,
     },
     /// HTTP GET 
