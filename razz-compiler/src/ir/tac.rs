@@ -2,7 +2,7 @@ use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, stat
 
 
 pub enum TACTerminator {
-    Return(Option<TACOperand>), 
+    Return(TACOperand), 
     Goto(BlockId), 
     IfGoto{
         cond: TACOperand, 
@@ -11,7 +11,10 @@ pub enum TACTerminator {
 }
 
 pub type TempId = u32;
-pub type Dest = Temp;
+pub enum Dest {
+    Temp(Temp), 
+    Var(String), 
+}
 
 #[derive(Clone, Copy)]
 pub struct Temp {
