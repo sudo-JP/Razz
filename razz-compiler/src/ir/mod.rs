@@ -1,3 +1,3 @@
 pub mod basic_block;
-pub mod tac;
-pub mod tac_lowerer;
+pub mod ssa;
+pub mod ssa_lowerer;

@@ -1,20 +1,17 @@
 use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, ir::basic_block::BlockId};
 
 
-pub enum TACTerminator {
-    Return(TACOperand), 
+pub enum SSATerminator {
+    Return(SSAOperand), 
     Goto(BlockId), 
     IfGoto{
-        cond: TACOperand, 
+        cond: SSAOperand, 
         label: BlockId,
     },
 }
 
 pub type TempId = u32;
-pub enum Dest {
-    Temp(Temp), 
-    Var(String), 
-}
+pub type Dest = Temp;
 
 #[derive(Clone, Copy)]
 pub struct Temp {
@@ -23,62 +20,60 @@ pub struct Temp {
 }
 
 
-pub enum TACOperand {
+#[derive(Clone)]
+pub enum SSAOperand {
     Temp(Temp), 
-    Var(String), 
     Const(Literal),
 }
 
 pub struct FieldInit {
     pub name: String,
-    pub value: TACOperand,
+    pub value: SSAOperand,
 }
 
-/// Three address code instruction 
-/// At most three address
-pub enum TACInstruction {
+pub enum SSAInstruction {
     /// Binary Op
     /// <target> = <left> <op> <right>
     BinOp {
         target: Dest, 
-        left: TACOperand,
+        left: SSAOperand,
         op: BinOpKind,
-        right: TACOperand, 
+        right: SSAOperand, 
     }, 
     /// Unary Op
     /// <target> = <op> <value>
     UnOp {
         target: Dest, 
         op: UnOpKind,
-        value: TACOperand, 
+        value: SSAOperand, 
     },
     /// Function call 
     /// <target> = <func>(foo: 1, bar: 2)
     /// <func>(foo: 1, bar: 2)
     Call {
         target: Option<Dest>, 
-        args: Vec<TACOperand>,
+        args: Vec<SSAOperand>,
         func: String,
     },
     /// Field Load
     /// <target> = <obj>-><key>
     FieldLoad {
         target: Dest, 
-        obj: TACOperand, 
+        obj: SSAOperand, 
         key: String, 
     },
     /// Field Store
     /// <obj>-><key> = <value>
     FieldStore {
-        obj: TACOperand, 
+        obj: SSAOperand, 
         key: String, 
-        value: TACOperand,
+        value: SSAOperand,
     },
     /// Copy, simple assignment 
     /// <target> = <value>
     Copy {
         target: Dest, 
-        value: TACOperand,
+        value: SSAOperand,
     }, 
     /// Construct for struct
     /// t1 = Color { r: t0, g: 5, b: t2 }
@@ -99,6 +94,6 @@ pub enum TACInstruction {
     HTTPWrite {
         method: HTTPMethodKind,
         ep: EndpointKind, 
-        value: TACOperand,
+        value: SSAOperand,
     },
 }
