@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use clap::ValueEnum;
 use crate::ast::{NodeId, Program, TypeKind};
 use crate::compiler::error::CompilerError;
+use crate::ir::ssa_lowerer::SSALowerer;
 use crate::lexer::tokens::Token;
 
 use crate::lexer::lexer::Lexer;
@@ -64,6 +65,10 @@ impl Compiler {
         if matches!(self.flag, CompilerStage::SemanticAnalysis) {
             return Ok(CompilerOutput::SemanticAnalysis(mutable_set, type_table));
         }
+
+        //  ============= IR LOWERING (SSA at least) ============= 
+        let lowerer = SSALowerer::new(type_table);
+        let _ = lowerer.lower(&prog);
 
         Ok(CompilerOutput::Codegen)
     }

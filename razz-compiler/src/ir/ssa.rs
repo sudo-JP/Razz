@@ -96,4 +96,8 @@ pub enum SSAInstruction {
         ep: EndpointKind, 
         value: SSAOperand,
     },
+    Phi {
+        target: Dest, 
+        args: Vec<Temp>,
+    },
 }

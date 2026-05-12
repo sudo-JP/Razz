@@ -1,12 +1,11 @@
 //! SSA Lowering from AST 
 //! Implementation of this paper: https://c9x.me/compile/bib/braun13cc.pdf
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::mem;
 
-use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
-statement::{Block, CompoundOp, CompoundOpKind, ElseIf, HTTPMethod, Stmt, StmtKind}, NodeId, TypeKind}, 
-ir::{basic_block::{BasicBlock, BlockId}, ssa::{Dest, FieldInit, SSAInstruction, SSAOperand, SSATerminator, Temp}}};
+use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, NodeId, Program, TypeKind}, 
+ir::{basic_block::{BasicBlock, BlockId}, ssa::{FieldInit, SSAInstruction, SSAOperand, SSATerminator, Temp}}};
 
 type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
 
@@ -16,20 +15,43 @@ pub struct SSALowerer<'ast> {
     blocks: Vec<SSABlock>,
     type_table: HashMap<NodeId, TypeKind>,
     curr_instrs: Vec<SSAInstruction>,
+    curr_block: BlockId,
 
     // Braun's stuff
     current_def: HashMap<&'ast str, HashMap<BlockId, SSAOperand>>,
+    sealed_block: HashSet<BlockId>,
+    incomplete_phis: HashMap<BlockId, HashMap<&'ast str, SSAInstruction>>,
+    preds: HashMap<BlockId, Vec<BlockId>>, // predecessor of a block
 }
 
 impl<'ast> SSALowerer<'ast> {
     pub fn new(type_table: HashMap<NodeId, TypeKind>) -> Self {
         Self { 
             temp_counter: 0, 
-            block_counter: 0 , 
+            block_counter: 0, 
+            curr_block: 0,
             blocks: vec![],
             type_table,
             curr_instrs: vec![],
             current_def: HashMap::new(),
+            sealed_block: HashSet::new(),
+            incomplete_phis: HashMap::new(),
+            preds: HashMap::new(),
+        }
+    }
+
+    pub fn lower(mut self, prog: &'ast Program) -> Vec<SSABlock> {
+        for f in &prog.funcs {
+            self.lower_fn_decl(&f.node);
+        }
+        self.blocks
+    }
+
+    fn lower_fn_decl(&mut self, fn_decl: &'ast FnDecl) {
+        // lower fn 
+        
+        for stmt in &fn_decl.body.stmts {
+            self.lower_stmt(stmt);
         }
     }
 
@@ -57,16 +79,25 @@ impl<'ast> SSALowerer<'ast> {
             .insert(block_id, value);
     }
 
-    fn read_variable(&mut self, variable: &'ast str, block_id: BlockId) -> SSAOperand {
+    fn read_variable(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
         if let Some(block) = self.current_def.get(variable)
             && let Some(value) = block.get(&block_id) {
                 value.clone()
         } else {
-            self.read_variable_recursive(variable, block_id)
+            self.read_variable_recursive(variable, variable_id, block_id)
         }
     }
 
-    fn read_variable_recursive(&mut self, variable: &'ast str, block_id: BlockId) -> SSAOperand {
+    fn read_variable_recursive(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
+        if !self.sealed_block.contains(&block_id) {
+            let ty = self.type_table.get(&variable_id)
+                .expect("Type must resolved within semantic");
+            let val = SSAInstruction::Phi { target: self.new_temp(*ty), args: vec![] };
+            self.incomplete_phis
+                .entry(block_id)
+                .or_insert_with(HashMap::new)
+                .insert(variable, val);
+        } 
         todo!()
     }
 
@@ -119,7 +150,7 @@ impl<'ast> SSALowerer<'ast> {
                 SSAOperand::Temp(temp)
             },
             ExprKind::Constant(lit) => SSAOperand::Const(lit.clone()),
-            ExprKind::Ident(var) => self.read_variable(&var, self.block_counter),
+            ExprKind::Ident(var) => self.read_variable(&var, expr.id, self.block_counter),
         }
     }
 
@@ -198,10 +229,10 @@ impl<'ast> SSALowerer<'ast> {
 
     // TODO
     fn seal_block(&mut self, term: SSATerminator) {
-        let id = self.block_counter;
+        self.curr_block = self.block_counter;
         self.block_counter += 1; 
         let block = BasicBlock{
-            id, 
+            id: self.curr_block,
             instrs: mem::take(&mut self.curr_instrs), 
             term: term,
         };
