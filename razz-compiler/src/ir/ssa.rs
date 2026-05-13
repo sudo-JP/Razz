@@ -13,7 +13,7 @@ pub enum SSATerminator {
 pub type TempId = u32;
 pub type Dest = Temp;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Temp {
     pub id: TempId, 
     pub ty: TypeKind,

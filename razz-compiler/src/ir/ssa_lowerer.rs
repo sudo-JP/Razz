@@ -89,7 +89,7 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn read_variable_recursive(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
-        if !self.sealed_block.contains(&block_id) {
+        let val = if !self.sealed_block.contains(&block_id) {
             let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
             let val = SSAInstruction::Phi { target: self.new_temp(*ty), args: vec![] };
@@ -97,8 +97,68 @@ impl<'ast> SSALowerer<'ast> {
                 .entry(block_id)
                 .or_insert_with(HashMap::new)
                 .insert(variable, val);
-        } 
+            //value
+            todo!()
+        } else if let Some(preds) = self.preds.get(&block_id) 
+        && preds.len() == 1{
+            //self.read_variable(variable, variable_id, preds[0])
+                
+            todo!()
+        } else {
+            /*let ty = self.type_table.get(&variable_id)
+                .expect("Type must resolved within semantic");
+            let val = SSAInstruction::Phi { target: self..self.new_temp(ty), args: vec![] };
+            self.write_variable(variable, block_id, val);
+            val*/
+            todo!()
+        };
         todo!()
+    }
+
+    //fn add_phi_operands(variable: &'ast str, phi: )
+
+    /// Remove trivial phi
+    /// A trivial phi is a phi containing only same temp 
+    /// or a phi that references itself 
+    /// Arg is destructed phi
+    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[Temp]) -> Option<Temp> {
+        let mut same: Option<Temp> = None;
+        for op in args {
+            // Self references
+            // i.e t1 = Phi(t1)
+            if let Some(same_temp) = &same 
+                && same_temp == op {
+                continue;
+            } 
+            // If the value reappears 
+            // i.e t1 = Phi(t2, t2)
+            else if op == target {
+                continue;
+            } 
+            if same.is_some() {
+                return None;
+            }
+
+            same = Some(*op);
+        }
+        // Undefined since semantic make sure variables 
+        // are defined 
+        let Some(same) = same else {
+            unreachable!()
+        };
+        self.replace_uses(target, &same);
+
+        Some(same)
+    }
+
+    fn replace_uses(&mut self, old: &Temp, new: &Temp) {
+        for block in self.blocks.as_mut_slice() {
+            for instr in block.instrs.as_mut_slice() {
+                match instr {
+                    _ => todo!()
+                }
+            }
+        }
     }
 
     // Expr lowering 
