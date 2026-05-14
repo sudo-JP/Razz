@@ -155,7 +155,60 @@ impl<'ast> SSALowerer<'ast> {
         for block in self.blocks.as_mut_slice() {
             for instr in block.instrs.as_mut_slice() {
                 match instr {
-                    _ => todo!()
+                    SSAInstruction::BinOp { target, left, right, .. } => {
+                        if target == old {
+                            *target = *new;
+                        }
+                        if let SSAOperand::Temp(t) = left
+                            && t == old {
+                            *left = SSAOperand::Temp(*new);
+                        }
+                        if let SSAOperand::Temp(t) = right 
+                            && t == old {
+                            *right = SSAOperand::Temp(*new);
+                        }
+                    },
+                    SSAInstruction::UnOp { target, value, .. } => {
+                        if target == old {
+                            *target = *new;
+                        }
+                        if let SSAOperand::Temp(t) = value
+                            && t == old {
+                            *value = SSAOperand::Temp(*new);
+                        }
+                    },
+                    SSAInstruction::Call { target, args, .. } => {
+                        if let Some(t) = target 
+                            && t == old {
+                            *t = *new;
+                        }
+                        for arg in args {
+                            if let SSAOperand::Temp(t) = arg 
+                                && t == old {
+                                *arg = SSAOperand::Temp(*new);
+                            }
+                        }
+                    },
+                    SSAInstruction::FieldLoad { target, obj, key } => {
+                    },
+                    SSAInstruction::FieldStore { obj, key, value } => {
+
+                    },
+                    SSAInstruction::Copy { target, value } => {
+
+                    },
+                    SSAInstruction::Construct { target, ty, fields } => {
+
+                    },
+                    SSAInstruction::HTTPGet { target, ep } => {
+
+                    },
+                    SSAInstruction::HTTPWrite { method, ep, value } => {
+
+                    }, 
+                    SSAInstruction::Phi { target, args } => {
+
+                    }
                 }
             }
         }
