@@ -152,62 +152,68 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn replace_uses(&mut self, old: &Temp, new: &Temp) {
+        let replace_op = |op: &mut SSAOperand| {
+            if let SSAOperand::Temp(t) = op 
+                && t == old {
+                *op = SSAOperand::Temp(*new);
+            }         
+        };
+
+        let replace_temp = |temp: &mut Temp| {
+            if temp == old {
+                *temp = *new;
+            }
+        };
+
         for block in self.blocks.as_mut_slice() {
             for instr in block.instrs.as_mut_slice() {
                 match instr {
                     SSAInstruction::BinOp { target, left, right, .. } => {
-                        if target == old {
-                            *target = *new;
-                        }
-                        if let SSAOperand::Temp(t) = left
-                            && t == old {
-                            *left = SSAOperand::Temp(*new);
-                        }
-                        if let SSAOperand::Temp(t) = right 
-                            && t == old {
-                            *right = SSAOperand::Temp(*new);
-                        }
+                        replace_temp(target);
+                        replace_op(left);
+                        replace_op(right);
                     },
                     SSAInstruction::UnOp { target, value, .. } => {
-                        if target == old {
-                            *target = *new;
-                        }
-                        if let SSAOperand::Temp(t) = value
-                            && t == old {
-                            *value = SSAOperand::Temp(*new);
-                        }
+                        replace_temp(target);
+                        replace_op(value);
                     },
                     SSAInstruction::Call { target, args, .. } => {
-                        if let Some(t) = target 
-                            && t == old {
-                            *t = *new;
+                        if let Some(t) = target {
+                            replace_temp(t);
                         }
                         for arg in args {
-                            if let SSAOperand::Temp(t) = arg 
-                                && t == old {
-                                *arg = SSAOperand::Temp(*new);
-                            }
+                            replace_op(arg);
                         }
                     },
-                    SSAInstruction::FieldLoad { target, obj, key } => {
+                    SSAInstruction::FieldLoad { target, obj, .. } => {
+                        replace_temp(target);
+                        replace_op(obj);
                     },
-                    SSAInstruction::FieldStore { obj, key, value } => {
-
+                    SSAInstruction::FieldStore { obj, value, .. } => {
+                        replace_op(obj);
+                        replace_op(value);
                     },
                     SSAInstruction::Copy { target, value } => {
-
+                        replace_temp(target);
+                        replace_op(value);
                     },
-                    SSAInstruction::Construct { target, ty, fields } => {
-
+                    SSAInstruction::Construct { target, fields, .. } => {
+                        replace_temp(target);
+                        for field in fields {
+                            replace_op(&mut field.value);
+                        }
                     },
-                    SSAInstruction::HTTPGet { target, ep } => {
-
+                    SSAInstruction::HTTPGet { target, .. } => {
+                        replace_temp(target);
                     },
-                    SSAInstruction::HTTPWrite { method, ep, value } => {
-
+                    SSAInstruction::HTTPWrite { value, .. } => {
+                        replace_op(value);
                     }, 
                     SSAInstruction::Phi { target, args } => {
-
+                        replace_temp(target);
+                        for arg in args {
+                            replace_temp(arg);
+                        }
                     }
                 }
             }
