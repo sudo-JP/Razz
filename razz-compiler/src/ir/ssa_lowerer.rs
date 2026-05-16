@@ -146,78 +146,109 @@ impl<'ast> SSALowerer<'ast> {
         let Some(same) = same else {
             unreachable!()
         };
-        self.replace_uses(target, &same);
+
+        let users = self.replace_uses(target, &same);
+        // Find the user and replace that 
+        for (block_id, instr_id) in users {
+            let phi_data = {
+                let block = self.blocks.iter()
+                    .find(|b| b.id == block_id)
+                    .expect("Valid block");
+                let instr = block.instrs
+                    .get(instr_id)
+                    .expect("Valid instr");
+                if let SSAInstruction::Phi { target, args } = instr {
+                    Some((*target, args.clone()))
+                } else {
+                    None
+                }
+            };
+            if let Some((target, args)) = phi_data {
+                self.try_remove_trivial_phi(&target, &args);
+            }
+        }
 
         Some(same)
     }
 
-    fn replace_uses(&mut self, old: &Temp, new: &Temp) {
+    fn replace_uses(&mut self, old: &Temp, new: &Temp) -> Vec<(BlockId, usize)> {
+        let mut users = vec![];
+
+        // Lambda funcs for less boiler plate code 
         let replace_op = |op: &mut SSAOperand| {
             if let SSAOperand::Temp(t) = op 
                 && t == old {
                 *op = SSAOperand::Temp(*new);
-            }         
+                true
+            } else { false }   
         };
 
         let replace_temp = |temp: &mut Temp| {
             if temp == old {
                 *temp = *new;
-            }
+                true 
+            } else { false }
         };
 
+
         for block in self.blocks.as_mut_slice() {
-            for instr in block.instrs.as_mut_slice() {
-                match instr {
+            for (instr_id, instr) in block.instrs.iter_mut().enumerate() {
+                let should_push = match instr {
                     SSAInstruction::BinOp { target, left, right, .. } => {
-                        replace_temp(target);
-                        replace_op(left);
-                        replace_op(right);
+                        replace_temp(target) ||
+                        replace_op(left) || 
+                        replace_op(right) 
                     },
                     SSAInstruction::UnOp { target, value, .. } => {
-                        replace_temp(target);
-                        replace_op(value);
+                        replace_temp(target) ||
+                        replace_op(value)
                     },
                     SSAInstruction::Call { target, args, .. } => {
-                        if let Some(t) = target {
-                            replace_temp(t);
-                        }
+                        let mut has_phi = if let Some(t) = target {
+                            replace_temp(t)
+                        } else { false };
                         for arg in args {
-                            replace_op(arg);
+                            has_phi |= replace_op(arg);
                         }
+                        has_phi
                     },
                     SSAInstruction::FieldLoad { target, obj, .. } => {
-                        replace_temp(target);
-                        replace_op(obj);
+                        replace_temp(target) ||
+                        replace_op(obj)
                     },
                     SSAInstruction::FieldStore { obj, value, .. } => {
-                        replace_op(obj);
-                        replace_op(value);
+                        replace_op(obj) ||
+                        replace_op(value)
                     },
                     SSAInstruction::Copy { target, value } => {
-                        replace_temp(target);
-                        replace_op(value);
+                        replace_temp(target) ||
+                        replace_op(value)
                     },
                     SSAInstruction::Construct { target, fields, .. } => {
-                        replace_temp(target);
+                        let mut has_phi = replace_temp(target);
                         for field in fields {
-                            replace_op(&mut field.value);
+                            has_phi |= replace_op(&mut field.value);
                         }
+                        has_phi
                     },
                     SSAInstruction::HTTPGet { target, .. } => {
-                        replace_temp(target);
+                        replace_temp(target)
                     },
                     SSAInstruction::HTTPWrite { value, .. } => {
-                        replace_op(value);
+                        replace_op(value)
                     }, 
                     SSAInstruction::Phi { target, args } => {
-                        replace_temp(target);
+                        let mut has_phi = replace_temp(target);
                         for arg in args {
-                            replace_temp(arg);
+                            has_phi |= replace_temp(arg);
                         }
-                    }
-                }
+                        has_phi
+                    },
+                };
+                if should_push { users.push((block.id, instr_id)); }
             }
         }
+        users
     }
 
     // Expr lowering 

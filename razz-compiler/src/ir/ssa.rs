@@ -26,11 +26,13 @@ pub enum SSAOperand {
     Const(Literal),
 }
 
+#[derive(Clone)]
 pub struct FieldInit {
     pub name: String,
     pub value: SSAOperand,
 }
 
+#[derive(Clone)]
 pub enum SSAInstruction {
     /// Binary Op
     /// <target> = <left> <op> <right>
