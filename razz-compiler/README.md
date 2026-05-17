@@ -31,6 +31,7 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 
 ### IR 
 - I Initially wanted to write TAC lowering. However, I saw that SSA provides a better optimization passes for things like DCE, etc so now I have to read a paper to transform AST -> SSA. 
+- This is the part that I wish to write the compiler in OCaml, or Haskell. I genuinely hates the borrow checker in this part, usually I'm fine (and happy with it being around), but this time, the borrow checker hinders me write the code accordingly to the paper. 
 
 ## AI Usage 
 I asks AI to help me write tests for me, code review and fix my own bugs when tests failed. I tried to tell the AI to treat it like black box.

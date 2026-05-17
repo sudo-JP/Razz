@@ -89,7 +89,7 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn read_variable_recursive(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
-        let val = if !self.sealed_block.contains(&block_id) {
+        if !self.sealed_block.contains(&block_id) {
             let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
             let val = SSAInstruction::Phi { target: self.new_temp(*ty), args: vec![] };
@@ -102,7 +102,6 @@ impl<'ast> SSALowerer<'ast> {
         } else if let Some(preds) = self.preds.get(&block_id) 
         && preds.len() == 1{
             //self.read_variable(variable, variable_id, preds[0])
-                
             todo!()
         } else {
             /*let ty = self.type_table.get(&variable_id)
@@ -111,18 +110,28 @@ impl<'ast> SSALowerer<'ast> {
             self.write_variable(variable, block_id, val);
             val*/
             todo!()
-        };
-        todo!()
+        }
     }
 
-    //fn add_phi_operands(variable: &'ast str, phi: )
+    fn add_phi_operands(&mut self, 
+        variable: &'ast str, variable_id: NodeId,   // Variables
+        block_id: BlockId,                          // Blocks for preds
+        target: &Temp, args: &mut Vec<SSAOperand>)  // Destructed Phi
+    -> Option<SSAOperand> {
+        let preds = self.preds.get(&block_id).cloned().unwrap_or_default();
+        for pred in preds {
+            let op = self.read_variable(variable, variable_id, pred);
+            args.push(op);
+        }
+        self.try_remove_trivial_phi(target, args)
+    }
 
     /// Remove trivial phi
     /// A trivial phi is a phi containing only same temp 
     /// or a phi that references itself 
     /// Arg is destructed phi
-    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[Temp]) -> Option<Temp> {
-        let mut same: Option<Temp> = None;
+    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[SSAOperand]) -> Option<SSAOperand> {
+        let mut same: Option<SSAOperand> = None;
         for op in args {
             // Self references
             // i.e t1 = Phi(t1)
@@ -132,14 +141,15 @@ impl<'ast> SSALowerer<'ast> {
             } 
             // If the value reappears 
             // i.e t1 = Phi(t2, t2)
-            else if op == target {
+            else if let SSAOperand::Temp(t) = op 
+                && t == target {
                 continue;
             } 
             if same.is_some() {
                 return None;
             }
 
-            same = Some(*op);
+            same = Some(op.clone());
         }
         // Undefined since semantic make sure variables 
         // are defined 
@@ -147,7 +157,7 @@ impl<'ast> SSALowerer<'ast> {
             unreachable!()
         };
 
-        let users = self.replace_uses(target, &same);
+        let users = self.replace_uses(&SSAOperand::Temp(*target), &same);
         // Find the user and replace that 
         for (block_id, instr_id) in users {
             let phi_data = {
@@ -171,22 +181,25 @@ impl<'ast> SSALowerer<'ast> {
         Some(same)
     }
 
-    fn replace_uses(&mut self, old: &Temp, new: &Temp) -> Vec<(BlockId, usize)> {
+    fn replace_uses(&mut self, old: &SSAOperand, new: &SSAOperand) -> Vec<(BlockId, usize)> {
         let mut users = vec![];
 
         // Lambda funcs for less boiler plate code 
         let replace_op = |op: &mut SSAOperand| {
-            if let SSAOperand::Temp(t) = op 
-                && t == old {
-                *op = SSAOperand::Temp(*new);
+            if op == old {
+                *op = new.clone();
                 true
             } else { false }   
         };
 
         let replace_temp = |temp: &mut Temp| {
-            if temp == old {
-                *temp = *new;
-                true 
+            if let SSAOperand::Temp(t) = old 
+                && t == temp {
+                if let SSAOperand::Temp(new_t) = new {
+                    *temp = *new_t;
+                    return true; 
+                }
+                false
             } else { false }
         };
 
@@ -240,7 +253,7 @@ impl<'ast> SSALowerer<'ast> {
                     SSAInstruction::Phi { target, args } => {
                         let mut has_phi = replace_temp(target);
                         for arg in args {
-                            has_phi |= replace_temp(arg);
+                            has_phi |= replace_op(arg);
                         }
                         has_phi
                     },

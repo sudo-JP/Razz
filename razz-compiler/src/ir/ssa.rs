@@ -20,7 +20,7 @@ pub struct Temp {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum SSAOperand {
     Temp(Temp), 
     Const(Literal),
@@ -100,6 +100,6 @@ pub enum SSAInstruction {
     },
     Phi {
         target: Dest, 
-        args: Vec<Temp>,
+        args: Vec<SSAOperand>,
     },
 }
