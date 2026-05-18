@@ -88,29 +88,50 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
+    fn push_to_specific_block(&mut self, instr: SSAInstruction, block_id: BlockId) {
+        self.blocks.iter_mut()
+            .find(|block| block.id == block_id)
+            .map(|block| block.instrs.push(instr));
+    }
+
+    /// According to the book, there are three cases 
+    /// If the current block is not sealed, we construct a temporary Phi and 
+    /// come back to that 
+    /// If the pred is 1, we want to optimize it by just read the var,
+    /// also is the base case 
+    /// Otherwise, if in a cycle, we want to eliminate trivial phis 
+    /// and potentially break the cycles. 
     fn read_variable_recursive(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
-        if !self.sealed_block.contains(&block_id) {
+        let val = if !self.sealed_block.contains(&block_id) {
             let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
-            let val = SSAInstruction::Phi { target: self.new_temp(*ty), args: vec![] };
+            let temp = self.new_temp(*ty);
+            let val = SSAInstruction::Phi { target: temp, args: vec![] };
             self.incomplete_phis
                 .entry(block_id)
                 .or_insert_with(HashMap::new)
-                .insert(variable, val);
-            //value
-            todo!()
+                .insert(variable, val.clone());
+
+            self.push_to_specific_block(val, block_id);
+            SSAOperand::Temp(temp)
         } else if let Some(preds) = self.preds.get(&block_id) 
         && preds.len() == 1{
-            //self.read_variable(variable, variable_id, preds[0])
-            todo!()
+            self.read_variable(variable, variable_id, preds[0])
         } else {
-            /*let ty = self.type_table.get(&variable_id)
+            let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
-            let val = SSAInstruction::Phi { target: self..self.new_temp(ty), args: vec![] };
-            self.write_variable(variable, block_id, val);
-            val*/
-            todo!()
-        }
+            let temp = self.new_temp(*ty);
+            let mut args = vec![];
+            self.write_variable(variable, block_id, SSAOperand::Temp(temp));
+            let try_op = self.add_phi_operands(variable, variable_id, block_id, &temp, &mut args);
+
+            let val = SSAInstruction::Phi { target: temp, args };
+            self.push_to_specific_block(val, block_id);
+
+            try_op.unwrap_or(SSAOperand::Temp(temp))
+        };
+        self.write_variable(variable, block_id, val.clone());
+        val
     }
 
     fn add_phi_operands(&mut self, 
