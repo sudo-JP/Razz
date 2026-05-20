@@ -350,7 +350,7 @@ impl<'ast> SSALowerer<'ast> {
                 SSAOperand::Temp(temp)
             },
             ExprKind::Constant(lit) => SSAOperand::Const(lit.clone()),
-            ExprKind::Ident(var) => self.read_variable(&var, expr.id, self.block_counter),
+            ExprKind::Ident(var) => self.read_variable(&var, expr.id, self.curr_block),
         }
     }
 
@@ -373,12 +373,10 @@ impl<'ast> SSALowerer<'ast> {
     fn lower_assign(&mut self, target: &'ast Expr, expr: &'ast Expr) {
         let expr_opr = self.lower_expr(expr);
         match &target.kind {
-            ExprKind::Ident(ident) => 
-                // TODO:
-                /*self.emit(SSAInstruction::Copy { 
-                target: Dest::Var(ident.to_string()), value: expr_opr 
-            })*/
-                todo!(),
+            ExprKind::Ident(ident) => {
+                self.write_variable(&ident, self.curr_block, expr_opr);
+                self.var_table.insert(&ident, expr.id);
+            }
             ExprKind::FieldAccess { obj, key } => {
                 let obj_opr = self.lower_expr(&obj);
                 self.emit(SSAInstruction::FieldStore { obj: obj_opr, key: key.node.to_string(), value: expr_opr });
@@ -415,16 +413,62 @@ impl<'ast> SSALowerer<'ast> {
         };
     }
 
-    fn lower_while(&mut self, cond: &Expr, body: &Block) {
+    fn next_block_id(&mut self) -> BlockId {
+        let id = self.block_counter;
+        self.block_counter += 1; 
+        id
+    }
+
+    fn add_pred(&mut self, curr: BlockId, pred: BlockId) {
+        self.preds.entry(curr)
+            .or_insert_with(Vec::new)
+            .push(pred);
+    }
+
+    fn lower_while(&mut self, cond: &'ast Expr, body: &'ast Block) {
+        let header_id = self.next_block_id();
+        let body_id = self.next_block_id();
+        let exit_id = self.next_block_id();
+
+        // Body's pred is the header
+        // Header's pred is the body, circular loop
+        // Exit's pred is header 
+        self.add_pred(body_id, header_id);
+        self.add_pred(header_id, body_id);
+        self.add_pred(exit_id, header_id);
+
+        let cond_op = self.lower_expr(cond);
+        self.finish_block(SSATerminator::IfGoto{ 
+            cond: cond_op, 
+            true_label: body_id,
+            false_label: exit_id,
+        });
+
+        self.curr_block = body_id;
+        self.seal_block(body_id);
+        self.seal_block(exit_id);
+        self.lower_block(body);
+        self.finish_block(SSATerminator::Goto(header_id));
+        self.curr_block = exit_id;
+
+        self.seal_block(header_id);
     }
 
     fn lower_for(&mut self, decl: &Option<Box<Stmt>>, cond: &Option<Expr>, update: &[Stmt], body: &Block) {
     }
 
-    fn lower_if(&mut self, cond: &Expr, body: &Block, else_ifs: &[ElseIf], else_body: &Option<Block>) {
+    fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &Option<Block>) {
+        let cond_op = self.lower_expr(cond);
+        self.lower_block(body);
     }
 
     fn lower_http_req(&mut self, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
+    }
+
+    fn lower_block(&mut self, block: &'ast Block) {
+        for stmt in &block.stmts {
+            self.lower_stmt(stmt);
+        }
     }
 
     // TODO

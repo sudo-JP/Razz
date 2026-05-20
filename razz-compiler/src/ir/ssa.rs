@@ -6,7 +6,8 @@ pub enum SSATerminator {
     Goto(BlockId), 
     IfGoto{
         cond: SSAOperand, 
-        label: BlockId,
+        true_label: BlockId,
+        false_label: BlockId,
     },
 }
 
