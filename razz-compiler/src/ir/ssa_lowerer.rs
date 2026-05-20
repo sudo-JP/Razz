@@ -22,6 +22,7 @@ pub struct SSALowerer<'ast> {
     sealed_block: HashSet<BlockId>,
     incomplete_phis: HashMap<BlockId, HashMap<&'ast str, SSAInstruction>>,
     preds: HashMap<BlockId, Vec<BlockId>>, // predecessor of a block
+    var_table: HashMap<&'ast str, NodeId>,
 }
 
 impl<'ast> SSALowerer<'ast> {
@@ -37,6 +38,7 @@ impl<'ast> SSALowerer<'ast> {
             sealed_block: HashSet::new(),
             incomplete_phis: HashMap::new(),
             preds: HashMap::new(),
+            var_table: HashMap::new(),
         }
     }
 
@@ -285,6 +287,20 @@ impl<'ast> SSALowerer<'ast> {
         users
     }
 
+    fn seal_block(&mut self, block_id: BlockId) {
+        if let Some(var_map) = self.incomplete_phis.get(&block_id) {
+            for (variable, instr) in var_map.clone() {
+                let node_id = self.var_table.get(variable)
+                    .expect("Lower assign have to declare");
+                let SSAInstruction::Phi { target, mut args } = instr else {
+                    unreachable!("Must contains only Phi")
+                };
+                self.add_phi_operands(variable, *node_id, block_id, &target, &mut args);
+            }
+        }
+        self.sealed_block.insert(block_id);
+    }
+
     // Expr lowering 
     fn lower_expr(&mut self, expr: &'ast Expr) -> SSAOperand {
         match &expr.kind {
@@ -348,7 +364,7 @@ impl<'ast> SSALowerer<'ast> {
             StmtKind::HTTPRequest { method, endpoint, body } => self.lower_http_req(method, endpoint, body),
             StmtKind::Return(expr) => {
                 let opr = self.lower_expr(expr);
-                self.seal_block(SSATerminator::Return(opr));
+                self.finish_block(SSATerminator::Return(opr));
             }, 
             StmtKind::Expr(expr) => { self.lower_expr(expr); },
         }
@@ -412,7 +428,7 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     // TODO
-    fn seal_block(&mut self, term: SSATerminator) {
+    fn finish_block(&mut self, term: SSATerminator) {
         self.curr_block = self.block_counter;
         self.block_counter += 1; 
         let block = BasicBlock{
