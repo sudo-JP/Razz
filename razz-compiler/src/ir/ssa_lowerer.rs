@@ -455,10 +455,60 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_for(&mut self, decl: &Option<Box<Stmt>>, cond: &Option<Expr>, update: &[Stmt], body: &Block) {
+        let header_id = self.next_block_id();
+        let body_id = self.next_block_id();
+        let exit_id = self.next_block_id();
     }
 
     fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &Option<Block>) {
+        let if_body_id = self.next_block_id();
+        let exit_id = self.next_block_id();
         let cond_op = self.lower_expr(cond);
+        self.add_pred(if_body_id, self.curr_block);
+        self.add_pred(exit_id, if_body_id);
+
+
+        // 1 for header, 1 for body 
+        let else_if_len = else_ifs.len();
+        let mut else_if_blocks_id: Vec<(BlockId, BlockId)> = Vec::with_capacity(else_if_len);
+
+        // Current body pred is the current header
+        for _ in 0..else_if_len {
+            let header_id = self.next_block_id();
+            let body_id = self.next_block_id();
+            self.add_pred(body_id, header_id);
+            self.add_pred(exit_id, body_id);
+            else_if_blocks_id.push((header_id, body_id));
+        }
+
+        // the i + 1 (curr) has pred of i (parent)
+        for i in (0..else_if_len-1).rev() {
+            let (curr_header, _) = else_if_blocks_id[i+1];
+            let (parent_header, _) = else_if_blocks_id[i];
+            self.add_pred(curr_header, parent_header);
+        }
+
+        // The first else if parent is the if 
+        let if_false_conditional_id = if let Some((first_header, _)) = else_if_blocks_id.first() {
+            self.add_pred(*first_header, self.curr_block);
+            *first_header
+        } else if let Some(_) = else_body {
+            let else_id = self.next_block_id();
+            self.add_pred(exit_id, else_id);
+            if let Some((last_header, _)) = else_if_blocks_id.last() {
+                self.add_pred(else_id, *last_header);
+            }
+            else_id
+        } else {
+            exit_id
+        };
+
+        self.finish_block(SSATerminator::IfGoto{ 
+            cond: cond_op, 
+            true_label: if_body_id, 
+            false_label: if_false_conditional_id,
+        });
+
         self.lower_block(body);
     }
 
