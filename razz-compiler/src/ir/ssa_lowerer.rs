@@ -460,7 +460,7 @@ impl<'ast> SSALowerer<'ast> {
         let exit_id = self.next_block_id();
     }
 
-    fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &Option<Block>) {
+    fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &'ast Option<Block>) {
         let if_body_id = self.next_block_id();
         let exit_id = self.next_block_id();
         let cond_op = self.lower_expr(cond);
@@ -488,20 +488,29 @@ impl<'ast> SSALowerer<'ast> {
             self.add_pred(curr_header, parent_header);
         }
 
+        let mut else_id: Option<BlockId> = None;
+
         // The first else if parent is the if 
         let if_false_conditional_id = if let Some((first_header, _)) = else_if_blocks_id.first() {
             self.add_pred(*first_header, self.curr_block);
             *first_header
         } else if let Some(_) = else_body {
-            let else_id = self.next_block_id();
-            self.add_pred(exit_id, else_id);
+            let else_block_id = self.next_block_id();
+            self.add_pred(exit_id, else_block_id);
             if let Some((last_header, _)) = else_if_blocks_id.last() {
-                self.add_pred(else_id, *last_header);
+                else_id = Some(else_block_id);
+                self.add_pred(else_block_id, *last_header);
             }
-            else_id
+            else_block_id
         } else {
             exit_id
         };
+
+        // Seal if body
+        self.curr_block = if_body_id;
+        self.seal_block(if_body_id);
+        self.seal_block(exit_id);
+        self.lower_block(body);
 
         self.finish_block(SSATerminator::IfGoto{ 
             cond: cond_op, 
@@ -509,7 +518,65 @@ impl<'ast> SSALowerer<'ast> {
             false_label: if_false_conditional_id,
         });
 
-        self.lower_block(body);
+        for i in 0..else_if_len-1 {
+            // Get element
+            let (header_id, curr_body_id) = else_if_blocks_id[i];
+            let (next_header_id, _) = else_if_blocks_id[i+1];
+
+            // Lower cond
+            self.curr_block = header_id;
+            let cond_op = self.lower_expr(&else_ifs[i].cond);
+
+            self.finish_block(SSATerminator::IfGoto{ 
+                cond: cond_op, 
+                true_label: curr_body_id, 
+                false_label: next_header_id,
+            });
+
+            // Lower body 
+            self.curr_block = curr_body_id;
+            self.seal_block(curr_body_id);
+            let block = &else_ifs[i].body;
+            self.lower_block(block);
+
+            // Exit point of body
+            self.finish_block(SSATerminator::Goto(exit_id));
+        }
+
+        // Lower the last else if because it wasn't included in for loop
+        if let Some((header_id, body_id)) = else_if_blocks_id.last()
+        && let Some(elif) = else_ifs.last() {
+            // Lower cond 
+            self.curr_block = *header_id;
+            let cond_op = self.lower_expr(&elif.cond);
+            let elif_exit_id = else_id.unwrap_or(exit_id);
+
+            // Exit point of cond 
+            self.finish_block(SSATerminator::IfGoto{ 
+                cond: cond_op, 
+                true_label: *body_id, 
+                false_label: elif_exit_id,
+            });
+            
+            // Lower body 
+            self.curr_block = *body_id;
+            self.seal_block(*body_id);
+            self.lower_block(&elif.body);
+
+            // Exit point of body
+            self.finish_block(SSATerminator::Goto(exit_id));
+        }
+
+        if let Some(else_block) = else_body 
+        && let Some(else_id) = else_id {
+            self.curr_block = else_id;
+            self.seal_block(else_id);
+            self.lower_block(else_block);
+            self.finish_block(SSATerminator::Goto(exit_id));
+        }
+
+        self.curr_block = exit_id;
+        self.seal_block(exit_id);
     }
 
     fn lower_http_req(&mut self, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
