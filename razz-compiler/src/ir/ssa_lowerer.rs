@@ -437,6 +437,7 @@ impl<'ast> SSALowerer<'ast> {
         self.add_pred(header_id, body_id);
         self.add_pred(exit_id, header_id);
 
+        self.curr_block = header_id;
         let cond_op = self.lower_expr(cond);
         self.finish_block(SSATerminator::IfGoto{ 
             cond: cond_op, 
@@ -446,18 +447,58 @@ impl<'ast> SSALowerer<'ast> {
 
         self.curr_block = body_id;
         self.seal_block(body_id);
-        self.seal_block(exit_id);
         self.lower_block(body);
         self.finish_block(SSATerminator::Goto(header_id));
+
         self.curr_block = exit_id;
+        self.seal_block(exit_id);
 
         self.seal_block(header_id);
     }
 
-    fn lower_for(&mut self, decl: &Option<Box<Stmt>>, cond: &Option<Expr>, update: &[Stmt], body: &Block) {
+    fn lower_for(&mut self, decl: &'ast Option<Box<Stmt>>, cond: &'ast Option<Expr>, update: &'ast [Stmt], body: &'ast Block) {
         let header_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
+
+        // Predecessor
+        // Like while loop
+        self.add_pred(body_id, header_id);
+        self.add_pred(header_id, body_id);
+        self.add_pred(exit_id, header_id);
+        
+        if let Some(decl_stmt) = decl {
+            self.lower_stmt(&decl_stmt);
+        }
+
+        self.curr_block = header_id;
+        if let Some(condition) = cond {
+            let cond_op = self.lower_expr(condition);
+            self.finish_block(SSATerminator::IfGoto{ 
+                cond: cond_op,
+                true_label: body_id, 
+                false_label: exit_id, 
+            });
+        } else {
+            // No codition, infinite loop
+            self.finish_block(SSATerminator::Goto(body_id));
+        }
+
+        // Body 
+        self.curr_block = body_id;
+        self.seal_block(body_id);
+        self.lower_block(body);
+
+        // Insert update after body 
+        for stmt in update {
+            self.lower_stmt(stmt);
+        }
+        self.finish_block(SSATerminator::Goto(header_id));
+
+        self.curr_block = exit_id;
+        self.seal_block(exit_id);
+
+        self.seal_block(header_id);
     }
 
     fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &'ast Option<Block>) {
@@ -588,7 +629,6 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
-    // TODO
     fn finish_block(&mut self, term: SSATerminator) {
         self.curr_block = self.block_counter;
         self.block_counter += 1; 
