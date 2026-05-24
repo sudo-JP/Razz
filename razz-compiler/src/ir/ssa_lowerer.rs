@@ -392,22 +392,59 @@ impl<'ast> SSALowerer<'ast> {
     /// target = t1 
     fn lower_compound_assign(&mut self, target: &'ast Expr, op: &CompoundOp, expr: &'ast Expr) {
         let expr_opr = self.lower_expr(expr);
+
+        let binop = match &op.node {
+            CompoundOpKind::AddE => BinOpKind::Add, 
+            CompoundOpKind::SubE => BinOpKind::Sub, 
+            CompoundOpKind::DivE => BinOpKind::Div, 
+            CompoundOpKind::MultE => BinOpKind::Mult,
+        };
+
         match &target.kind {
             ExprKind::Ident(ident) => {
-                let t0 = self.lower_expr(target);
-                let desugared_op = match &op.node {
-                    CompoundOpKind::AddE => BinOpKind::Add,
-                    CompoundOpKind::SubE => BinOpKind::Sub, 
-                    CompoundOpKind::DivE => BinOpKind::Div, 
-                    CompoundOpKind::MultE => BinOpKind::Mult,
-                };
-                let t1 = self.expr_temp(target);
-                self.emit(SSAInstruction::BinOp { target: t1, left: t0, op: desugared_op, right: expr_opr });
-                // TODO:
-                // self.emit(SSAInstruction::Copy { target: Dest::Var(ident.to_string()), value: SSAOperand::Temp(t1) });
+                // With SSA, we can read up the variables 
+                let var_id = self.var_table.get(ident.as_str())
+                    .expect("Can't assign with compound, sematic should handles this");
+
+                let ident_temp = self.read_variable(&ident, *var_id, self.curr_block);
+                let res_ty = self.type_table.get(&target.id).unwrap();
+                let new_temp = self.new_temp(*res_ty);
+
+                self.emit(SSAInstruction::BinOp{ 
+                    target: new_temp, 
+                    left: ident_temp, 
+                    op: binop, 
+                    right: expr_opr, 
+                });
+                self.write_variable(&ident, self.curr_block, SSAOperand::Temp(new_temp));
             },
             ExprKind::FieldAccess { obj, key } => {
-                todo!()
+                // Load the object to a temp 
+                let obj_temp = self.lower_expr(&obj);
+                let obj_ty = self.type_table.get(&obj.id)
+                    .expect("Semantic should handles this")
+                    .clone();
+                let target = self.new_temp(obj_ty);
+                self.emit(SSAInstruction::FieldLoad{ 
+                    target,
+                    obj: obj_temp.clone(), 
+                    key: key.node.to_string(),
+                });
+
+                // Then field assign it 
+                let final_target = self.new_temp(obj_ty);
+                self.emit(SSAInstruction::BinOp{ 
+                    target: final_target, 
+                    left: SSAOperand::Temp(target), 
+                    op: binop, 
+                    right: expr_opr, 
+                });
+
+                self.emit(SSAInstruction::FieldStore{ 
+                    obj: obj_temp, 
+                    key: key.node.to_string(), 
+                    value: SSAOperand::Temp(final_target),
+                });
             },
             _ => unreachable!("Handled by Parser and Semantic, this case does not exist")
         };
@@ -620,7 +657,13 @@ impl<'ast> SSALowerer<'ast> {
         self.seal_block(exit_id);
     }
 
-    fn lower_http_req(&mut self, method: &HTTPMethod, endpoint: &Endpoint, body: &Expr) {
+    fn lower_http_req(&mut self, method: &HTTPMethod, endpoint: &Endpoint, body: &'ast Expr) {
+        let t = self.lower_expr(body);
+        self.emit(SSAInstruction::HTTPWrite{ 
+            method: method.node, 
+            ep: endpoint.node, 
+            value: t, 
+        });
     }
 
     fn lower_block(&mut self, block: &'ast Block) {
