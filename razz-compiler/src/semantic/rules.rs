@@ -158,6 +158,27 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
     let mut allowed_bool = HashSet::new();
     allowed_bool.insert(TypeKind::Bool);
 
+    let mut allowed_equality = HashSet::new();
+    allowed_equality.insert(TypeKind::Bool);
+    allowed_equality.insert(TypeKind::Int);
+    allowed_equality.insert(TypeKind::Float);
+    allowed_equality.insert(TypeKind::String);
+    allowed_equality.insert(TypeKind::Null);
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Dielectric));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Lambertian));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Metal));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Vec3));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Point3));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Color));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Background));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Camera));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Image));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Sphere));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Output));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Arduino));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::PPM));
+    allowed_equality.insert(TypeKind::SpecificType(SpecificTypeKind::Material));
+
     // Finallize
     m.insert(BinOpKind::Add, allowed_add);
     m.insert(BinOpKind::Sub, allowed_sub);

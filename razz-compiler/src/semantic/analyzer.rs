@@ -328,6 +328,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             }, 
             _ => unreachable!("Expect to be Ident or FieldAccess"),
         }
+        self.type_table.insert(target.id, expr_ty);
     }
 
     /// Only allowed int, float to compound assign
@@ -339,19 +340,28 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
 
 
         match &target.kind {
-            ExprKind::FieldAccess { obj, .. } => {
-                walk_expr(self, &obj);
-                let Some(t) = self.type_table.get(&obj.id) else {
+            ExprKind::FieldAccess { obj, key } => {
+                let Some(obj_ty) = self.type_table.get(&obj.id) else {
                     return;
                 };
-                if !matches!(t, 
+                let TypeKind::SpecificType(sp_ty) = *obj_ty else {
+                    return;
+                };
+                let field_map = FIELD_ACCESS_MAP.get(&sp_ty)
+                    .expect("Field access has to cover all specific type");
+
+                let Some(ty) = field_map.get(key.node.as_str()) else {
+                    self.error(SemanticErrorKind::InvalidFieldAccessKey(key.node.to_string()), key.span);
+                    return;
+                };
+                if !matches!(ty, 
                     TypeKind::Int
                     | TypeKind::Float) {
-                    self.error(SemanticErrorKind::InvalidBinaryAssign{ on: *t, with: op.node }, stmt.span);
+                    self.error(SemanticErrorKind::InvalidBinaryAssign{ on: *ty, with: op.node }, stmt.span);
                     return;
                 }
-                if t.satisfies(&expr_ty) {
-                    self.error(SemanticErrorKind::TypeMismatch{ expected: *t, got: expr_ty }, stmt.span);
+                if !expr_ty.satisfies(ty) {
+                    self.error(SemanticErrorKind::TypeMismatch{ expected: *ty, got: expr_ty }, stmt.span);
                     return;
                 }
             },
@@ -374,6 +384,7 @@ impl<'ast> Walkable for SemanticAnalyzer<'ast> {
             }, 
             _ => unreachable!("Expect to be Ident or FieldAccess"),
         }
+        self.type_table.insert(target.id, expr_ty);
     }
 
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {

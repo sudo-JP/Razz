@@ -50,7 +50,13 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_fn_decl(&mut self, fn_decl: &'ast FnDecl) {
-        // lower fn 
+        let fn_id = self.next_block_id();
+        self.curr_block = fn_id; 
+        for param in &fn_decl.params {
+            let t = self.new_temp(param.ty.node);
+            self.var_table.insert(&param.name.node, param.id);
+            self.write_variable(&param.name.node, fn_id, SSAOperand::Temp(t));
+        }
         
         for stmt in &fn_decl.body.stmts {
             self.lower_stmt(stmt);
@@ -90,10 +96,31 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
+    fn update_phi_args(&mut self, block_id: BlockId, target: Temp, args: Vec<SSAOperand>) {
+        let matcher = |instr: &SSAInstruction| matches!(instr, SSAInstruction::Phi { target: t, .. } if t.id == target.id);
+    
+        if block_id == self.curr_block {
+            if let Some(instr) = self.curr_instrs.iter_mut().find(|i| matcher(i)) {
+                *instr = SSAInstruction::Phi { target, args };
+            }
+            return;
+        }
+    
+        if let Some(block) = self.blocks.iter_mut().find(|b| b.id == block_id) {
+            if let Some(instr) = block.instrs.iter_mut().find(|i| matcher(i)) {
+                *instr = SSAInstruction::Phi { target, args };
+            }
+        }
+    }
+
     fn push_to_specific_block(&mut self, instr: SSAInstruction, block_id: BlockId) {
-        self.blocks.iter_mut()
-            .find(|block| block.id == block_id)
-            .map(|block| block.instrs.push(instr));
+        if block_id == self.curr_block {
+            self.curr_instrs.push(instr);
+            return;
+        }
+        if let Some(block) = self.blocks.iter_mut().find(|b| b.id == block_id) {
+            block.instrs.push(instr);
+        }
     }
 
     /// According to the book, there are three cases 
@@ -141,7 +168,8 @@ impl<'ast> SSALowerer<'ast> {
         block_id: BlockId,                          // Blocks for preds
         target: &Temp, args: &mut Vec<SSAOperand>)  // Destructed Phi
     -> Option<SSAOperand> {
-        let preds = self.preds.get(&block_id).cloned().unwrap_or_default();
+        let mut preds = self.preds.get(&block_id).cloned().unwrap_or_default();
+        preds.sort_unstable();
         for pred in preds {
             let op = self.read_variable(variable, variable_id, pred);
             args.push(op);
@@ -296,6 +324,7 @@ impl<'ast> SSALowerer<'ast> {
                     unreachable!("Must contains only Phi")
                 };
                 self.add_phi_operands(variable, *node_id, block_id, &target, &mut args);
+                self.update_phi_args(block_id, target, args);
             }
         }
         self.sealed_block.insert(block_id);
@@ -407,7 +436,8 @@ impl<'ast> SSALowerer<'ast> {
                     .expect("Can't assign with compound, sematic should handles this");
 
                 let ident_temp = self.read_variable(&ident, *var_id, self.curr_block);
-                let res_ty = self.type_table.get(&target.id).unwrap();
+                let res_ty = self.type_table.get(&target.id)
+                    .unwrap();
                 let new_temp = self.new_temp(*res_ty);
 
                 self.emit(SSAInstruction::BinOp{ 
@@ -421,7 +451,7 @@ impl<'ast> SSALowerer<'ast> {
             ExprKind::FieldAccess { obj, key } => {
                 // Load the object to a temp 
                 let obj_temp = self.lower_expr(&obj);
-                let obj_ty = self.type_table.get(&obj.id)
+                let obj_ty = self.type_table.get(&expr.id)
                     .expect("Semantic should handles this")
                     .clone();
                 let target = self.new_temp(obj_ty);
@@ -463,18 +493,26 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_while(&mut self, cond: &'ast Expr, body: &'ast Block) {
-        let header_id = self.next_block_id();
+        let header_id = self.curr_block;
+        let preheader_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
+
+        for defs in self.current_def.values_mut() {
+            if let Some(val) = defs.remove(&header_id) {
+                defs.insert(preheader_id, val);
+            }
+        }
 
         // Body's pred is the header
         // Header's pred is the body, circular loop
         // Exit's pred is header 
+        self.add_pred(header_id, preheader_id);
         self.add_pred(body_id, header_id);
         self.add_pred(header_id, body_id);
         self.add_pred(exit_id, header_id);
 
-        self.curr_block = header_id;
+
         let cond_op = self.lower_expr(cond);
         self.finish_block(SSATerminator::IfGoto{ 
             cond: cond_op, 
@@ -494,21 +532,29 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_for(&mut self, decl: &'ast Option<Box<Stmt>>, cond: &'ast Option<Expr>, update: &'ast [Stmt], body: &'ast Block) {
-        let header_id = self.next_block_id();
+        let header_id = self.curr_block;
+        let preheader_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
 
         // Predecessor
         // Like while loop
-        self.add_pred(body_id, header_id);
+        self.add_pred(header_id, preheader_id);
         self.add_pred(header_id, body_id);
+        self.add_pred(body_id, header_id);
         self.add_pred(exit_id, header_id);
+
         
         if let Some(decl_stmt) = decl {
             self.lower_stmt(&decl_stmt);
         }
 
-        self.curr_block = header_id;
+        for defs in self.current_def.values_mut() {
+            if let Some(val) = defs.remove(&header_id) {
+                defs.insert(preheader_id, val);
+            }
+        }
+
         if let Some(condition) = cond {
             let cond_op = self.lower_expr(condition);
             self.finish_block(SSATerminator::IfGoto{ 
@@ -539,120 +585,104 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_if(&mut self, cond: &'ast Expr, body: &'ast Block, else_ifs: &'ast [ElseIf], else_body: &'ast Option<Block>) {
+        let header_id = self.curr_block;
         let if_body_id = self.next_block_id();
         let exit_id = self.next_block_id();
-        let cond_op = self.lower_expr(cond);
-        self.add_pred(if_body_id, self.curr_block);
-        self.add_pred(exit_id, if_body_id);
-
-
-        // 1 for header, 1 for body 
+    
         let else_if_len = else_ifs.len();
-        let mut else_if_blocks_id: Vec<(BlockId, BlockId)> = Vec::with_capacity(else_if_len);
-
-        // Current body pred is the current header
+        let mut else_if_blocks: Vec<(BlockId, BlockId)> = Vec::with_capacity(else_if_len);
         for _ in 0..else_if_len {
-            let header_id = self.next_block_id();
+            let header = self.next_block_id();
             let body_id = self.next_block_id();
-            self.add_pred(body_id, header_id);
+            else_if_blocks.push((header, body_id));
+            self.add_pred(body_id, header);
             self.add_pred(exit_id, body_id);
-            else_if_blocks_id.push((header_id, body_id));
         }
-
-        // the i + 1 (curr) has pred of i (parent)
-        for i in (0..else_if_len-1).rev() {
-            let (curr_header, _) = else_if_blocks_id[i+1];
-            let (parent_header, _) = else_if_blocks_id[i];
-            self.add_pred(curr_header, parent_header);
+    
+        let else_id = if else_body.is_some() {
+            let id = self.next_block_id();
+            self.add_pred(exit_id, id);
+            Some(id)
+        } else {
+            None
+        };
+    
+        // preds from header
+        self.add_pred(if_body_id, header_id);
+        self.add_pred(exit_id, if_body_id);
+    
+        if let Some((first_header, _)) = else_if_blocks.first() {
+            self.add_pred(*first_header, header_id);
+        } else if let Some(else_id) = else_id {
+            self.add_pred(else_id, header_id);
         }
-
-        let mut else_id: Option<BlockId> = None;
-
-        // The first else if parent is the if 
-        let if_false_conditional_id = if let Some((first_header, _)) = else_if_blocks_id.first() {
-            self.add_pred(*first_header, self.curr_block);
+    
+        // else-if header chain
+        for i in 1..else_if_len {
+            let (curr_header, _) = else_if_blocks[i];
+            let (prev_header, _) = else_if_blocks[i - 1];
+            self.add_pred(curr_header, prev_header);
+        }
+    
+        // else block pred from last else-if header
+        if let (Some(else_id), Some((last_header, _))) = (else_id, else_if_blocks.last()) {
+            self.add_pred(else_id, *last_header);
+        }
+    
+        let if_false_target = if let Some((first_header, _)) = else_if_blocks.first() {
             *first_header
-        } else if let Some(_) = else_body {
-            let else_block_id = self.next_block_id();
-            self.add_pred(exit_id, else_block_id);
-            if let Some((last_header, _)) = else_if_blocks_id.last() {
-                else_id = Some(else_block_id);
-                self.add_pred(else_block_id, *last_header);
-            }
-            else_block_id
+        } else if let Some(else_id) = else_id {
+            else_id
         } else {
             exit_id
         };
-
-        // Seal if body
+    
+        // Header terminator
+        let cond_op = self.lower_expr(cond);
+        self.finish_block(SSATerminator::IfGoto {
+            cond: cond_op,
+            true_label: if_body_id,
+            false_label: if_false_target,
+        });
+    
+        // If body
         self.curr_block = if_body_id;
         self.seal_block(if_body_id);
-        self.seal_block(exit_id);
         self.lower_block(body);
-
-        self.finish_block(SSATerminator::IfGoto{ 
-            cond: cond_op, 
-            true_label: if_body_id, 
-            false_label: if_false_conditional_id,
-        });
-
-        for i in 0..else_if_len-1 {
-            // Get element
-            let (header_id, curr_body_id) = else_if_blocks_id[i];
-            let (next_header_id, _) = else_if_blocks_id[i+1];
-
-            // Lower cond
-            self.curr_block = header_id;
+        self.finish_block(SSATerminator::Goto(exit_id));
+    
+        // Else-if chain
+        for (i, (elif_header, elif_body)) in else_if_blocks.iter().enumerate() {
+            self.curr_block = *elif_header;
             let cond_op = self.lower_expr(&else_ifs[i].cond);
-
-            self.finish_block(SSATerminator::IfGoto{ 
-                cond: cond_op, 
-                true_label: curr_body_id, 
-                false_label: next_header_id,
+            let false_target = if i + 1 < else_if_len {
+                else_if_blocks[i + 1].0
+            } else if let Some(else_id) = else_id {
+                else_id
+            } else {
+                exit_id
+            };
+    
+            self.finish_block(SSATerminator::IfGoto {
+                cond: cond_op,
+                true_label: *elif_body,
+                false_label: false_target,
             });
-
-            // Lower body 
-            self.curr_block = curr_body_id;
-            self.seal_block(curr_body_id);
-            let block = &else_ifs[i].body;
-            self.lower_block(block);
-
-            // Exit point of body
+    
+            self.curr_block = *elif_body;
+            self.seal_block(*elif_body);
+            self.lower_block(&else_ifs[i].body);
             self.finish_block(SSATerminator::Goto(exit_id));
         }
-
-        // Lower the last else if because it wasn't included in for loop
-        if let Some((header_id, body_id)) = else_if_blocks_id.last()
-        && let Some(elif) = else_ifs.last() {
-            // Lower cond 
-            self.curr_block = *header_id;
-            let cond_op = self.lower_expr(&elif.cond);
-            let elif_exit_id = else_id.unwrap_or(exit_id);
-
-            // Exit point of cond 
-            self.finish_block(SSATerminator::IfGoto{ 
-                cond: cond_op, 
-                true_label: *body_id, 
-                false_label: elif_exit_id,
-            });
-            
-            // Lower body 
-            self.curr_block = *body_id;
-            self.seal_block(*body_id);
-            self.lower_block(&elif.body);
-
-            // Exit point of body
-            self.finish_block(SSATerminator::Goto(exit_id));
-        }
-
-        if let Some(else_block) = else_body 
-        && let Some(else_id) = else_id {
+    
+        // Else body
+        if let (Some(else_id), Some(else_block)) = (else_id, else_body) {
             self.curr_block = else_id;
             self.seal_block(else_id);
             self.lower_block(else_block);
             self.finish_block(SSATerminator::Goto(exit_id));
         }
-
+    
         self.curr_block = exit_id;
         self.seal_block(exit_id);
     }
@@ -673,8 +703,6 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn finish_block(&mut self, term: SSATerminator) {
-        self.curr_block = self.block_counter;
-        self.block_counter += 1; 
         let block = BasicBlock{
             id: self.curr_block,
             instrs: mem::take(&mut self.curr_instrs), 

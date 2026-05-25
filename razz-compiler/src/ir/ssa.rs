@@ -1,6 +1,7 @@
 use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, ir::basic_block::BlockId};
 
 
+#[derive(Debug)]
 pub enum SSATerminator {
     Return(SSAOperand), 
     Goto(BlockId), 
@@ -14,26 +15,26 @@ pub enum SSATerminator {
 pub type TempId = u32;
 pub type Dest = Temp;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Temp {
     pub id: TempId, 
     pub ty: TypeKind,
 }
 
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SSAOperand {
     Temp(Temp), 
     Const(Literal),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct FieldInit {
     pub name: String,
     pub value: SSAOperand,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum SSAInstruction {
     /// Binary Op
     /// <target> = <left> <op> <right>
