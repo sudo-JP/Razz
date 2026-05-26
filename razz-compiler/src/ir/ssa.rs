@@ -1,5 +1,52 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, ir::basic_block::BlockId};
+use crate::{
+    ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
+    statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, 
+    ir::basic_block::BlockId
+};
+use std::fmt;
 
+
+pub type TempId = u32;
+pub type Dest = Temp;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Temp {
+    pub id: TempId, 
+    pub ty: TypeKind,
+}
+
+impl fmt::Display for Temp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "t{}", self.id)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SSAOperand {
+    Temp(Temp), 
+    Const(Literal),
+}
+
+impl fmt::Display for SSAOperand {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Temp(t) => write!(f, "{t}"),
+            Self::Const(c) => write!(f, "{c}"),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FieldInit {
+    pub name: String,
+    pub value: SSAOperand,
+}
+
+impl fmt::Display for FieldInit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.name, self.value)
+    }
+}
 
 #[derive(Debug)]
 pub enum SSATerminator {
@@ -12,26 +59,15 @@ pub enum SSATerminator {
     },
 }
 
-pub type TempId = u32;
-pub type Dest = Temp;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Temp {
-    pub id: TempId, 
-    pub ty: TypeKind,
-}
-
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum SSAOperand {
-    Temp(Temp), 
-    Const(Literal),
-}
-
-#[derive(Debug, Clone)]
-pub struct FieldInit {
-    pub name: String,
-    pub value: SSAOperand,
+impl fmt::Display for SSATerminator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Return(opr) => write!(f, "ret {opr}"),
+            Self::Goto(id) => write!(f, "goto {id}"), 
+            Self::IfGoto { cond, true_label, false_label } => 
+                write!(f, "if {cond} goto {true_label} else {false_label}"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -104,4 +140,10 @@ pub enum SSAInstruction {
         target: Dest, 
         args: Vec<SSAOperand>,
     },
+}
+
+impl fmt::Display for SSAInstruction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
 }

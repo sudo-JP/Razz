@@ -1,4 +1,5 @@
 use crate::{ast::{NodeId, Spanned, SpecificType}, common::Span};
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub struct Expr {
@@ -41,6 +42,18 @@ pub enum Literal {
     String(String),
     Bool(bool), 
     Null,
+}
+
+impl fmt::Display for Literal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Int(num) => write!(f, "{num}"),
+            Self::Float(num) => write!(f, "{num}"),
+            Self::String(s) => write!(f, "{s}"),
+            Self::Bool(b) => write!(f, "{b}"),
+            Self::Null => write!(f, "null"),
+        }
+    }
 }
 
 
