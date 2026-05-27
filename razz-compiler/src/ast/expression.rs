@@ -27,12 +27,40 @@ pub enum BinOpKind {
     Or, 
 }
 
+impl fmt::Display for BinOpKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Add => write!(f, "+"), 
+            Self::Sub => write!(f, "-"), 
+            Self::Div => write!(f, "/"),
+            Self::Mult => write!(f, "*"), 
+            Self::Lt => write!(f, "<"), 
+            Self::Le => write!(f, "<="), 
+            Self::Gt => write!(f, ">"),
+            Self::Ge => write!(f, ">="),
+            Self::Eq => write!(f, "=="),
+            Self::Neq => write!(f, "!="),
+            Self::And => write!(f, "&&"),
+            Self::Or => write!(f, "||"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum UnOpKind {
     /// !expr
     Not, 
     /// -expr
     Minus, 
+}
+
+impl fmt::Display for UnOpKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Not => write!(f, "!"), 
+            Self::Minus => write!(f, "-"), 
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -65,6 +93,7 @@ pub enum EndpointKind {
     Image,
     Output,
 }
+
 
 
 /// Argument to function 

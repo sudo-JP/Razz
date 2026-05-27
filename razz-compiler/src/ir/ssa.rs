@@ -144,6 +144,37 @@ pub enum SSAInstruction {
 
 impl fmt::Display for SSAInstruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        match self {
+            Self::BinOp { target, left, op, right } => 
+                write!(f, "{target} = {left} {op} {right}"),
+            Self::UnOp { target, op, value } => 
+                write!(f, "{target} = {op}{value}"),
+            Self::Call { target, args, func } => {
+                // At most 4 elements I think 
+                let mut args_str = String::with_capacity(args.len() * 4);
+                let mut first = true; 
+                for opr in args {
+                    if !first {
+                        args_str.push_str(",");
+                    } 
+                    first = false;
+                    args_str.push_str(&opr.to_string());
+                }
+
+                    
+                if let Some(t) = target {
+                    write!(f, "{t} = {func}({args_str})")
+                } else {
+                    write!(f, "{func}({args_str})")
+                }
+            }
+            Self::FieldLoad { target, obj, key } => 
+                write!(f, "{target} = {obj}->{key}"),
+            Self::FieldStore { obj, key, value } => 
+                write!(f, "{obj}->{key} = {value}"),
+            Self::Copy { target, value } => 
+                write!(f, "{target} = {value}"),
+            _ => todo!()
+        }
     }
 }
