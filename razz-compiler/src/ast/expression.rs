@@ -94,6 +94,17 @@ pub enum EndpointKind {
     Output,
 }
 
+impl fmt::Display for EndpointKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Hittable => write!(f, "/hittable"), 
+            Self::Camera => write!(f, "/camera"), 
+            Self::Background => write!(f, "/background"), 
+            Self::Image => write!(f, "/image"),
+            Self::Output => write!(f, "/output")
+        }
+    }
+}
 
 
 /// Argument to function 

@@ -34,6 +34,12 @@ fn main() -> io::Result<()> {
             }
         }
 
+        Ok(CompilerOutput::IR(blocks)) => {
+            for block in blocks {
+                println!("{block}");
+            }
+        }
+
         // Add more when the compiler grows 
         _ => {}
     }

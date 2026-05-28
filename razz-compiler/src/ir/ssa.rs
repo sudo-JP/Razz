@@ -174,7 +174,38 @@ impl fmt::Display for SSAInstruction {
                 write!(f, "{obj}->{key} = {value}"),
             Self::Copy { target, value } => 
                 write!(f, "{target} = {value}"),
-            _ => todo!()
+            Self::Construct { target, ty, fields } => {
+                let mut fields_str = String::from("{");
+                let mut first = true; 
+
+                for field in fields {
+                    if !first {
+                        fields_str.push_str(",");
+                    }
+                    fields_str.push_str(&field.to_string());
+                    first = false; 
+                }
+                fields_str.push_str("}");
+                write!(f, "{target} = {ty} {fields_str}")
+            },
+            Self::HTTPGet { target, ep } =>
+                write!(f, "{target} = GET {ep}"),
+            Self::HTTPWrite { method, ep, value } => 
+                write!(f, "{method} {ep} {value}"),
+            Self::Phi { target, args } => {
+                let mut args_str = String::with_capacity(args.len() * 4); 
+                let mut first = true; 
+
+                for arg in args {
+                    if !first {
+                        args_str.push_str(",");
+                    }
+                    args_str.push_str(&arg.to_string());
+                    first = false;
+                }
+
+                write!(f, "{target} = Phi({args_str})")
+            },
         }
     }
 }

@@ -1,3 +1,4 @@
+use strum::Display;
 use crate::{ast::statement::FnDecl, common::Span};
 
 pub mod expression;
@@ -41,7 +42,7 @@ impl TypeKind {
 }
 
 
-#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq, Display)]
 pub enum SpecificTypeKind {
     Dielectric, 
     Lambertian, 

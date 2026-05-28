@@ -1,4 +1,5 @@
 use crate::{ast::{expression::{Endpoint, Expr}, NodeId, Spanned, Type}, common::Span};
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub struct Stmt {
@@ -43,6 +44,16 @@ pub enum HTTPMethodKind {
     Post, 
     Put, 
     Patch, 
+}
+
+impl fmt::Display for HTTPMethodKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Post => write!(f, "POST"),
+            Self::Put => write!(f, "PUT"),
+            Self::Patch => write!(f, "PATCH"),
+        }
+    }
 }
 
 /// Function definition
