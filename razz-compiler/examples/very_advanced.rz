@@ -8,7 +8,7 @@ fn main() null {
     cam = GET /camera;
     cam->vfov = 5.0; 
     // Adjust camera angle 
-    PATCH /camera Camera cam;
+    PATCH /camera Camera { vfov: cam->vfov };
 
     color = Color {
         r: add(b:3, a: 2), 
@@ -19,10 +19,13 @@ fn main() null {
     // Type can be specified 
     // Some types like the background or camera is in the language itself
     background: Background = GET /background; 
-    background->top = color;
-    background->bottom = Color { r: 255, g: 255, b: 255 };
+    background->top = Vec3 { x: 0.2, y: 0.4, z: 0.6 };
+    background->bottom = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
 
-    PUT /background Background background;
+    PUT /background Background {
+        top: background->top,
+        bottom: background->bottom
+    };
     a = 255; 
     for i = 2; i < 100; i += 1 {
         a += -i; 
@@ -42,26 +45,19 @@ fn main() null {
     ); 
 
     coord = Vec3 {
-        x: 1,
-        y: 2, 
-        z: 3, 
+        x: 1.0,
+        y: 2.0, 
+        z: 3.0, 
     };
 
     POST /hittable Sphere {
         coord: coord,
         radius: 0.5,
-        color: color,
+        material: Lambertian { albedo: color }
     }; 
     
     PATCH /output Output {
-        type: PPM,
         file: "test.ppm"
-    }; 
-
-
-    PATCH /output Output {
-        type: Arduino,
-        file: "test.ppm" // Ignored? 
     }; 
     return null;
 }
