@@ -1,0 +1,6 @@
+fn main() null {
+    for i = 0; ; dummy = 0 {
+        dummy = 1;
+    }
+    return null;
+}

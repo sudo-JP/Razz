@@ -1,0 +1,8 @@
+fn main() null {
+    while false {
+        while false {
+            dummy = 1;
+        }
+    }
+    return null;
+}

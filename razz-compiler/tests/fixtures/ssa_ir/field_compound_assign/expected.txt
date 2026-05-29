@@ -1,0 +1,7 @@
+block_0:
+  t0 = GET /camera
+  t0->vfov = 90
+  t1 = t0->vfov
+  t2 = t1 + 10
+  t0->vfov = t2
+  ret null

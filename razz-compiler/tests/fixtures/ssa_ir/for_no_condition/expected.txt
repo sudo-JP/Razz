@@ -1,0 +1,6 @@
+block_0:
+  goto block_2
+block_2:
+  goto block_0
+block_3:
+  ret null

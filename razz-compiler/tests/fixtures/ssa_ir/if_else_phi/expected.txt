@@ -1,0 +1,9 @@
+block_0:
+  if true goto block_1 else block_3
+block_1:
+  goto block_2
+block_3:
+  goto block_2
+block_2:
+  t0 = Phi(1,2)
+  ret t0

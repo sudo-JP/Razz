@@ -1,0 +1,10 @@
+block_0:
+  if false goto block_2 else block_3
+block_2:
+  if false goto block_5 else block_6
+block_5:
+  goto block_2
+block_6:
+  goto block_0
+block_3:
+  ret null

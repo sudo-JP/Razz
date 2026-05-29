@@ -2,7 +2,7 @@
 Please see `docs/` for documentation on the language and `examples/` for sample language usage. 
 
 ## Pipeline 
-```Source Code -> Lexer -> Parser -> AST -> Type Check -> IR -> Codegen```
+```Source Code -> Lexer -> Parser -> AST -> Type Check -> SSA IR -> HIR -> Codegen```
 
 Yes I handwrote all of this myself, even the docs and the `====== LEXER =====`
 
