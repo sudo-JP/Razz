@@ -14,7 +14,7 @@ pub fn load_fixture(path: &str) -> (String, String) {
     (input, expected)
 }
 
-fn colored_assert(actual: &str, expected: &str) {
+pub fn colored_assert(actual: &str, expected: &str) {
     if actual != expected {
         let diff = TextDiff::from_lines(actual, expected);
 

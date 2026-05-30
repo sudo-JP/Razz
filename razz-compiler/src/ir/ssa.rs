@@ -1,25 +1,10 @@
 use crate::{
     ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
-    statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, 
-    ir::basic_block::BlockId
+    statement::HTTPMethodKind, SpecificTypeKind}, 
+    ir::{basic_block::BlockId, Dest, Temp}
 };
 use std::fmt;
 
-
-pub type TempId = u32;
-pub type Dest = Temp;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Temp {
-    pub id: TempId, 
-    pub ty: TypeKind,
-}
-
-impl fmt::Display for Temp {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "t{}", self.id)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SSAOperand {
@@ -37,12 +22,12 @@ impl fmt::Display for SSAOperand {
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldInit {
+pub struct SSAFieldInit {
     pub name: String,
     pub value: SSAOperand,
 }
 
-impl fmt::Display for FieldInit {
+impl fmt::Display for SSAFieldInit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}: {}", self.name, self.value)
     }
@@ -63,9 +48,9 @@ impl fmt::Display for SSATerminator {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Return(opr) => write!(f, "ret {opr}"),
-            Self::Goto(id) => write!(f, "goto {id}"), 
+            Self::Goto(id) => write!(f, "goto block_{id}"), 
             Self::IfGoto { cond, true_label, false_label } => 
-                write!(f, "if {cond} goto {true_label} else {false_label}"),
+                write!(f, "if {cond} goto block_{true_label} else block_{false_label}"),
         }
     }
 }
@@ -121,7 +106,7 @@ pub enum SSAInstruction {
     Construct {
         target: Dest, 
         ty: SpecificTypeKind,
-        fields: Vec<FieldInit>,
+        fields: Vec<SSAFieldInit>,
     },
     /// HTTP GET 
     /// <target> = GET <ep>
@@ -136,6 +121,18 @@ pub enum SSAInstruction {
         ep: EndpointKind, 
         value: SSAOperand,
     },
+    /// When multiple code branches 
+    /// merge into a single variable i.e:
+    /// x = 0; 
+    /// if (x > 1) {
+    ///     x = 2;
+    /// } else {
+    ///     x = 3;
+    /// }
+    /// So now that what collapsed are 
+    /// t = Phi(2, 3), as in a temp, 
+    /// for x after the if produces either
+    /// 2 or 3, depending on the runtime of x
     Phi {
         target: Dest, 
         args: Vec<SSAOperand>,

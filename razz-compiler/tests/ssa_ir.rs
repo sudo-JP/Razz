@@ -10,7 +10,7 @@ use razz_compiler::ir::ssa::{SSAInstruction, SSATerminator};
 
 #[cfg(test)]
 mod common;
-use common::{colored_assert_debug, load_fixture};
+use common::{colored_assert, load_fixture};
 
 type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
 
@@ -41,7 +41,7 @@ fn simple_binop_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/simple_binop");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn if_else_phi_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/if_else_phi");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
@@ -57,7 +57,7 @@ fn while_loop_phi_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/while_loop_phi");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn call_and_unary_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/call_and_unary");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
@@ -73,7 +73,7 @@ fn for_loop_phi_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/for_loop_phi");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn field_compound_assign_lowering() {
     let (input, expected) = load_fixture("tests/fixtures/ssa_ir/field_compound_assign");
     let blocks = run_ir(&input);
     let actual = format_ir(&blocks);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 macro_rules! ssa_fixture_test {
@@ -91,7 +91,7 @@ macro_rules! ssa_fixture_test {
             let (input, expected) = load_fixture($path);
             let blocks = run_ir(&input);
             let actual = format_ir(&blocks);
-            colored_assert_debug(&actual, &expected);
+            colored_assert(&actual, &expected);
         }
     };
 }

@@ -4,8 +4,12 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
-use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, NodeId, Program, TypeKind}, 
-ir::{basic_block::{BasicBlock, BlockId}, ssa::{FieldInit, SSAInstruction, SSAOperand, SSATerminator, Temp}}};
+use crate::ir::Temp;
+use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
+    statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
+    NodeId, Program, TypeKind}, 
+    ir::{basic_block::{BasicBlock, BlockId}, 
+    ssa::{SSAFieldInit, SSAInstruction, SSAOperand, SSATerminator}}};
 
 type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
 
@@ -364,7 +368,7 @@ impl<'ast> SSALowerer<'ast> {
                 let temp = self.expr_temp(expr);
                 let field_init_vec = fields.iter()
                     .map(|field| {
-                        FieldInit{
+                        SSAFieldInit{
                             name: field.key.node.to_string(), 
                             value: self.lower_expr(&field.value),
                         }

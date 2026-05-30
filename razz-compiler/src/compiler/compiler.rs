@@ -31,12 +31,12 @@ pub enum CompilerOutput {
 }
 
 pub struct Compiler {
-    flag: CompilerStage,
+    debug: CompilerStage,
 }
 
 impl Compiler {
     pub fn new(c: CompilerStage) -> Self {
-        Self { flag: c }
+        Self { debug: c }
     }
 
     pub fn compiles(&self, contents: &str) -> Result<CompilerOutput, CompilerError> {
@@ -46,7 +46,7 @@ impl Compiler {
         let tokens = lexer.lex()
             .map_err(CompilerError::Lexer)?;
 
-        if matches!(self.flag, CompilerStage::Lexer) {
+        if matches!(self.debug, CompilerStage::Lexer) {
             return Ok(CompilerOutput::Lexer(tokens));
         }
 
@@ -55,7 +55,7 @@ impl Compiler {
         let prog = parser.parse()
             .map_err(CompilerError::Parser)?;
 
-        if matches!(self.flag, CompilerStage::Parser) {
+        if matches!(self.debug, CompilerStage::Parser) {
             return Ok(CompilerOutput::Parser(prog));
         }
 
@@ -64,14 +64,14 @@ impl Compiler {
         let (mutable_set, type_table) = analyzer.check(&prog)
             .map_err(CompilerError::SemanticAnalysis)?;
 
-        if matches!(self.flag, CompilerStage::SemanticAnalysis) {
+        if matches!(self.debug, CompilerStage::SemanticAnalysis) {
             return Ok(CompilerOutput::SemanticAnalysis(mutable_set, type_table));
         }
 
         //  ============= IR LOWERING (SSA at least) ============= 
         let lowerer = SSALowerer::new(type_table);
         let lowered_blocks = lowerer.lower(&prog);
-        if matches!(self.flag, CompilerStage::IR) {
+        if matches!(self.debug, CompilerStage::IR) {
             return Ok(CompilerOutput::IR(lowered_blocks));
         }
 

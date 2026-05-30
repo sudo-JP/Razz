@@ -8,5 +8,5 @@ pub struct Cli {
     pub path: String, 
 
     #[arg(short, long, value_enum, default_value_t = CompilerStage::Codegen)]
-    pub compile: CompilerStage,
+    pub debug: CompilerStage,
 }

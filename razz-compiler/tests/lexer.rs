@@ -7,7 +7,7 @@ use razz_compiler::compiler::{
     compiler::{Compiler, CompilerOutput, CompilerStage},
     error::CompilerError,
 };
-use common::{colored_assert_debug, load_fixture};
+use common::{colored_assert, load_fixture};
 
 fn run_lexer(input: &str) -> String {
     let compiler = Compiler::new(CompilerStage::Lexer);
@@ -30,54 +30,54 @@ fn run_lexer(input: &str) -> String {
 fn delimiters() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/delimiters");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn operators_with_no_div() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/operators_with_no_div");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn literals_basic() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/literals_basic");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn literals_basic_invalid() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/literals_basic_invalid");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn slash_handling() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/slash_handling");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn slash_invalid() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/slash_invalid");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn verbose() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/verbose");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
 
 #[test]
 fn endpoints_valid() {
     let (input, expected) = load_fixture("tests/fixtures/lexer/endpoints_valid");
     let actual = run_lexer(&input);
-    colored_assert_debug(&actual, &expected);
+    colored_assert(&actual, &expected);
 }
