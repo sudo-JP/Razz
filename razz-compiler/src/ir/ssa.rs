@@ -1,10 +1,65 @@
 use crate::{
     ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
-    statement::HTTPMethodKind, SpecificTypeKind}, 
-    ir::{basic_block::BlockId, Dest, Temp}
+    statement::HTTPMethodKind, SpecificTypeKind, TypeKind}, 
+    ir::{basic_block::{BasicBlock, BlockId}, Dest, Temp}
 };
 use std::fmt;
 
+pub type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
+
+#[derive(Debug)]
+pub struct SSAFunctionParam {
+    pub name: String, 
+    pub ty: TypeKind,
+}
+
+impl fmt::Display for SSAFunctionParam {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.name, self.ty)
+    }
+}
+
+#[derive(Debug)]
+pub struct SSAFunction {
+    pub name: String, 
+    pub params: Vec<SSAFunctionParam>,
+    pub block_id: BlockId,
+    pub blocks: Vec<SSABlock>,
+}
+
+impl fmt::Display for SSAFunction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut params_str = String::new();
+        let mut first = true; 
+
+        for param in &self.params {
+            if !first {
+                params_str.push_str(", ");
+            }
+            params_str.push_str(&param.to_string());
+            first = false; 
+        }
+        writeln!(f, "fn {}#{}({}) {{", self.name, self.block_id, params_str)?;
+        for block in &self.blocks {
+            writeln!(f, "{}", block)?;
+        }
+        writeln!(f, "}}")
+    }
+}
+
+#[derive(Debug)]
+pub struct SSAProgram {
+    pub functions: Vec<SSAFunction>,
+}
+
+impl fmt::Display for SSAProgram {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for function in &self.functions {
+            write!(f, "{}", function.to_string())?;
+        }
+        Ok(())
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SSAOperand {
@@ -152,7 +207,7 @@ impl fmt::Display for SSAInstruction {
                 let mut first = true; 
                 for opr in args {
                     if !first {
-                        args_str.push_str(",");
+                        args_str.push_str(", ");
                     } 
                     first = false;
                     args_str.push_str(&opr.to_string());
@@ -177,7 +232,7 @@ impl fmt::Display for SSAInstruction {
 
                 for field in fields {
                     if !first {
-                        fields_str.push_str(",");
+                        fields_str.push_str(", ");
                     }
                     fields_str.push_str(&field.to_string());
                     first = false; 
@@ -195,7 +250,7 @@ impl fmt::Display for SSAInstruction {
 
                 for arg in args {
                     if !first {
-                        args_str.push_str(",");
+                        args_str.push_str(", ");
                     }
                     args_str.push_str(&arg.to_string());
                     first = false;

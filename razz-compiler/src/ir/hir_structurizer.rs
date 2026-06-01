@@ -5,3 +5,9 @@
 //! Rust or Python, this pass is needed
 
 
+pub struct HIRStructurizer {
+
+}
+
+impl HIRStructurizer {
+}

@@ -1,5 +1,6 @@
 use strum::Display;
 use crate::{ast::statement::FnDecl, common::Span};
+use std::fmt;
 
 pub mod expression;
 pub mod statement;
@@ -30,6 +31,19 @@ pub enum TypeKind {
     String,
     Null,
     SpecificType(SpecificTypeKind),
+}
+
+impl fmt::Display for TypeKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Int => write!(f, "int"), 
+            Self::Float => write!(f, "float"),
+            Self::Bool => write!(f, "bool"),
+            Self::String => write!(f,"string"),
+            Self::Null => write!(f, "null"),
+            Self::SpecificType(sp_ty) => write!(f, "{}", sp_ty)
+        }
+    }
 }
 
 impl TypeKind {

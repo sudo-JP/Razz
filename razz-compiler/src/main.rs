@@ -34,11 +34,7 @@ fn main() -> io::Result<()> {
             }
         }
 
-        Ok(CompilerOutput::IR(blocks)) => {
-            for block in blocks {
-                println!("{block}");
-            }
-        }
+        Ok(CompilerOutput::SSAIR(ir_prog)) => print!("{}", ir_prog),
 
         // Add more when the compiler grows 
         _ => {}

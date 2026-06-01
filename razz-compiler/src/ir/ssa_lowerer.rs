@@ -4,6 +4,8 @@
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
+
+use crate::ir::ssa::{SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
     statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
@@ -11,7 +13,6 @@ use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind},
     ir::{basic_block::{BasicBlock, BlockId}, 
     ssa::{SSAFieldInit, SSAInstruction, SSAOperand, SSATerminator}}};
 
-type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
 
 pub struct SSALowerer<'ast> {
     temp_counter: u32, 
@@ -20,6 +21,7 @@ pub struct SSALowerer<'ast> {
     type_table: HashMap<NodeId, TypeKind>,
     curr_instrs: Vec<SSAInstruction>,
     curr_block: BlockId,
+    ir_prog: SSAProgram,
 
     // Braun's stuff
     current_def: HashMap<&'ast str, HashMap<BlockId, SSAOperand>>,
@@ -31,12 +33,14 @@ pub struct SSALowerer<'ast> {
 
 impl<'ast> SSALowerer<'ast> {
     pub fn new(type_table: HashMap<NodeId, TypeKind>) -> Self {
+        let ir_prog = SSAProgram { functions: vec![], };
         Self { 
             temp_counter: 0, 
             block_counter: 0, 
             curr_block: 0,
             blocks: vec![],
             type_table,
+            ir_prog,
             curr_instrs: vec![],
             current_def: HashMap::new(),
             sealed_block: HashSet::new(),
@@ -46,11 +50,11 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
-    pub fn lower(mut self, prog: &'ast Program) -> Vec<SSABlock> {
+    pub fn lower(mut self, prog: &'ast Program) -> SSAProgram {
         for f in &prog.funcs {
             self.lower_fn_decl(&f.node);
         }
-        self.blocks
+        self.ir_prog
     }
 
     fn lower_fn_decl(&mut self, fn_decl: &'ast FnDecl) {
@@ -62,9 +66,25 @@ impl<'ast> SSALowerer<'ast> {
             self.write_variable(&param.name.node, fn_id, SSAOperand::Temp(t));
         }
         
-        for stmt in &fn_decl.body.stmts {
-            self.lower_stmt(stmt);
-        }
+        self.lower_block(&fn_decl.body);
+
+        let blocks = mem::take(&mut self.blocks);
+        let params = fn_decl.params
+            .iter()
+            .map(|p| SSAFunctionParam {
+                name: p.name.node.to_string(),
+                ty: p.ty.node,
+            })
+            .collect();
+
+        let function = SSAFunction {
+            name: fn_decl.name.node.to_string(),
+            block_id: fn_id,
+            params,
+            blocks,
+        };
+
+        self.ir_prog.functions.push(function);
     }
 
     // Primitive functions
@@ -341,13 +361,22 @@ impl<'ast> SSALowerer<'ast> {
                 let lhs_opr = self.lower_expr(&lhs);
                 let rhs_opr = self.lower_expr(&rhs);
                 let temp = self.expr_temp(expr);
-                self.emit(SSAInstruction::BinOp { target: temp, left: lhs_opr, op: op.node, right: rhs_opr });
+                self.emit(SSAInstruction::BinOp { 
+                    target: temp, 
+                    left: lhs_opr, 
+                    op: op.node, 
+                    right: rhs_opr 
+                });
                 SSAOperand::Temp(temp)
             },
             ExprKind::UnOp { op, value } => {
                 let value_opr = self.lower_expr(&value); 
                 let temp = self.expr_temp(expr);
-                self.emit(SSAInstruction::UnOp { target: temp, op: op.node, value: value_opr });
+                self.emit(SSAInstruction::UnOp { 
+                    target: temp, 
+                    op: op.node, 
+                    value: value_opr 
+                });
                 SSAOperand::Temp(temp)
             },
             ExprKind::FunctionCall { name, args } => {
@@ -355,13 +384,21 @@ impl<'ast> SSALowerer<'ast> {
                 let args_opr = args.iter()
                     .map(|arg| self.lower_expr(&arg.expr))
                     .collect();
-                self.emit(SSAInstruction::Call { target: Some(temp), args: args_opr, func: name.node.to_string() });
+                self.emit(SSAInstruction::Call { 
+                    target: Some(temp), 
+                    args: args_opr, 
+                    func: name.node.to_string() 
+                });
                 SSAOperand::Temp(temp)
             },
             ExprKind::FieldAccess { obj, key } => {
                 let temp = self.expr_temp(expr);
                 let obj_opr = self.lower_expr(&obj);
-                self.emit(SSAInstruction::FieldLoad { target: temp, obj: obj_opr, key: key.node.to_string() });
+                self.emit(SSAInstruction::FieldLoad { 
+                    target: temp, 
+                    obj: obj_opr, 
+                    key: key.node.to_string() 
+                });
                 SSAOperand::Temp(temp)
             },
             ExprKind::StructLiteral { ty, fields } => {
@@ -374,7 +411,11 @@ impl<'ast> SSALowerer<'ast> {
                         }
                     })
                     .collect();
-                self.emit(SSAInstruction::Construct { target: temp, ty: ty.node, fields: field_init_vec });
+                self.emit(SSAInstruction::Construct { 
+                    target: temp, 
+                    ty: ty.node, 
+                    fields: field_init_vec 
+                });
                 SSAOperand::Temp(temp)
             },
             ExprKind::HTTPRequest(ep) => {

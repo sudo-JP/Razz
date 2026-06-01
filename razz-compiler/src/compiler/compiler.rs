@@ -3,8 +3,7 @@ use std::collections::{HashMap, HashSet};
 use clap::ValueEnum;
 use crate::ast::{NodeId, Program, TypeKind};
 use crate::compiler::error::CompilerError;
-use crate::ir::basic_block::BasicBlock;
-use crate::ir::ssa::{SSAInstruction, SSATerminator};
+use crate::ir::ssa::SSAProgram;
 use crate::ir::ssa_lowerer::SSALowerer;
 use crate::lexer::tokens::Token;
 
@@ -17,7 +16,7 @@ pub enum CompilerStage {
     Lexer, 
     Parser, 
     SemanticAnalysis, 
-    IR, 
+    SSAIR, 
     Codegen, 
 }
 
@@ -26,7 +25,7 @@ pub enum CompilerOutput {
     Lexer(Vec<Token>),
     Parser(Program), 
     SemanticAnalysis(HashSet<NodeId>, HashMap<NodeId, TypeKind>),
-    IR(Vec<BasicBlock<SSAInstruction, SSATerminator>>),
+    SSAIR(SSAProgram),
     Codegen,
 }
 
@@ -71,8 +70,8 @@ impl Compiler {
         //  ============= IR LOWERING (SSA at least) ============= 
         let lowerer = SSALowerer::new(type_table);
         let lowered_blocks = lowerer.lower(&prog);
-        if matches!(self.debug, CompilerStage::IR) {
-            return Ok(CompilerOutput::IR(lowered_blocks));
+        if matches!(self.debug, CompilerStage::SSAIR) {
+            return Ok(CompilerOutput::SSAIR(lowered_blocks));
         }
 
         Ok(CompilerOutput::Codegen)
