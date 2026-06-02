@@ -5,19 +5,16 @@ use razz_compiler::compiler::{
     compiler::{Compiler, CompilerOutput, CompilerStage},
     error::CompilerError,
 };
-use razz_compiler::ir::basic_block::BasicBlock;
-use razz_compiler::ir::ssa::{SSAInstruction, SSATerminator};
+use razz_compiler::ir::ssa::SSAProgram;
 
 #[cfg(test)]
 mod common;
 use common::{colored_assert, load_fixture};
 
-type SSABlock = BasicBlock<SSAInstruction, SSATerminator>;
-
-fn run_ir(input: &str) -> Vec<SSABlock> {
-    let compiler = Compiler::new(CompilerStage::IR);
+fn run_ir(input: &str) -> SSAProgram {
+    let compiler = Compiler::new(CompilerStage::SSAIR);
     match compiler.compiles(input) {
-        Ok(CompilerOutput::IR(blocks)) => blocks,
+        Ok(CompilerOutput::SSAIR(blocks)) => blocks,
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::Lexer(errors)) => panic!("Unexpected lexer error: {:?}", errors),
         Err(CompilerError::Parser(errors)) => panic!("Unexpected parser error: {:?}", errors),
@@ -28,12 +25,8 @@ fn run_ir(input: &str) -> Vec<SSABlock> {
     }
 }
 
-fn format_ir(blocks: &[SSABlock]) -> String {
-    blocks
-        .iter()
-        .map(|block| block.to_string())
-        .collect::<Vec<_>>()
-        .join("\n")
+fn format_ir(program: &SSAProgram) -> String {
+    program.to_string().trim_end().to_string()
 }
 
 #[test]

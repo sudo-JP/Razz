@@ -1,6 +1,8 @@
-block_0:
-  if true goto block_1 else block_2
-block_1:
-  goto block_2
-block_2:
-  ret null
+fn main#0() null {
+  block_0:
+    if true goto block_1 else block_2
+  block_1:
+    goto block_2
+  block_2:
+    ret null
+}

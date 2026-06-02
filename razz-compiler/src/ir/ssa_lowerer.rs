@@ -82,6 +82,7 @@ impl<'ast> SSALowerer<'ast> {
             block_id: fn_id,
             params,
             blocks,
+            return_ty: fn_decl.return_type.node,
         };
 
         self.ir_prog.functions.push(function);
@@ -424,7 +425,15 @@ impl<'ast> SSALowerer<'ast> {
                 SSAOperand::Temp(temp)
             },
             ExprKind::Constant(lit) => SSAOperand::Const(lit.clone()),
-            ExprKind::Ident(var) => self.read_variable(&var, expr.id, self.curr_block),
+            ExprKind::Ident(var) => {
+                let mut var_id = self.var_table.get(var.as_str())
+                    .copied()
+                    .unwrap_or(expr.id);
+                if !self.type_table.contains_key(&var_id) {
+                    var_id = expr.id;
+                }
+                self.read_variable(var.as_str(), var_id, self.curr_block)
+            },
         }
     }
 

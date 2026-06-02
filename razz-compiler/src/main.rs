@@ -34,6 +34,13 @@ fn main() -> io::Result<()> {
             }
         }
 
+        Err(CompilerError::SemanticAnalysis(errs)) => {
+            is_err = true;
+            for e in errs {
+                eprintln!("{}: {:?}", "error".red().bold(), e);
+            }
+        }
+
         Ok(CompilerOutput::SSAIR(ir_prog)) => print!("{}", ir_prog),
 
         // Add more when the compiler grows 

@@ -194,7 +194,7 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
 
     m.insert(BinOpKind::And, allowed_bool.clone());
     m.insert(BinOpKind::Or, allowed_bool.clone());
-    m.insert(BinOpKind::Eq, allowed_bool.clone());
-    m.insert(BinOpKind::Neq, allowed_bool.clone());
+    m.insert(BinOpKind::Eq, allowed_equality.clone());
+    m.insert(BinOpKind::Neq, allowed_equality.clone());
     m
 });

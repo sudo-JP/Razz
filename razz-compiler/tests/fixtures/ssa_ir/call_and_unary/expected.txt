@@ -1,7 +1,11 @@
-block_0:
-  t2 = t0 + t1
-  ret t2
-block_1:
-  t3 = -1
-  t4 = add(t3,2)
-  ret t4
+fn add#0(a: int, b: int) int {
+  block_0:
+    t2 = t0 + t1
+    ret t2
+}
+fn main#1() int {
+  block_1:
+    t3 = -1
+    t4 = add(t3, 2)
+    ret t4
+}

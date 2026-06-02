@@ -25,6 +25,7 @@ pub struct SSAFunction {
     pub params: Vec<SSAFunctionParam>,
     pub block_id: BlockId,
     pub blocks: Vec<SSABlock>,
+    pub return_ty: TypeKind,
 }
 
 impl fmt::Display for SSAFunction {
@@ -39,7 +40,7 @@ impl fmt::Display for SSAFunction {
             params_str.push_str(&param.to_string());
             first = false; 
         }
-        writeln!(f, "fn {}#{}({}) {{", self.name, self.block_id, params_str)?;
+        writeln!(f, "fn {}#{}({}) {} {{", self.name, self.block_id, params_str, self.return_ty)?;
         for block in &self.blocks {
             writeln!(f, "{}", block)?;
         }

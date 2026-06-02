@@ -1,9 +1,11 @@
-block_0:
-  t0 = Phi(0,t2)
-  t1 = t0 < 2
-  if t1 goto block_2 else block_3
-block_2:
-  t2 = t0 + 1
-  goto block_0
-block_3:
-  ret t0
+fn main#0() int {
+  block_0:
+    t0 = Phi(0, t2)
+    t1 = t0 < 2
+    if t1 goto block_2 else block_3
+  block_2:
+    t2 = t0 + 1
+    goto block_0
+  block_3:
+    ret t0
+}

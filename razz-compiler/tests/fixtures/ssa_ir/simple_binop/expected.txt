@@ -1,3 +1,5 @@
-block_0:
-  t0 = 1 + 2
-  ret t0
+fn main#0() int {
+  block_0:
+    t0 = 1 + 2
+    ret t0
+}

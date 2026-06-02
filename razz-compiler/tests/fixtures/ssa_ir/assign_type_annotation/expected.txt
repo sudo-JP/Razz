@@ -1,2 +1,4 @@
-block_0:
-  ret 1
+fn main#0() int {
+  block_0:
+    ret 1
+}

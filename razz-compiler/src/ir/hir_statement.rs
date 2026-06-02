@@ -1,4 +1,4 @@
-use crate::{ast::{expression::EndpointKind, statement::HTTPMethodKind}, ir::{hir_expression::HIRExpr, Temp}};
+use crate::{ast::{expression::EndpointKind, statement::HTTPMethodKind, TypeKind}, ir::{hir_expression::HIRExpr, Temp}};
 
 pub type HIRBlock = Vec<HIRStmt>;
 pub struct HIRElseIf {
@@ -6,8 +6,23 @@ pub struct HIRElseIf {
     pub body: HIRBlock,
 }
 
-// No for loop btw, its all desugared to while 
+pub struct HIRFunctionParam {
+    pub name: String, 
+    pub ty: TypeKind,
+}
 
+pub struct HIRFunction {
+    pub name: String, 
+    pub params: Vec<HIRFunctionParam>, 
+    pub block: HIRBlock,
+    pub return_ty: TypeKind,
+}
+
+pub struct HIRProgram {
+    pub functions: Vec<HIRFunction>,
+}
+
+// No for loop btw, its all desugared to while 
 pub enum HIRStmt {
     /// <temp> = <expr>
     Assign {

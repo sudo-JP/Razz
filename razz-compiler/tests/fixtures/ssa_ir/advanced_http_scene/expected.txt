@@ -1,18 +1,20 @@
-block_0:
-  t0 = GET /camera
-  t0->vfov = 60.5
-  t2 = t0->vfov
-  t1 = Camera {vfov: t2}
-  PATCH /camera t1
-  t4 = Vec3 {x: 1,y: 2,z: 3}
-  t6 = Color {r: 10,g: 20,b: 30}
-  t5 = Lambertian {albedo: t6}
-  t3 = Sphere {coord: t4,radius: 0.5,material: t5}
-  POST /hittable t3
-  t8 = Vec3 {x: 0.1,y: 0.2,z: 0.3}
-  t9 = Vec3 {x: 0,y: 0,z: 0}
-  t7 = Background {top: t8,bottom: t9}
-  PUT /background t7
-  t10 = Output {file: scene.ppm}
-  PATCH /output t10
-  ret null
+fn main#0() null {
+  block_0:
+    t0 = GET /camera
+    t0->vfov = 60.5
+    t2 = t0->vfov
+    t1 = Camera {vfov: t2}
+    PATCH /camera t1
+    t4 = Vec3 {x: 1, y: 2, z: 3}
+    t6 = Color {r: 10, g: 20, b: 30}
+    t5 = Lambertian {albedo: t6}
+    t3 = Sphere {coord: t4, radius: 0.5, material: t5}
+    POST /hittable t3
+    t8 = Vec3 {x: 0.1, y: 0.2, z: 0.3}
+    t9 = Vec3 {x: 0, y: 0, z: 0}
+    t7 = Background {top: t8, bottom: t9}
+    PUT /background t7
+    t10 = Output {file: scene.ppm}
+    PATCH /output t10
+    ret null
+}
