@@ -117,9 +117,9 @@ pub enum SSAInstruction {
     /// <target> = <left> <op> <right>
     BinOp {
         target: Dest, 
-        left: SSAOperand,
+        lhs: SSAOperand,
         op: BinOpKind,
-        right: SSAOperand, 
+        rhs: SSAOperand, 
     }, 
     /// Unary Op
     /// <target> = <op> <value>
@@ -198,8 +198,8 @@ pub enum SSAInstruction {
 impl fmt::Display for SSAInstruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::BinOp { target, left, op, right } => 
-                write!(f, "{target} = {left} {op} {right}"),
+            Self::BinOp { target, lhs, op, rhs } => 
+                write!(f, "{target} = {lhs} {op} {rhs}"),
             Self::UnOp { target, op, value } => 
                 write!(f, "{target} = {op}{value}"),
             Self::Call { target, args, func } => {

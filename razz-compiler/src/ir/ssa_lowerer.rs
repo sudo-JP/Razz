@@ -283,10 +283,10 @@ impl<'ast> SSALowerer<'ast> {
         for block in self.blocks.as_mut_slice() {
             for (instr_id, instr) in block.instrs.iter_mut().enumerate() {
                 let should_push = match instr {
-                    SSAInstruction::BinOp { target, left, right, .. } => {
+                    SSAInstruction::BinOp { target, lhs, rhs, .. } => {
                         replace_temp(target) ||
-                        replace_op(left) || 
-                        replace_op(right) 
+                        replace_op(lhs) || 
+                        replace_op(rhs) 
                     },
                     SSAInstruction::UnOp { target, value, .. } => {
                         replace_temp(target) ||
@@ -364,9 +364,9 @@ impl<'ast> SSALowerer<'ast> {
                 let temp = self.expr_temp(expr);
                 self.emit(SSAInstruction::BinOp { 
                     target: temp, 
-                    left: lhs_opr, 
+                    lhs: lhs_opr, 
                     op: op.node, 
-                    right: rhs_opr 
+                    rhs: rhs_opr 
                 });
                 SSAOperand::Temp(temp)
             },
@@ -496,9 +496,9 @@ impl<'ast> SSALowerer<'ast> {
 
                 self.emit(SSAInstruction::BinOp{ 
                     target: new_temp, 
-                    left: ident_temp, 
+                    lhs: ident_temp, 
                     op: binop, 
-                    right: expr_opr, 
+                    rhs: expr_opr, 
                 });
                 self.write_variable(&ident, self.curr_block, SSAOperand::Temp(new_temp));
             },
@@ -519,9 +519,9 @@ impl<'ast> SSALowerer<'ast> {
                 let final_target = self.new_temp(obj_ty);
                 self.emit(SSAInstruction::BinOp{ 
                     target: final_target, 
-                    left: SSAOperand::Temp(target), 
+                    lhs: SSAOperand::Temp(target), 
                     op: binop, 
-                    right: expr_opr, 
+                    rhs: expr_opr, 
                 });
 
                 self.emit(SSAInstruction::FieldStore{ 

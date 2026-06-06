@@ -1,19 +1,17 @@
-use crate::{ast::{expression::EndpointKind, statement::HTTPMethodKind, TypeKind}, ir::{hir_expression::HIRExpr, Temp}};
+use crate::{
+    ast::{TypeKind, expression::EndpointKind, statement::HTTPMethodKind},
+    ir::{Temp, hir::HIRFunctionParam, hir_expression::HIRExpr},
+};
 
 pub type HIRBlock = Vec<HIRStmt>;
 pub struct HIRElseIf {
-    pub cond: HIRExpr, 
+    pub cond: HIRExpr,
     pub body: HIRBlock,
 }
 
-pub struct HIRFunctionParam {
-    pub name: String, 
-    pub ty: TypeKind,
-}
-
 pub struct HIRFunction {
-    pub name: String, 
-    pub params: Vec<HIRFunctionParam>, 
+    pub name: String,
+    pub params: Vec<HIRFunctionParam>,
     pub block: HIRBlock,
     pub return_ty: TypeKind,
 }
@@ -22,30 +20,31 @@ pub struct HIRProgram {
     pub functions: Vec<HIRFunction>,
 }
 
-// No for loop btw, its all desugared to while 
+// No for loop btw, its all desugared to while
 pub enum HIRStmt {
     /// <temp> = <expr>
-    Assign {
-        target: Temp,
-        expr: HIRExpr,
+    Assign { 
+        target: Temp, 
+        expr: HIRExpr 
     },
     /// <obj>-><key> = <value>
     FieldStore {
         obj: HIRExpr,
-        key: String, 
+        key: String,
         value: HIRExpr,
     },
     /// while <cond> <block>
-    While {
-        cond: HIRExpr,
-        block: HIRBlock,
+    While { 
+        cond: HIRExpr, 
+        block: 
+        HIRBlock 
     },
     /// if <cond> <body>
     /// <else_ifs>
     /// else <else_body>
     If {
-        cond: HIRExpr, 
-        body: HIRBlock, 
+        cond: HIRExpr,
+        body: HIRBlock,
         else_ifs: Vec<HIRElseIf>,
         else_body: Option<HIRBlock>,
     },
@@ -57,7 +56,7 @@ pub enum HIRStmt {
         ep: EndpointKind,
         body: HIRExpr,
     },
-    /// Plain expression, its more so for 
+    /// Plain expression, its more so for
     /// plain function calling
     Expr(HIRExpr),
 }
