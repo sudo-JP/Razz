@@ -46,6 +46,50 @@ impl HIRStructurizer {
                 let assignment = HIRStmt::Assign { target: *target, expr: binop };
                 self.curr_instrs.push(assignment);
             }, 
+            SSAInstruction::UnOp { target, op, value } => {
+                let value = Box::new(self.structurize_operand(value));
+                let unop = HIRExpr::UnOp{ 
+                    op: *op, 
+                    value 
+                };
+                let assignment = HIRStmt::Assign { target: *target, expr: unop };
+                self.curr_instrs.push(assignment);
+            },
+            SSAInstruction::Call { target, args, func } => {
+                let fn_call = HIRExpr::FunctionCall{ 
+                    name: func.to_string(), 
+                    args: args.iter()
+                        .map(|arg| self.structurize_operand(arg))
+                        .collect(),
+                };
+                if let Some(t) = target {
+                    let assignment = HIRStmt::Assign { target: *t, expr: fn_call };
+                    self.curr_instrs.push(assignment);
+                } else {
+                    self.curr_instrs.push(HIRStmt::Expr(fn_call));
+                }
+            },
+            SSAInstruction::FieldLoad { target, obj, key } => {
+                let obj = Box::new(self.structurize_operand(obj));
+                let struct_access = HIRExpr::FieldAccess{ 
+                    obj: obj, 
+                    key: key.to_string() 
+                };
+                let assignment = HIRStmt::Assign { target: *target, expr: struct_access };
+                self.curr_instrs.push(assignment);
+            },
+            SSAInstruction::FieldStore { obj, key, value } => {
+                let obj = self.structurize_operand(obj);
+                let value = self.structurize_operand(value);
+                let field_store = HIRStmt::FieldStore{ 
+                    obj, 
+                    key: key.to_string(), 
+                    value, 
+                };
+                self.curr_instrs.push(field_store);
+            },
+            SSAInstruction::Copy { target, value } => {
+            }
             _ => todo!()
         }
     }
