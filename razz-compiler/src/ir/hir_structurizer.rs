@@ -4,7 +4,7 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use crate::ir::{hir_expression::HIRExpr, hir_statement::{HIRProgram, HIRStmt}, 
+use crate::ir::{hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, 
     ssa::{SSAInstruction, SSAOperand, SSAProgram}
 };
 
@@ -22,7 +22,16 @@ impl HIRStructurizer {
         }
     }
 
-    pub fn structurize(self, ssa_prog: SSAProgram) -> HIRProgram {
+    pub fn structurize(mut self, ssa_prog: SSAProgram) -> HIRProgram {
+        for function in ssa_prog.functions {
+            for block in function.blocks {
+                for instr in block.instrs {
+                    self.structurize_instr(&instr);
+                }
+                // Finished a block, check with terminator 
+
+            }
+        }
         todo!()
     }
 
@@ -89,8 +98,40 @@ impl HIRStructurizer {
                 self.curr_instrs.push(field_store);
             },
             SSAInstruction::Copy { target, value } => {
+                let expr = self.structurize_operand(value);
+                
+                let assignment = HIRStmt::Assign { target: *target, expr };
+                self.curr_instrs.push(assignment);
+            }, 
+            SSAInstruction::Construct { target, ty, fields } => {
+                let struct_lit = HIRExpr::StructLiteral{ 
+                    ty: *ty, 
+                    fields: fields.iter()
+                        .map(|ssa_field| HIRFieldInit{
+                            name: ssa_field.name.to_string(),
+                            value: self.structurize_operand(&ssa_field.value),
+                        })
+                        .collect()
+                };
+
+                let assignment = HIRStmt::Assign { target: *target, expr: struct_lit };
+                self.curr_instrs.push(assignment);
+            },
+            SSAInstruction::HTTPGet { target, ep } => {
+                let expr = HIRExpr::HTTPRequest(*ep);
+
+                let assignment = HIRStmt::Assign { target: *target, expr };
+                self.curr_instrs.push(assignment);
+            },
+            SSAInstruction::HTTPWrite { method, ep, value } => {
+                let body = self.structurize_operand(value);
+
+                let req = HIRStmt::HTTPRequest { method: *method, ep: *ep, body };
+                self.curr_instrs.push(req);
+            },
+            SSAInstruction::Phi { target, args } => {
+                todo!()
             }
-            _ => todo!()
         }
     }
 }
