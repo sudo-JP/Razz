@@ -1,0 +1,17 @@
+fn main#0() int {
+  block_0:
+    t0 = 1 > 1
+    if t0 goto block_1 else block_3
+  block_1:
+    goto block_2
+  block_3:
+    t1 = 1 <= 10
+    if t1 goto block_4 else block_5
+  block_4:
+    goto block_2
+  block_5:
+    goto block_2
+  block_2:
+    t2 = Phi(2, 5, 8)
+    ret t2
+}

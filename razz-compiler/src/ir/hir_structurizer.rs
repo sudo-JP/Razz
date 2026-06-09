@@ -4,8 +4,9 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use crate::ir::{hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, 
-    ssa::{SSAInstruction, SSAOperand, SSAProgram}
+use std::collections::HashMap;
+
+use crate::ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 };
 
 
@@ -24,15 +25,39 @@ impl HIRStructurizer {
 
     pub fn structurize(mut self, ssa_prog: SSAProgram) -> HIRProgram {
         for function in ssa_prog.functions {
-            for block in function.blocks {
-                for instr in block.instrs {
-                    self.structurize_instr(&instr);
-                }
-                // Finished a block, check with terminator 
+            self.structurize_fn(function);
+        }
+        self.program
+    }
 
+    fn structurize_fn(&mut self, function: SSAFunction) {
+        if function.blocks.len() == 0 {
+            return;
+        }
+
+        // Construct map for DFS
+        let mut block_map: HashMap<BlockId, &SSABlock> = HashMap::new();
+        for block in &function.blocks {
+            block_map.insert(block.id, block);
+        }
+
+        // Perform DFS 
+        let mut stack: Vec<BlockId> = Vec::with_capacity(function.blocks.len());
+        stack.push(function.blocks[0].id);
+
+        while !stack.is_empty() {
+            let node_id = stack.pop().unwrap();
+            let node = block_map.get(&node_id).unwrap();
+
+            match &node.term {
+                SSATerminator::Return(opr) => {},
+                SSATerminator::Goto(id) => stack.push(*id),
+                SSATerminator::IfGoto { true_label, false_label, .. } => {
+                    stack.push(*true_label);
+                    stack.push(*false_label);
+                }
             }
         }
-        todo!()
     }
 
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
@@ -129,9 +154,7 @@ impl HIRStructurizer {
                 let req = HIRStmt::HTTPRequest { method: *method, ep: *ep, body };
                 self.curr_instrs.push(req);
             },
-            SSAInstruction::Phi { target, args } => {
-                todo!()
-            }
+            SSAInstruction::Phi { .. } => {},
         }
     }
 }

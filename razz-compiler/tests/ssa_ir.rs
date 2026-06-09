@@ -107,3 +107,4 @@ ssa_fixture_test!(for_no_decl_lowering, "tests/fixtures/ssa_ir/for_no_decl");
 ssa_fixture_test!(nested_while_lowering, "tests/fixtures/ssa_ir/nested_while");
 ssa_fixture_test!(nested_for_lowering, "tests/fixtures/ssa_ir/nested_for");
 ssa_fixture_test!(nested_if_lowering, "tests/fixtures/ssa_ir/nested_if");
+ssa_fixture_test!(multiple_phis_merging_path, "tests/fixtures/ssa_ir/multiple_phis_merging_path");

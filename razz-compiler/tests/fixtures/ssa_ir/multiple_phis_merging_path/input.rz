@@ -1,4 +1,4 @@
-fn main() null {
+fn main() int {
     x = 1; 
     if (x > 1) {
         x = 2;
@@ -7,5 +7,5 @@ fn main() null {
     } else {
         x = 8;
     }
-    return null;
+    return x;
 }

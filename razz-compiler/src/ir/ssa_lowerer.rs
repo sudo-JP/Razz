@@ -161,6 +161,8 @@ impl<'ast> SSALowerer<'ast> {
                 .expect("Type must resolved within semantic");
             let temp = self.new_temp(*ty);
             let val = SSAInstruction::Phi { target: temp, args: vec![] };
+
+            // Insert into incomplete phi
             self.incomplete_phis
                 .entry(block_id)
                 .or_insert_with(HashMap::new)
@@ -194,6 +196,7 @@ impl<'ast> SSALowerer<'ast> {
         target: &Temp, args: &mut Vec<SSAOperand>)  // Destructed Phi
     -> Option<SSAOperand> {
         let mut preds = self.preds.get(&block_id).cloned().unwrap_or_default();
+        // For deterministic debugging 
         preds.sort_unstable();
         for pred in preds {
             let op = self.read_variable(variable, variable_id, pred);
@@ -708,6 +711,7 @@ impl<'ast> SSALowerer<'ast> {
         // Else-if chain
         for (i, (elif_header, elif_body)) in else_if_blocks.iter().enumerate() {
             self.curr_block = *elif_header;
+            self.seal_block(*elif_header);
             let cond_op = self.lower_expr(&else_ifs[i].cond);
             let false_target = if i + 1 < else_if_len {
                 else_if_blocks[i + 1].0
