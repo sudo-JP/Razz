@@ -442,7 +442,13 @@ impl<'ast> SSALowerer<'ast> {
 
     fn lower_stmt(&mut self, stmt: &'ast Stmt) {
         match &stmt.kind {
-            StmtKind::Assign { target, expr, .. } => self.lower_assign(target, expr),
+            StmtKind::Assign { target, expr, .. } => {
+                if let ExprKind::Ident(a) = &target.kind {
+                    println!("assign: {a} @ block {}", self.curr_block);
+
+                };
+                self.lower_assign(target, expr);
+            }
             StmtKind::CompoundAssign { target, op, expr } => self.lower_compound_assign(target, op, expr),
             StmtKind::While { cond, body } => self.lower_while(cond, body),
             StmtKind::For { decl, cond, update, body } => self.lower_for(decl, cond, update, body),
@@ -550,8 +556,8 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_while(&mut self, cond: &'ast Expr, body: &'ast Block) {
-        let header_id = self.curr_block;
-        let preheader_id = self.next_block_id();
+        let preheader_id = self.curr_block;
+        let header_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
 
@@ -569,6 +575,9 @@ impl<'ast> SSALowerer<'ast> {
         self.add_pred(header_id, body_id);
         self.add_pred(exit_id, header_id);
 
+        self.finish_block(SSATerminator::Goto(header_id));
+        self.curr_block = header_id;
+        self.seal_block(preheader_id);
 
         let cond_op = self.lower_expr(cond);
         self.finish_block(SSATerminator::IfGoto{ 
@@ -589,8 +598,8 @@ impl<'ast> SSALowerer<'ast> {
     }
 
     fn lower_for(&mut self, decl: &'ast Option<Box<Stmt>>, cond: &'ast Option<Expr>, update: &'ast [Stmt], body: &'ast Block) {
-        let header_id = self.curr_block;
-        let preheader_id = self.next_block_id();
+        let preheader_id = self.curr_block;
+        let header_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
 
@@ -606,11 +615,10 @@ impl<'ast> SSALowerer<'ast> {
             self.lower_stmt(&decl_stmt);
         }
 
-        for defs in self.current_def.values_mut() {
-            if let Some(val) = defs.remove(&header_id) {
-                defs.insert(preheader_id, val);
-            }
-        }
+        self.finish_block(SSATerminator::Goto(header_id));
+        self.curr_block = header_id;
+        self.seal_block(preheader_id);
+
 
         if let Some(condition) = cond {
             let cond_op = self.lower_expr(condition);

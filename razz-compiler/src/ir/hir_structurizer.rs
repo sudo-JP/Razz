@@ -4,7 +4,7 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 };
@@ -42,13 +42,16 @@ impl HIRStructurizer {
         }
 
         // Perform DFS 
+        
         let mut stack: Vec<BlockId> = Vec::with_capacity(function.blocks.len());
+        let mut visited: HashSet<BlockId> = HashSet::new();
         stack.push(function.blocks[0].id);
 
         while !stack.is_empty() {
             let node_id = stack.pop().unwrap();
             let node = block_map.get(&node_id).unwrap();
 
+            visited.insert(node_id);
             match &node.term {
                 SSATerminator::Return(opr) => {},
                 SSATerminator::Goto(id) => stack.push(*id),
@@ -58,6 +61,41 @@ impl HIRStructurizer {
                 }
             }
         }
+    }
+
+    fn dfs(&mut self, 
+        node_id: &BlockId, 
+        block_map: &HashMap<BlockId, &SSABlock>, 
+        visited: &mut HashSet<BlockId>,
+        ancestors: &mut HashMap<BlockId, BlockId>) 
+    -> Vec<HIRStmt> {
+        // If already in visited, must be a loop
+        if visited.get(node_id).is_some() {
+            return vec![];
+        }
+
+        // Mark current node as visited
+        visited.insert(*node_id);
+
+        // Get node neighbour
+        let node = block_map.get(node_id).unwrap();
+        let stmts = match &node.term {
+            // Base case
+            SSATerminator::Return(_) => vec![],
+
+            // Recursive case
+            SSATerminator::Goto(id) => {
+                ancestors.insert(*id, *node_id);
+                self.dfs(id, block_map, visited, ancestors) 
+            }
+            SSATerminator::IfGoto { true_label, false_label, .. } => {
+                ancestors.insert(*true_label, *node_id);
+                ancestors.insert(*false_label, *node_id);
+                self.dfs(true_label, block_map, visited, ancestors)
+            },
+        };
+
+        stmts
     }
 
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
