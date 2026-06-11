@@ -178,11 +178,12 @@ impl<'ast> SSALowerer<'ast> {
                 .expect("Type must resolved within semantic");
             let temp = self.new_temp(*ty);
             let mut args = vec![];
-            self.write_variable(variable, block_id, SSAOperand::Temp(temp));
-            let try_op = self.add_phi_operands(variable, variable_id, block_id, &temp, &mut args);
 
-            let val = SSAInstruction::Phi { target: temp, args };
-            self.push_to_specific_block(val, block_id);
+            self.write_variable(variable, block_id, SSAOperand::Temp(temp));
+            self.push_to_specific_block(SSAInstruction::Phi { target: temp, args: vec![] }, block_id);
+
+            let try_op = self.add_phi_operands(variable, variable_id, block_id, &temp, &mut args);
+            self.update_phi_args(block_id, temp, args);
 
             try_op.unwrap_or(SSAOperand::Temp(temp))
         };
@@ -237,6 +238,16 @@ impl<'ast> SSALowerer<'ast> {
         };
 
         let users = self.replace_uses(&SSAOperand::Temp(*target), &same);
+        let retain_no_phi = |instr: &SSAInstruction| 
+            if let SSAInstruction::Phi { target: t, .. } = instr {
+                t != target 
+            } 
+            else { true };
+        self.curr_instrs.retain(retain_no_phi);
+        for block in &mut self.blocks {
+            block.instrs.retain(retain_no_phi);
+        }
+
         // Find the user and replace that 
         for (block_id, instr_id) in users {
             let phi_data = {
@@ -443,10 +454,6 @@ impl<'ast> SSALowerer<'ast> {
     fn lower_stmt(&mut self, stmt: &'ast Stmt) {
         match &stmt.kind {
             StmtKind::Assign { target, expr, .. } => {
-                if let ExprKind::Ident(a) = &target.kind {
-                    println!("assign: {a} @ block {}", self.curr_block);
-
-                };
                 self.lower_assign(target, expr);
             }
             StmtKind::CompoundAssign { target, op, expr } => self.lower_compound_assign(target, op, expr),
@@ -561,18 +568,11 @@ impl<'ast> SSALowerer<'ast> {
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
 
-        for defs in self.current_def.values_mut() {
-            if let Some(val) = defs.remove(&header_id) {
-                defs.insert(preheader_id, val);
-            }
-        }
-
         // Body's pred is the header
         // Header's pred is the body, circular loop
         // Exit's pred is header 
         self.add_pred(header_id, preheader_id);
         self.add_pred(body_id, header_id);
-        self.add_pred(header_id, body_id);
         self.add_pred(exit_id, header_id);
 
         self.finish_block(SSATerminator::Goto(header_id));
@@ -589,6 +589,8 @@ impl<'ast> SSALowerer<'ast> {
         self.curr_block = body_id;
         self.seal_block(body_id);
         self.lower_block(body);
+        let back_edge_block = self.curr_block;
+        self.add_pred(header_id, back_edge_block);
         self.finish_block(SSATerminator::Goto(header_id));
 
         self.curr_block = exit_id;
@@ -599,6 +601,7 @@ impl<'ast> SSALowerer<'ast> {
 
     fn lower_for(&mut self, decl: &'ast Option<Box<Stmt>>, cond: &'ast Option<Expr>, update: &'ast [Stmt], body: &'ast Block) {
         let preheader_id = self.curr_block;
+        let update_block_id = self.next_block_id();
         let header_id = self.next_block_id();
         let body_id = self.next_block_id();
         let exit_id = self.next_block_id();
@@ -606,7 +609,8 @@ impl<'ast> SSALowerer<'ast> {
         // Predecessor
         // Like while loop
         self.add_pred(header_id, preheader_id);
-        self.add_pred(header_id, body_id);
+        self.add_pred(header_id, update_block_id);
+        self.add_pred(update_block_id, body_id);
         self.add_pred(body_id, header_id);
         self.add_pred(exit_id, header_id);
 
@@ -636,8 +640,11 @@ impl<'ast> SSALowerer<'ast> {
         self.curr_block = body_id;
         self.seal_block(body_id);
         self.lower_block(body);
+        self.finish_block(SSATerminator::Goto(update_block_id));
 
         // Insert update after body 
+        self.seal_block(update_block_id);
+        self.curr_block = update_block_id;
         for stmt in update {
             self.lower_stmt(stmt);
         }
