@@ -1,11 +1,13 @@
 fn main#0() int {
   block_0:
+    goto block_1
+  block_1:
     t0 = Phi(0, t2)
     t1 = t0 < 3
     if t1 goto block_2 else block_3
   block_2:
     t2 = t0 + 1
-    goto block_0
+    goto block_1
   block_3:
     ret t0
 }

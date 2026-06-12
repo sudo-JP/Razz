@@ -1,12 +1,20 @@
 fn main#0() null {
   block_0:
-    if false goto block_2 else block_3
-  block_2:
-    if false goto block_5 else block_6
-  block_5:
     goto block_2
-  block_6:
-    goto block_0
+  block_2:
+    if false goto block_3 else block_4
   block_3:
+    goto block_6
+  block_6:
+    if false goto block_7 else block_8
+  block_7:
+    goto block_5
+  block_5:
+    goto block_6
+  block_8:
+    goto block_1
+  block_1:
+    goto block_2
+  block_4:
     ret null
 }

@@ -2,7 +2,11 @@ fn main#0() null {
   block_0:
     goto block_2
   block_2:
-    goto block_0
+    goto block_3
   block_3:
+    goto block_1
+  block_1:
+    goto block_2
+  block_4:
     ret null
 }
