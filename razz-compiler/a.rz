@@ -1,14 +1,11 @@
 fn main() null {
-    i = 0;
-    while i < 5 {
+    for i = 0; i < 2; i += 1 {
         b = 1; 
         if b > 2 {
             a = GET /camera;
         } else {
             a = GET /background;
         }
-        i += 1;
     }
-
     return null;
 }

@@ -4,21 +4,24 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, mem};
 
 use crate::ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 };
 
 
 pub struct HIRStructurizer {
-    curr_instrs: Vec<HIRStmt>,
     program: HIRProgram,
+}
+
+enum DFSResult {
+    ForwardEdge(Vec<HIRStmt>),
+    BackEdge(Vec<HIRStmt>),
 }
 
 impl HIRStructurizer {
     pub fn new() -> Self {
         Self {
-            curr_instrs: vec![],
             program: HIRProgram { functions: vec![] },
         }
     }
@@ -67,35 +70,47 @@ impl HIRStructurizer {
         node_id: &BlockId, 
         block_map: &HashMap<BlockId, &SSABlock>, 
         visited: &mut HashSet<BlockId>,
-        ancestors: &mut HashMap<BlockId, BlockId>) 
-    -> Vec<HIRStmt> {
-        // If already in visited, must be a loop
+        visiting: &mut HashSet<BlockId>) 
+    -> DFSResult {
         if visited.get(node_id).is_some() {
-            return vec![];
+            // If already in visited, it is finished, skip
+            return DFSResult::ForwardEdge(vec![])
+        } else if visiting.get(node_id).is_some() {
+            // Otherwise, back edge detected
+            todo!()
         }
+
+        // Mark current node as visiting
+        visiting.insert(*node_id);
+
+        // Get node neighbour
+        let node = block_map.get(node_id).unwrap();
+        let res = match &node.term {
+            // Base case
+            SSATerminator::Return(opr) => {
+                let opr_expr = self.structurize_operand(opr);
+                let ret_stmt = HIRStmt::Return(opr_expr);
+
+                todo!()
+            },
+
+            // Recursive case
+            SSATerminator::Goto(id) => {
+                let mut neigh_res = self.dfs(id, block_map, visited, visiting);
+                todo!()
+            }
+            SSATerminator::IfGoto { true_label, false_label, .. } => {
+                self.dfs(true_label, block_map, visited, visiting);
+                todo!()
+            },
+        };
+        // Finished visiting
+        visiting.remove(node_id);
 
         // Mark current node as visited
         visited.insert(*node_id);
 
-        // Get node neighbour
-        let node = block_map.get(node_id).unwrap();
-        let stmts = match &node.term {
-            // Base case
-            SSATerminator::Return(_) => vec![],
-
-            // Recursive case
-            SSATerminator::Goto(id) => {
-                ancestors.insert(*id, *node_id);
-                self.dfs(id, block_map, visited, ancestors) 
-            }
-            SSATerminator::IfGoto { true_label, false_label, .. } => {
-                ancestors.insert(*true_label, *node_id);
-                ancestors.insert(*false_label, *node_id);
-                self.dfs(true_label, block_map, visited, ancestors)
-            },
-        };
-
-        stmts
+        res
     }
 
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
@@ -105,7 +120,7 @@ impl HIRStructurizer {
         }
     }
 
-    fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) {
+    fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> Option<HIRStmt> {
         match ssa_instr {
             SSAInstruction::BinOp { target, lhs, op, rhs } => {
                 let lhs = Box::new(self.structurize_operand(lhs));
@@ -115,8 +130,7 @@ impl HIRStructurizer {
                     op: *op,
                     rhs, 
                 };
-                let assignment = HIRStmt::Assign { target: *target, expr: binop };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr: binop })
             }, 
             SSAInstruction::UnOp { target, op, value } => {
                 let value = Box::new(self.structurize_operand(value));
@@ -124,8 +138,7 @@ impl HIRStructurizer {
                     op: *op, 
                     value 
                 };
-                let assignment = HIRStmt::Assign { target: *target, expr: unop };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr: unop })
             },
             SSAInstruction::Call { target, args, func } => {
                 let fn_call = HIRExpr::FunctionCall{ 
@@ -135,10 +148,9 @@ impl HIRStructurizer {
                         .collect(),
                 };
                 if let Some(t) = target {
-                    let assignment = HIRStmt::Assign { target: *t, expr: fn_call };
-                    self.curr_instrs.push(assignment);
+                    Some(HIRStmt::Assign { target: *t, expr: fn_call })
                 } else {
-                    self.curr_instrs.push(HIRStmt::Expr(fn_call));
+                    Some(HIRStmt::Expr(fn_call))
                 }
             },
             SSAInstruction::FieldLoad { target, obj, key } => {
@@ -147,24 +159,20 @@ impl HIRStructurizer {
                     obj: obj, 
                     key: key.to_string() 
                 };
-                let assignment = HIRStmt::Assign { target: *target, expr: struct_access };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr: struct_access })
             },
             SSAInstruction::FieldStore { obj, key, value } => {
                 let obj = self.structurize_operand(obj);
                 let value = self.structurize_operand(value);
-                let field_store = HIRStmt::FieldStore{ 
+                Some(HIRStmt::FieldStore{ 
                     obj, 
                     key: key.to_string(), 
                     value, 
-                };
-                self.curr_instrs.push(field_store);
+                })
             },
             SSAInstruction::Copy { target, value } => {
                 let expr = self.structurize_operand(value);
-                
-                let assignment = HIRStmt::Assign { target: *target, expr };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr })
             }, 
             SSAInstruction::Construct { target, ty, fields } => {
                 let struct_lit = HIRExpr::StructLiteral{ 
@@ -177,22 +185,18 @@ impl HIRStructurizer {
                         .collect()
                 };
 
-                let assignment = HIRStmt::Assign { target: *target, expr: struct_lit };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr: struct_lit })
             },
             SSAInstruction::HTTPGet { target, ep } => {
                 let expr = HIRExpr::HTTPRequest(*ep);
-
-                let assignment = HIRStmt::Assign { target: *target, expr };
-                self.curr_instrs.push(assignment);
+                Some(HIRStmt::Assign { target: *target, expr })
             },
             SSAInstruction::HTTPWrite { method, ep, value } => {
                 let body = self.structurize_operand(value);
 
-                let req = HIRStmt::HTTPRequest { method: *method, ep: *ep, body };
-                self.curr_instrs.push(req);
+                Some(HIRStmt::HTTPRequest { method: *method, ep: *ep, body })
             },
-            SSAInstruction::Phi { .. } => {},
+            SSAInstruction::Phi { .. } => None,
         }
     }
 }
