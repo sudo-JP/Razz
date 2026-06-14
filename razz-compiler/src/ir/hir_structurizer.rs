@@ -16,7 +16,10 @@ pub struct HIRStructurizer {
 
 enum DFSResult {
     ForwardEdge(Vec<HIRStmt>),
-    BackEdge(Vec<HIRStmt>),
+    BackEdge {
+        pointing_to_id: BlockId,
+        instrs: Vec<HIRStmt>
+    },
 }
 
 impl HIRStructurizer {
@@ -85,23 +88,67 @@ impl HIRStructurizer {
 
         // Get node neighbour
         let node = block_map.get(node_id).unwrap();
+
+        let mut curr_instrs = node.instrs.iter()
+            .filter_map(|instr| self.structurize_instr(instr))
+            .collect::<Vec<HIRStmt>>();
+
         let res = match &node.term {
             // Base case
             SSATerminator::Return(opr) => {
                 let opr_expr = self.structurize_operand(opr);
                 let ret_stmt = HIRStmt::Return(opr_expr);
-
-                todo!()
+                curr_instrs.push(ret_stmt);
+                DFSResult::ForwardEdge(curr_instrs)
             },
 
             // Recursive case
             SSATerminator::Goto(id) => {
-                let mut neigh_res = self.dfs(id, block_map, visited, visiting);
-                todo!()
+                let neigh_res = self.dfs(id, block_map, visited, visiting);
+                match neigh_res {
+                    DFSResult::ForwardEdge(mut stmts) => {
+                        curr_instrs.append(&mut stmts);
+                        DFSResult::ForwardEdge(curr_instrs)
+                    }, 
+                    DFSResult::BackEdge { pointing_to_id, mut instrs } => {
+                        curr_instrs.append(&mut instrs);
+                        DFSResult::BackEdge {
+                            instrs: curr_instrs, 
+                            pointing_to_id,
+                        }
+                    }
+                }
             }
-            SSATerminator::IfGoto { true_label, false_label, .. } => {
-                self.dfs(true_label, block_map, visited, visiting);
-                todo!()
+            SSATerminator::IfGoto { cond, true_label, false_label } => {
+                let neigh_res = self.dfs(true_label, block_map, visited, visiting);
+                let cond = self.structurize_operand(cond);
+
+                match neigh_res {
+                    DFSResult::ForwardEdge(mut stmt) => {
+                        curr_instrs.append(&mut stmt);
+                        DFSResult::ForwardEdge(curr_instrs)
+                    }, 
+                    DFSResult::BackEdge { pointing_to_id, mut instrs } => {
+                        if pointing_to_id == *node_id {                
+                            // If pointing to current block, construct
+                            // a loop
+                            let for_stmt = HIRStmt::While { 
+                                cond: cond,
+                                block: instrs,
+                            };
+
+                            curr_instrs.push(for_stmt);
+                            DFSResult::ForwardEdge(curr_instrs)
+                        } else {
+                            // Just bubble up result for the actual back edge 
+                            curr_instrs.append(&mut instrs);
+                            DFSResult::BackEdge { 
+                                pointing_to_id, 
+                                instrs: curr_instrs,
+                            }
+                        }
+                    },
+                }
             },
         };
         // Finished visiting
