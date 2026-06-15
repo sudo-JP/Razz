@@ -1,9 +1,8 @@
 use crate::{
     ast::{TypeKind, expression::EndpointKind, statement::HTTPMethodKind},
-    ir::{Temp, hir::HIRFunctionParam, hir_expression::HIRExpr},
+    ir::{Temp, hir::{HIRBlock, HIRFunctionParam}, hir_expression::HIRExpr},
 };
 
-pub type HIRBlock = Vec<HIRStmt>;
 pub struct HIRElseIf {
     pub cond: HIRExpr,
     pub body: HIRBlock,
@@ -45,8 +44,7 @@ pub enum HIRStmt {
     If {
         cond: HIRExpr,
         body: HIRBlock,
-        else_ifs: Vec<HIRElseIf>,
-        else_body: Option<HIRBlock>,
+        else_body: HIRBlock,
     },
     /// return <expr>
     Return(HIRExpr),

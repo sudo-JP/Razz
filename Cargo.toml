@@ -6,7 +6,7 @@ members = [
     "razz-pico"
 ]
 
-resolver = "2"
+resolver = "3"
 
 default-members = [
     "razz-core", 

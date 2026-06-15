@@ -6,8 +6,8 @@
 
 use std::{collections::{HashMap, HashSet}, mem};
 
-use crate::ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
-};
+use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
+}};
 
 
 pub struct HIRStructurizer {
@@ -120,35 +120,70 @@ impl HIRStructurizer {
                 }
             }
             SSATerminator::IfGoto { cond, true_label, false_label } => {
-                let neigh_res = self.dfs(true_label, block_map, visited, visiting);
+                let true_res = self.dfs(true_label, block_map, visited, visiting);
+                let false_res = self.dfs(false_label, block_map, visited, visiting);
                 let cond = self.structurize_operand(cond);
 
-                match neigh_res {
-                    DFSResult::ForwardEdge(mut stmt) => {
-                        curr_instrs.append(&mut stmt);
+                match (true_res, false_res) {
+                    (DFSResult::ForwardEdge(then), 
+                    DFSResult::ForwardEdge(else_)) => {
+                        // Regular if 
+                        let if_stmt = HIRStmt::If { 
+                            cond, 
+                            body: then, 
+                            else_body: else_,
+                        };
+                        curr_instrs.push(if_stmt);
                         DFSResult::ForwardEdge(curr_instrs)
                     }, 
-                    DFSResult::BackEdge { pointing_to_id, mut instrs } => {
-                        if pointing_to_id == *node_id {                
-                            // If pointing to current block, construct
-                            // a loop
+                    (DFSResult::BackEdge { pointing_to_id, mut instrs },
+                    DFSResult::ForwardEdge(mut after)) => {
+                        if pointing_to_id == *node_id {
+                            // Loop is true body
                             let for_stmt = HIRStmt::While { 
-                                cond: cond,
+                                cond, 
                                 block: instrs,
                             };
-
                             curr_instrs.push(for_stmt);
+                            curr_instrs.append(&mut after);
                             DFSResult::ForwardEdge(curr_instrs)
                         } else {
-                            // Just bubble up result for the actual back edge 
                             curr_instrs.append(&mut instrs);
+                            curr_instrs.append(&mut after);
                             DFSResult::BackEdge { 
                                 pointing_to_id, 
-                                instrs: curr_instrs,
+                                instrs: curr_instrs 
                             }
                         }
                     },
+                    (DFSResult::ForwardEdge(mut after), 
+                    DFSResult::BackEdge { pointing_to_id, mut instrs }) => {
+                        // This code shouldn't occurs, but will handle it anyway 
+                        let cond = HIRExpr::UnOp { 
+                            op: UnOpKind::Not, 
+                            value: Box::new(cond),
+                        };
+                        if pointing_to_id == *node_id {
+                            // Loop is false body
+                            let for_stmt = HIRStmt::While { 
+                                cond, 
+                                block: instrs
+                            };
+                            curr_instrs.push(for_stmt);
+                            curr_instrs.append(&mut after);
+                            DFSResult::ForwardEdge(curr_instrs)
+                        } else {
+                            curr_instrs.append(&mut instrs);
+                            curr_instrs.append(&mut after);
+                            DFSResult::BackEdge { 
+                                pointing_to_id, 
+                                instrs: curr_instrs 
+                            }
+                        }
+                    }, 
+                    _ => unreachable!("This case should not happen")
                 }
+
             },
         };
         // Finished visiting
