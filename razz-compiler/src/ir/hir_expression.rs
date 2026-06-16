@@ -1,11 +1,13 @@
 //! This looks pretty much like src/ast/expression.rs
 use crate::{ast::{expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, SpecificTypeKind}, ir::Temp};
 
+#[derive(Debug)]
 pub struct HIRFieldInit {
     pub name: String, 
     pub value: HIRExpr,
 }
 
+#[derive(Debug)]
 pub enum HIRExpr {
     /// <lhs> <op> <rhs>
     BinOp {

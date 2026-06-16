@@ -4,9 +4,9 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::{collections::{HashMap, HashSet}, mem};
+use std::collections::{HashMap, HashSet};
 
-use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
+use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 }};
 
 
@@ -48,25 +48,33 @@ impl HIRStructurizer {
         }
 
         // Perform DFS 
-        
-        let mut stack: Vec<BlockId> = Vec::with_capacity(function.blocks.len());
         let mut visited: HashSet<BlockId> = HashSet::new();
-        stack.push(function.blocks[0].id);
+        let mut visiting: HashSet<BlockId> = HashSet::new();
+        let dfs_res = self.dfs(
+            &function.block_id, 
+            &block_map, 
+            &mut visited, 
+            &mut visiting
+        );
 
-        while !stack.is_empty() {
-            let node_id = stack.pop().unwrap();
-            let node = block_map.get(&node_id).unwrap();
+        let DFSResult::ForwardEdge(block) = dfs_res else {
+            unreachable!("function block must be a forward edge")
+        };
 
-            visited.insert(node_id);
-            match &node.term {
-                SSATerminator::Return(opr) => {},
-                SSATerminator::Goto(id) => stack.push(*id),
-                SSATerminator::IfGoto { true_label, false_label, .. } => {
-                    stack.push(*true_label);
-                    stack.push(*false_label);
-                }
-            }
-        }
+        let params =  function.params.iter()
+            .map(|p| HIRFunctionParam {
+                name: p.name.to_string(),
+                ty: p.ty
+            })
+            .collect();
+
+        let function_stmt = HIRFunction {
+            name: function.name.to_string(),
+            params,
+            block,
+            return_ty: function.return_ty,
+        };
+        self.program.functions.push(function_stmt);
     }
 
     fn dfs(&mut self, 
@@ -80,7 +88,10 @@ impl HIRStructurizer {
             return DFSResult::ForwardEdge(vec![])
         } else if visiting.get(node_id).is_some() {
             // Otherwise, back edge detected
-            todo!()
+            return DFSResult::BackEdge { 
+                pointing_to_id: *node_id, 
+                instrs: vec![] 
+            };
         }
 
         // Mark current node as visiting

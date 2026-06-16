@@ -3,6 +3,8 @@ use std::collections::{HashMap, HashSet};
 use clap::ValueEnum;
 use crate::ast::{NodeId, Program, TypeKind};
 use crate::compiler::error::CompilerError;
+use crate::ir::hir_statement::HIRProgram;
+use crate::ir::hir_structurizer::HIRStructurizer;
 use crate::ir::ssa::SSAProgram;
 use crate::ir::ssa_lowerer::SSALowerer;
 use crate::lexer::tokens::Token;
@@ -17,6 +19,7 @@ pub enum CompilerStage {
     Parser, 
     SemanticAnalysis, 
     SSAIR, 
+    HIR,
     Codegen, 
 }
 
@@ -26,6 +29,7 @@ pub enum CompilerOutput {
     Parser(Program), 
     SemanticAnalysis(HashSet<NodeId>, HashMap<NodeId, TypeKind>),
     SSAIR(SSAProgram),
+    HIR(HIRProgram),
     Codegen,
 }
 
@@ -72,6 +76,13 @@ impl Compiler {
         let lowered_blocks = lowerer.lower(&prog);
         if matches!(self.debug, CompilerStage::SSAIR) {
             return Ok(CompilerOutput::SSAIR(lowered_blocks));
+        }
+
+        //  ============= HIR STRUCTURIZER ============= 
+        let structurizer = HIRStructurizer::new();
+        let hir_structurized = structurizer.structurize(lowered_blocks);
+        if matches!(self.debug, CompilerStage::HIR) {
+            return Ok(CompilerOutput::HIR(hir_structurized));
         }
 
         Ok(CompilerOutput::Codegen)

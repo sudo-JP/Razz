@@ -43,6 +43,8 @@ fn main() -> io::Result<()> {
 
         Ok(CompilerOutput::SSAIR(ir_prog)) => print!("{}", ir_prog),
 
+        Ok(CompilerOutput::HIR(hir_prog)) => println!("{:?}", hir_prog),
+
         // Add more when the compiler grows 
         _ => {}
     }
