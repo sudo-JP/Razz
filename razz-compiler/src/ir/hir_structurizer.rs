@@ -4,7 +4,7 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 }};
@@ -54,7 +54,8 @@ impl HIRStructurizer {
             &function.block_id, 
             &block_map, 
             &mut visited, 
-            &mut visiting
+            &mut visiting,
+            None
         );
 
         let DFSResult::ForwardEdge(block) = dfs_res else {
@@ -81,11 +82,15 @@ impl HIRStructurizer {
         node_id: &BlockId, 
         block_map: &HashMap<BlockId, &SSABlock>, 
         visited: &mut HashSet<BlockId>,
-        visiting: &mut HashSet<BlockId>) 
+        visiting: &mut HashSet<BlockId>,
+        stop_at: Option<BlockId>) 
     -> DFSResult {
         if visited.get(node_id).is_some() {
             // If already in visited, it is finished, skip
             return DFSResult::ForwardEdge(vec![])
+        } else if let Some(id) = stop_at 
+        && id == *node_id {
+            return DFSResult::ForwardEdge(vec![]);
         } else if visiting.get(node_id).is_some() {
             // Otherwise, back edge detected
             return DFSResult::BackEdge { 
@@ -115,7 +120,7 @@ impl HIRStructurizer {
 
             // Recursive case
             SSATerminator::Goto(id) => {
-                let neigh_res = self.dfs(id, block_map, visited, visiting);
+                let neigh_res = self.dfs(id, block_map, visited, visiting, None);
                 match neigh_res {
                     DFSResult::ForwardEdge(mut stmts) => {
                         curr_instrs.append(&mut stmts);
@@ -131,8 +136,8 @@ impl HIRStructurizer {
                 }
             }
             SSATerminator::IfGoto { cond, true_label, false_label } => {
-                let true_res = self.dfs(true_label, block_map, visited, visiting);
-                let false_res = self.dfs(false_label, block_map, visited, visiting);
+                let true_res = self.dfs(true_label, block_map, visited, visiting, None);
+                let false_res = self.dfs(false_label, block_map, visited, visiting, None);
                 let cond = self.structurize_operand(cond);
 
                 match (true_res, false_res) {
@@ -192,7 +197,7 @@ impl HIRStructurizer {
                             }
                         }
                     }, 
-                    _ => unreachable!("This case should not happen")
+                    _ => todo!()
                 }
 
             },
@@ -204,6 +209,39 @@ impl HIRStructurizer {
         visited.insert(*node_id);
 
         res
+    }
+
+    /// This algorithm is BFS 
+    /// Precondition: Takes in a queue populated with nodes its want to visit
+    /// and its neighbour map
+    /// Return: convergence path if found
+    fn find_convergence_path(&self,
+        queue: &mut VecDeque<BlockId>,
+        block_map: &HashMap<BlockId, &SSABlock>
+    ) -> Option<BlockId> {
+
+        let mut visited: HashSet<BlockId> = HashSet::new();
+        while let Some(node_id) = queue.pop_front() {
+            // Get neighbour
+            // Precondition that block map populates with node ids
+            let node = block_map.get(&node_id).unwrap();
+            match &node.term {
+                SSATerminator::Return(_) => {}, 
+                SSATerminator::Goto(neigh_id) => {
+                    if let Some(_) = visited.get(neigh_id) {
+                        return Some(*neigh_id);
+                    }
+                    queue.push_back(*neigh_id);
+                }, 
+                SSATerminator::IfGoto { cond, true_label, false_label } =>
+                {
+
+                }
+            }
+
+            visited.insert(node_id);
+        }
+        None
     }
 
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
