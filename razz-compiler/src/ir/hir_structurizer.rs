@@ -85,12 +85,12 @@ impl HIRStructurizer {
         visiting: &mut HashSet<BlockId>,
         stop_at: Option<BlockId>) 
     -> DFSResult {
-        if visited.get(node_id).is_some() {
-            // If already in visited, it is finished, skip
-            return DFSResult::ForwardEdge(vec![])
-        } else if let Some(id) = stop_at 
+        if let Some(id) = stop_at 
         && id == *node_id {
             return DFSResult::ForwardEdge(vec![]);
+        } else if visited.get(node_id).is_some() {
+            // If already in visited, it is finished, skip
+            return DFSResult::ForwardEdge(vec![])
         } else if visiting.get(node_id).is_some() {
             // Otherwise, back edge detected
             return DFSResult::BackEdge { 
@@ -136,8 +136,22 @@ impl HIRStructurizer {
                 }
             }
             SSATerminator::IfGoto { cond, true_label, false_label } => {
-                let true_res = self.dfs(true_label, block_map, visited, visiting, None);
-                let false_res = self.dfs(false_label, block_map, visited, visiting, None);
+                let mut queue: VecDeque<(BlockId, bool)> = VecDeque::new();
+                queue.push_back((*true_label, true));
+                queue.push_back((*false_label, false));
+                let convergence_path = self.find_convergence_path(&mut queue, block_map);
+
+                let mut res = |label| self.dfs(
+                    label, 
+                    block_map, 
+                    visited, 
+                    visiting, 
+                    convergence_path
+                );
+
+                let true_res = res(true_label);
+                let false_res = res(false_label);
+
                 let cond = self.structurize_operand(cond);
 
                 match (true_res, false_res) {
@@ -212,34 +226,53 @@ impl HIRStructurizer {
     }
 
     /// This algorithm is BFS 
-    /// Precondition: Takes in a queue populated with nodes its want to visit
+    /// Precondition: Takes in a queue populated with nodes 
+    /// it want to visit, the boolean ancestor of the node,
     /// and its neighbour map
     /// Return: convergence path if found
     fn find_convergence_path(&self,
-        queue: &mut VecDeque<BlockId>,
+        queue: &mut VecDeque<(BlockId, bool)>,
         block_map: &HashMap<BlockId, &SSABlock>
     ) -> Option<BlockId> {
 
-        let mut visited: HashSet<BlockId> = HashSet::new();
-        while let Some(node_id) = queue.pop_front() {
+        // Boolean is used to find mismatching flag 
+        // since say a true label have its own divergence 
+        // and convergence path, but not the join path of 
+        // the false label, we could incorrectly compute 
+        // the join path.
+        // Thus we have to find visited pair, such that 
+        // one visiting node flag is true, visited is false
+        // and vice versa. 
+        let mut visited: HashMap<BlockId, bool> = HashMap::new();
+
+        while let Some((node_id, curr_flag)) = queue.pop_front() {
+            if let Some(ancestor) = visited.get(&node_id) {
+                // When the true and false differs
+                if *ancestor != curr_flag {
+                    return Some(node_id);
+                } 
+                // Otherwise already visited
+                else {
+                    continue;
+                }
+            } 
+
             // Get neighbour
             // Precondition that block map populates with node ids
             let node = block_map.get(&node_id).unwrap();
             match &node.term {
                 SSATerminator::Return(_) => {}, 
                 SSATerminator::Goto(neigh_id) => {
-                    if let Some(_) = visited.get(neigh_id) {
-                        return Some(*neigh_id);
-                    }
-                    queue.push_back(*neigh_id);
+                    queue.push_back((*neigh_id, curr_flag));
                 }, 
-                SSATerminator::IfGoto { cond, true_label, false_label } =>
+                SSATerminator::IfGoto { true_label, false_label, .. } =>
                 {
-
+                    queue.push_back((*true_label, curr_flag));
+                    queue.push_back((*false_label, curr_flag));
                 }
             }
 
-            visited.insert(node_id);
+            visited.insert(node_id, curr_flag);
         }
         None
     }
