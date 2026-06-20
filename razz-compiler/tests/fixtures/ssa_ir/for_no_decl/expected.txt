@@ -2,7 +2,7 @@ fn main#0() int {
   block_0:
     goto block_2
   block_2:
-    t0 = Phi(0, t2)
+    t0 = Phi(0 from block_0, t2 from block_1)
     t1 = t0 < 2
     if t1 goto block_3 else block_4
   block_3:

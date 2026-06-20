@@ -10,6 +10,6 @@ fn main#0() int {
   block_5:
     goto block_2
   block_2:
-    t0 = Phi(1, 2, 3)
+    t0 = Phi(1 from block_1, 2 from block_4, 3 from block_5)
     ret t0
 }

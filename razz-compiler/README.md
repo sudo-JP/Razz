@@ -29,10 +29,19 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - Symbol table takes in owned String, it requires allocation each time. I tried to use lifetime specifier but it didn't work because there's more ownership stuff. I might use arena allocator or something like that later on, or find a better way to elegantly resolve this issue. 
 - Type union is annoying as hell. I'm talking about how Sphere's material can be Dielectrics, Metal, or Lambertian, etc. Made a "phantom" Material enum so we can match on it with `impl satisfied()`.
 
-### IR 
+### SSA IR 
 - I Initially wanted to write TAC lowering. However, I saw that SSA provides a better optimization passes for things like DCE, etc so now I have to read a paper to transform AST -> SSA. 
 - This is the part that I wish to write the compiler in OCaml, or Haskell. I genuinely hates the borrow checker in this part, usually I'm fine (and happy with it being around), but this time, the borrow checker hinders me write the code accordingly to the paper. 
 - The greatest test of patience. 
 
+### HIR 
+- The reason why HIR is needed is because my target language is high level language, like Rust, or Python. With SSA, there are bunch of gotos so it doesn't translate well to these languages. Though I think codegen to C would be easy compared to Rust from SSA, but I'm not doing that yet. 
+- Then why even bother with SSA where HIR prints nicely to high level language? Aka why not do AST -> HIR? It's because I hate myself. Jokes, but SSA is great for optimization, HIR structure is too nested for optimization. 
+- Unexpected but expected situation where BFS and DFS apply here. DFS is for finding the the cycle in the CFG con struct loops, and BFS is for finding meaningful convergence path of a diverged node. 
+- This is where I learn compiler is the greatest test of patience, as said above. A lot of the IR stuff, I have to take 2, or even 3 steps back, just so I can jump 4 steps ahead. 
+- Nuances like readjusting Phi args, where it came from, resolving the entire structure, etc. Supporting arrays for this language will be a great pain.
+
+## Summary overall feelings throughout this journey
+
 ## AI Usage 
-I asks AI to help me write tests for me, code review and fix my own bugs when tests failed. I tried to tell the AI to treat it like black box.
+I asks AI to help me write tests for me, code review and fix my own bugs when tests failed. I tried to tell the AI to treat it like black box. It's not like I don't use AI at all, but I'm very frugal in the sense that I'll continue to use free services until the end of time. That being said, I use Claude to basically do pair programming, where I think, implement, and ask for ideas when problems arise. 

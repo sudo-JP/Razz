@@ -250,11 +250,18 @@ impl HIRStructurizer {
                 instrs.append(&mut first_fwd);
                 DFSResult::BackEdge { pointing_to_id, instrs: first_fwd }
             },
-            (DFSResult::BackEdge { pointing_to_id, instrs },
-            DFSResult::ForwardEdge(second_fwd)) => {
-                todo!()
+            (DFSResult::BackEdge { pointing_to_id, mut instrs },
+            DFSResult::ForwardEdge(mut second_fwd)) => {
+                instrs.append(&mut second_fwd);
+                DFSResult::BackEdge { pointing_to_id, instrs }
             }
-            _ => todo!()
+            (DFSResult::BackEdge { pointing_to_id: first_id, instrs: mut first_instrs },
+            DFSResult::BackEdge { pointing_to_id: second_id, instrs: mut second_instrs }) => {
+                // Should be same value, since bubbling from the same loop
+                assert_eq!(first_id, second_id);
+                first_instrs.append(&mut second_instrs);
+                DFSResult::BackEdge { pointing_to_id: first_id, instrs: first_instrs }
+            }
         }
     }
 

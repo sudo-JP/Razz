@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 
-use crate::ir::ssa::{SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
+use crate::ir::ssa::{PhiArgs, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
     statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
@@ -121,7 +121,7 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
-    fn update_phi_args(&mut self, block_id: BlockId, target: Temp, args: Vec<SSAOperand>) {
+    fn update_phi_args(&mut self, block_id: BlockId, target: Temp, args: Vec<PhiArgs>) {
         let matcher = |instr: &SSAInstruction| matches!(instr, SSAInstruction::Phi { target: t, .. } if t.id == target.id);
     
         if block_id == self.curr_block {
@@ -148,14 +148,10 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
-    /// According to the book, there are three cases 
-    /// If the current block is not sealed, we construct a temporary Phi and 
-    /// come back to that 
-    /// If the pred is 1, we want to optimize it by just read the var,
-    /// also is the base case 
-    /// Otherwise, if in a cycle, we want to eliminate trivial phis 
-    /// and potentially break the cycles. 
     fn read_variable_recursive(&mut self, variable: &'ast str, variable_id: NodeId, block_id: BlockId) -> SSAOperand {
+        // According to the book, there are three cases 
+        // If the current block is not sealed, we construct a temporary Phi and 
+        // come back to that 
         let val = if !self.sealed_block.contains(&block_id) {
             let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
@@ -170,10 +166,16 @@ impl<'ast> SSALowerer<'ast> {
 
             self.push_to_specific_block(val, block_id);
             SSAOperand::Temp(temp)
+
         } else if let Some(preds) = self.preds.get(&block_id) 
         && preds.len() == 1{
+            // If the pred is 1, we want to optimize it by just read the var,
+            // also is the base case 
             self.read_variable(variable, variable_id, preds[0])
+
         } else {
+            // Otherwise, if in a cycle, we want to eliminate trivial phis 
+            // and potentially break the cycles. 
             let ty = self.type_table.get(&variable_id)
                 .expect("Type must resolved within semantic");
             let temp = self.new_temp(*ty);
@@ -194,14 +196,14 @@ impl<'ast> SSALowerer<'ast> {
     fn add_phi_operands(&mut self, 
         variable: &'ast str, variable_id: NodeId,   // Variables
         block_id: BlockId,                          // Blocks for preds
-        target: &Temp, args: &mut Vec<SSAOperand>)  // Destructed Phi
+        target: &Temp, args: &mut Vec<PhiArgs>)     // Destructed Phi
     -> Option<SSAOperand> {
         let mut preds = self.preds.get(&block_id).cloned().unwrap_or_default();
         // For deterministic debugging 
         preds.sort_unstable();
         for pred in preds {
             let op = self.read_variable(variable, variable_id, pred);
-            args.push(op);
+            args.push(PhiArgs { from_id: pred, operand: op });
         }
         self.try_remove_trivial_phi(target, args)
     }
@@ -210,26 +212,26 @@ impl<'ast> SSALowerer<'ast> {
     /// A trivial phi is a phi containing only same temp 
     /// or a phi that references itself 
     /// Arg is destructed phi
-    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[SSAOperand]) -> Option<SSAOperand> {
+    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[PhiArgs]) -> Option<SSAOperand> {
         let mut same: Option<SSAOperand> = None;
-        for op in args {
+        for arg in args {
             // Self references
             // i.e t1 = Phi(t1)
             if let Some(same_temp) = &same 
-                && same_temp == op {
+                && *same_temp == arg.operand {
                 continue;
             } 
             // If the value reappears 
             // i.e t1 = Phi(t2, t2)
-            else if let SSAOperand::Temp(t) = op 
-                && t == target {
+            else if let SSAOperand::Temp(t) = arg.operand
+                && t == *target {
                 continue;
             } 
             if same.is_some() {
                 return None;
             }
 
-            same = Some(op.clone());
+            same = Some(arg.operand.clone());
         }
         // Undefined since semantic make sure variables 
         // are defined 
@@ -343,7 +345,7 @@ impl<'ast> SSALowerer<'ast> {
                     SSAInstruction::Phi { target, args } => {
                         let mut has_phi = replace_temp(target);
                         for arg in args {
-                            has_phi |= replace_op(arg);
+                            has_phi |= replace_op(&mut arg.operand);
                         }
                         has_phi
                     },
