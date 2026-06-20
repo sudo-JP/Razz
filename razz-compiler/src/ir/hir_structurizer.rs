@@ -139,7 +139,11 @@ impl HIRStructurizer {
                 let mut queue: VecDeque<(BlockId, bool)> = VecDeque::new();
                 queue.push_back((*true_label, true));
                 queue.push_back((*false_label, false));
-                let convergence_path = self.find_convergence_path(&mut queue, block_map);
+                let convergence_path = self.find_convergence_path(
+                    &mut queue, 
+                    block_map, 
+                    *node_id
+                );
 
                 let mut res = |label| self.dfs(
                     label, 
@@ -154,7 +158,7 @@ impl HIRStructurizer {
 
                 let cond = self.structurize_operand(cond);
 
-                match (true_res, false_res) {
+                let combined = match (true_res, false_res) {
                     (DFSResult::ForwardEdge(then), 
                     DFSResult::ForwardEdge(else_)) => {
                         // Regular if 
@@ -211,7 +215,14 @@ impl HIRStructurizer {
                             }
                         }
                     }, 
-                    _ => todo!()
+                    _ => unreachable!("should be taken care by BFS")
+                };
+
+                if let Some(conv_label) = convergence_path {
+                    let conv_res = self.dfs(&conv_label, block_map, visited, visiting, stop_at);
+                    self.merge_results(combined, conv_res)
+                } else {
+                    combined
                 }
 
             },
@@ -225,6 +236,28 @@ impl HIRStructurizer {
         res
     }
 
+    /// First contains orignal result
+    /// Second contains the convergence path result
+    fn merge_results(&self, first: DFSResult, second: DFSResult) -> DFSResult {
+        match (first, second) {
+            (DFSResult::ForwardEdge(mut first_fwd),
+            DFSResult::ForwardEdge(mut second_fwd)) => {
+                first_fwd.append(&mut second_fwd);
+                DFSResult::ForwardEdge(first_fwd)
+            },
+            (DFSResult::ForwardEdge(mut first_fwd),
+            DFSResult::BackEdge { pointing_to_id, mut instrs }) => {
+                instrs.append(&mut first_fwd);
+                DFSResult::BackEdge { pointing_to_id, instrs: first_fwd }
+            },
+            (DFSResult::BackEdge { pointing_to_id, instrs },
+            DFSResult::ForwardEdge(second_fwd)) => {
+                todo!()
+            }
+            _ => todo!()
+        }
+    }
+
     /// This algorithm is BFS 
     /// Precondition: Takes in a queue populated with nodes 
     /// it want to visit, the boolean ancestor of the node,
@@ -232,7 +265,8 @@ impl HIRStructurizer {
     /// Return: convergence path if found
     fn find_convergence_path(&self,
         queue: &mut VecDeque<(BlockId, bool)>,
-        block_map: &HashMap<BlockId, &SSABlock>
+        block_map: &HashMap<BlockId, &SSABlock>,
+        parent: BlockId
     ) -> Option<BlockId> {
 
         // Boolean is used to find mismatching flag 
@@ -255,7 +289,9 @@ impl HIRStructurizer {
                 else {
                     continue;
                 }
-            } 
+            } else if parent == node_id {
+                continue;
+            }
 
             // Get neighbour
             // Precondition that block map populates with node ids
