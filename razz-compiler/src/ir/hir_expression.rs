@@ -15,6 +15,18 @@ pub enum HIRExpr {
         op: BinOpKind,
         rhs: Box<HIRExpr>,
     },
+    /// If as an expression, body and else both 
+    /// returning something 
+    /// if <cond> {
+    ///    return <then>
+    /// } else {
+    ///    return <else_>
+    /// }
+    If {
+        cond: Box<HIRExpr>, 
+        then: Box<HIRExpr>,
+        else_: Box<HIRExpr>,
+    },
     /// <op> <value>
     UnOp {
         op: UnOpKind, 

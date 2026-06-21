@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
+use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{PhiArgs, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 }};
 
 
@@ -318,6 +318,41 @@ impl HIRStructurizer {
             visited.insert(node_id, curr_flag);
         }
         None
+    }
+
+    /// Check if label is contains in phi args, if it is,
+    /// check for the value that arg holds, to resolve it. 
+    /// If a value right there, aka the phi's from points 
+    /// to the current block label, then just take the value. 
+    /// Otherwise, if a block yields more decision, 
+    /// recurse and construct a nested if statement, 
+    /// containing the in question divergence path
+    fn resolve_phi_value(&self, label: BlockId, phi_args: &[PhiArgs], block_map: &HashMap<BlockId, &SSABlock>) -> HIRExpr {
+        // Base case 
+        if let Some(arg) = phi_args.iter()
+            .find(|arg| arg.from_id == label) {
+            return self.structurize_operand(&arg.operand);
+        }
+
+        // If does not exist in the phi, recurse
+        let block = block_map.get(&label)
+            .expect("block map should hold all blocks");
+        match &block.term {
+            SSATerminator::Return(_) => unreachable!("phi resolution should never walk into a return"),
+            SSATerminator::Goto(goto_label) => {
+                self.resolve_phi_value(*goto_label, phi_args, block_map)
+            },
+            SSATerminator::IfGoto { cond, true_label, false_label } => {
+                let if_expr = self.resolve_phi_value(*true_label, phi_args, block_map);
+                let else_expr = self.resolve_phi_value(*false_label, phi_args, block_map);
+
+                HIRExpr::If { 
+                    cond: Box::new(self.structurize_operand(cond)), 
+                    then: Box::new(if_expr), 
+                    else_: Box::new(else_expr), 
+                }
+            },
+        }
     }
 
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
