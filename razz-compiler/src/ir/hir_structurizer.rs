@@ -157,6 +157,7 @@ impl HIRStructurizer {
                 let false_res = res(false_label);
 
                 let cond = self.structurize_operand(cond);
+                let cond_phi = cond.clone();
 
                 let combined = match (true_res, false_res) {
                     (DFSResult::ForwardEdge(then), 
@@ -219,7 +220,37 @@ impl HIRStructurizer {
                 };
 
                 if let Some(conv_label) = convergence_path {
+                    let conv_node = block_map.get(&conv_label)
+                        .expect("all blocks must live in block map");
+
+                    let phis = conv_node.instrs.iter()
+                        .filter_map(|instr| match instr {
+                            SSAInstruction::Phi { target, args } => 
+                                Some((target, args)),
+                                _ => None,
+                        })
+                        .collect::<Vec<_>>();
+
+                    let phi_assigns = phis.iter()
+                        .map(|(target, args)| {
+                            let then_val = self.resolve_phi_value(*true_label, args, block_map);
+                            let else_val = self.resolve_phi_value(*false_label, args, block_map);
+
+                            let if_expr = HIRExpr::If { 
+                                cond: Box::new(cond_phi.clone()), 
+                                then: Box::new(then_val), 
+                                else_: Box::new(else_val),
+                            };
+
+                            HIRStmt::Assign { 
+                                target: **target, 
+                                expr: if_expr 
+                            }
+                        })
+                        .collect::<Vec<_>>();
+
                     let conv_res = self.dfs(&conv_label, block_map, visited, visiting, stop_at);
+                    let conv_res = self.prepend_stmt_to_result(phi_assigns, conv_res);
                     self.merge_results(combined, conv_res)
                 } else {
                     combined
@@ -234,6 +265,19 @@ impl HIRStructurizer {
         visited.insert(*node_id);
 
         res
+    }
+
+    fn prepend_stmt_to_result(&self, stmts: Vec<HIRStmt>, res: DFSResult) -> DFSResult {
+        match res {
+            DFSResult::ForwardEdge(mut fwd_stmts) => {
+                fwd_stmts.splice(..0, stmts);
+                DFSResult::ForwardEdge(fwd_stmts)
+            }
+            DFSResult::BackEdge { pointing_to_id, mut instrs } => {
+                instrs.splice(..0, stmts);
+                DFSResult::BackEdge { pointing_to_id, instrs }
+            }
+        }
     }
 
     /// First contains orignal result
