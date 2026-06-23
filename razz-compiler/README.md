@@ -40,6 +40,7 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - Unexpected but expected situation where BFS and DFS apply here. DFS is for finding the the cycle in the CFG con struct loops, and BFS is for finding meaningful convergence path of a diverged node. 
 - This is where I learn compiler is the greatest test of patience, as said above. A lot of the IR stuff, I have to take 2, or even 3 steps back, just so I can jump 4 steps ahead. 
 - Nuances like readjusting Phi args, where it came from, resolving the entire structure, etc. Supporting arrays for this language will be a great pain.
+- Although I gotta admit, it's pretty fun to see my algorithms knowledges (specifically graph) are being applied here. If you read through the code for structurizing, it's filled with BFS/DFS. 
 
 ## Summary overall feelings throughout this journey
 

@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::{ast::expression::UnOpKind, ir::{basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{PhiArgs, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
+use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{PhiArgs, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 }};
 
 
@@ -21,6 +21,8 @@ enum DFSResult {
         instrs: Vec<HIRStmt>
     },
 }
+
+const BLOCK_MAP_ERR: &str = "all blocks must live in block map";
 
 impl HIRStructurizer {
     pub fn new() -> Self {
@@ -105,9 +107,16 @@ impl HIRStructurizer {
         // Get node neighbour
         let node = block_map.get(node_id).unwrap();
 
-        let mut curr_instrs = node.instrs.iter()
-            .filter_map(|instr| self.structurize_instr(instr))
-            .collect::<Vec<HIRStmt>>();
+        let mut curr_phis: Vec<(&Temp, &[PhiArgs])> = Vec::new();
+        let mut curr_instrs = Vec::with_capacity(node.instrs.len());
+
+        for instr in &node.instrs {
+            if let SSAInstruction::Phi { target, args } = instr {
+                curr_phis.push((target, args));
+            } else {
+                curr_instrs.push(self.structurize_instr(instr));
+            }
+        }
 
         let res = match &node.term {
             // Base case
@@ -221,7 +230,7 @@ impl HIRStructurizer {
 
                 if let Some(conv_label) = convergence_path {
                     let conv_node = block_map.get(&conv_label)
-                        .expect("all blocks must live in block map");
+                        .expect(BLOCK_MAP_ERR);
 
                     let phis = conv_node.instrs.iter()
                         .filter_map(|instr| match instr {
@@ -380,7 +389,7 @@ impl HIRStructurizer {
 
         // If does not exist in the phi, recurse
         let block = block_map.get(&label)
-            .expect("block map should hold all blocks");
+            .expect(BLOCK_MAP_ERR);
         match &block.term {
             SSATerminator::Return(_) => unreachable!("phi resolution should never walk into a return"),
             SSATerminator::Goto(goto_label) => {
@@ -399,6 +408,42 @@ impl HIRStructurizer {
         }
     }
 
+    /// DFS to check if given from's node, 
+    /// can we reach to's node
+    fn is_reachable(&self, 
+        block_map: &HashMap<BlockId, &SSABlock>, 
+        from_id: BlockId,
+        to_id: BlockId
+    ) -> bool {
+        let mut stack = vec![from_id];
+        let mut visited: HashSet<BlockId> = HashSet::new();
+
+        while let Some(curr_id) = stack.pop() {
+            if curr_id == to_id {
+                return true;
+            } else if visited.get(&curr_id).is_some() {
+                continue;
+            }
+
+            let curr = block_map.get(&curr_id)
+                .expect(BLOCK_MAP_ERR);
+
+            match curr.term {
+                SSATerminator::Return(_) => {},
+                SSATerminator::Goto(label) => stack.push(label),
+                SSATerminator::IfGoto { true_label, false_label, .. }
+                    => { 
+                    stack.push(false_label);
+                    stack.push(true_label);
+                }
+            }
+
+
+            visited.insert(curr_id);
+        }
+        false
+    }
+
     fn structurize_operand(&self, operand: &SSAOperand) -> HIRExpr {
         match operand {
             SSAOperand::Temp(t) => HIRExpr::Temp(*t),
@@ -406,7 +451,7 @@ impl HIRStructurizer {
         }
     }
 
-    fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> Option<HIRStmt> {
+    fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> HIRStmt {
         match ssa_instr {
             SSAInstruction::BinOp { target, lhs, op, rhs } => {
                 let lhs = Box::new(self.structurize_operand(lhs));
@@ -416,7 +461,7 @@ impl HIRStructurizer {
                     op: *op,
                     rhs, 
                 };
-                Some(HIRStmt::Assign { target: *target, expr: binop })
+                HIRStmt::Assign { target: *target, expr: binop }
             }, 
             SSAInstruction::UnOp { target, op, value } => {
                 let value = Box::new(self.structurize_operand(value));
@@ -424,7 +469,7 @@ impl HIRStructurizer {
                     op: *op, 
                     value 
                 };
-                Some(HIRStmt::Assign { target: *target, expr: unop })
+                HIRStmt::Assign { target: *target, expr: unop }
             },
             SSAInstruction::Call { target, args, func } => {
                 let fn_call = HIRExpr::FunctionCall{ 
@@ -434,9 +479,9 @@ impl HIRStructurizer {
                         .collect(),
                 };
                 if let Some(t) = target {
-                    Some(HIRStmt::Assign { target: *t, expr: fn_call })
+                    HIRStmt::Assign { target: *t, expr: fn_call }
                 } else {
-                    Some(HIRStmt::Expr(fn_call))
+                    HIRStmt::Expr(fn_call)
                 }
             },
             SSAInstruction::FieldLoad { target, obj, key } => {
@@ -445,20 +490,20 @@ impl HIRStructurizer {
                     obj: obj, 
                     key: key.to_string() 
                 };
-                Some(HIRStmt::Assign { target: *target, expr: struct_access })
+                HIRStmt::Assign { target: *target, expr: struct_access }
             },
             SSAInstruction::FieldStore { obj, key, value } => {
                 let obj = self.structurize_operand(obj);
                 let value = self.structurize_operand(value);
-                Some(HIRStmt::FieldStore{ 
+                HIRStmt::FieldStore{ 
                     obj, 
                     key: key.to_string(), 
                     value, 
-                })
+                }
             },
             SSAInstruction::Copy { target, value } => {
                 let expr = self.structurize_operand(value);
-                Some(HIRStmt::Assign { target: *target, expr })
+                HIRStmt::Assign { target: *target, expr }
             }, 
             SSAInstruction::Construct { target, ty, fields } => {
                 let struct_lit = HIRExpr::StructLiteral{ 
@@ -471,18 +516,18 @@ impl HIRStructurizer {
                         .collect()
                 };
 
-                Some(HIRStmt::Assign { target: *target, expr: struct_lit })
+                HIRStmt::Assign { target: *target, expr: struct_lit }
             },
             SSAInstruction::HTTPGet { target, ep } => {
                 let expr = HIRExpr::HTTPRequest(*ep);
-                Some(HIRStmt::Assign { target: *target, expr })
+                HIRStmt::Assign { target: *target, expr }
             },
             SSAInstruction::HTTPWrite { method, ep, value } => {
                 let body = self.structurize_operand(value);
 
-                Some(HIRStmt::HTTPRequest { method: *method, ep: *ep, body })
+                HIRStmt::HTTPRequest { method: *method, ep: *ep, body }
             },
-            SSAInstruction::Phi { .. } => None,
+            SSAInstruction::Phi { .. } => unreachable!("Phi must be dealt with separately"),
         }
     }
 }
