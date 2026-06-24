@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 
-use crate::ir::ssa::{PhiArgs, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
+use crate::ir::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
     statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
@@ -121,7 +121,7 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
-    fn update_phi_args(&mut self, block_id: BlockId, target: Temp, args: Vec<PhiArgs>) {
+    fn update_phi_args(&mut self, block_id: BlockId, target: Temp, args: Vec<PhiArg>) {
         let matcher = |instr: &SSAInstruction| matches!(instr, SSAInstruction::Phi { target: t, .. } if t.id == target.id);
     
         if block_id == self.curr_block {
@@ -196,14 +196,14 @@ impl<'ast> SSALowerer<'ast> {
     fn add_phi_operands(&mut self, 
         variable: &'ast str, variable_id: NodeId,   // Variables
         block_id: BlockId,                          // Blocks for preds
-        target: &Temp, args: &mut Vec<PhiArgs>)     // Destructed Phi
+        target: &Temp, args: &mut Vec<PhiArg>)     // Destructed Phi
     -> Option<SSAOperand> {
         let mut preds = self.preds.get(&block_id).cloned().unwrap_or_default();
         // For deterministic debugging 
         preds.sort_unstable();
         for pred in preds {
             let op = self.read_variable(variable, variable_id, pred);
-            args.push(PhiArgs { from_id: pred, operand: op });
+            args.push(PhiArg { from_id: pred, operand: op });
         }
         self.try_remove_trivial_phi(target, args)
     }
@@ -212,7 +212,7 @@ impl<'ast> SSALowerer<'ast> {
     /// A trivial phi is a phi containing only same temp 
     /// or a phi that references itself 
     /// Arg is destructed phi
-    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[PhiArgs]) -> Option<SSAOperand> {
+    fn try_remove_trivial_phi(&mut self, target: &Temp, args: &[PhiArg]) -> Option<SSAOperand> {
         let mut same: Option<SSAOperand> = None;
         for arg in args {
             // Self references

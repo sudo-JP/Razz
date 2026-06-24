@@ -4,9 +4,13 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::{collections::{HashMap, HashSet, VecDeque}, ops::Deref};
 
-use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}, ssa::{PhiArgs, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
+use crate::{ast::expression::UnOpKind, ir::
+    {Temp, basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, 
+        hir_statement::
+        {HIRFunction, HIRProgram, HIRStmt}, 
+        ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
 }};
 
 
@@ -80,6 +84,54 @@ impl HIRStructurizer {
         self.program.functions.push(function_stmt);
     }
 
+    fn process_loop_edge(
+        &mut self,
+        node_id: BlockId,
+        pointing_to_id: BlockId,
+        mut instrs: Vec<HIRStmt>,
+        mut after: Vec<HIRStmt>,
+        mut curr_instrs: Vec<HIRStmt>,
+        cond: HIRExpr,
+        curr_phis: &[(&Temp, &[PhiArg])],
+        block_map: &HashMap<BlockId, &SSABlock> 
+    ) -> DFSResult {
+        if pointing_to_id == node_id {
+            // This means we in a loop
+            let mut decl: Vec<HIRStmt> = vec![];
+            let mut updates: Vec<HIRStmt> = vec![];
+
+            for (target, args) in curr_phis {
+                for arg in *args {
+                    let expr = self.structurize_operand(&arg.operand);
+                    let target = **target;
+                    if !self.is_reachable(block_map, arg.from_id, node_id) {
+                        decl.push(HIRStmt::Assign { target, expr });
+                    } else {
+                        updates.push(HIRStmt::Assign { target, expr });
+                    }
+                }
+            }
+
+            instrs.append(&mut updates);
+            let for_stmt = HIRStmt::While {
+                cond,
+                block: instrs,
+            };
+            curr_instrs.append(&mut decl);
+            curr_instrs.push(for_stmt);
+            curr_instrs.append(&mut after);
+            DFSResult::ForwardEdge(curr_instrs)
+        } else {
+            // Otherwise bubble up back edge if cycle not detected
+            curr_instrs.append(&mut instrs);
+            curr_instrs.append(&mut after);
+            DFSResult::BackEdge {
+                pointing_to_id,
+                instrs: curr_instrs,
+            }
+        }
+    }
+
     fn dfs(&mut self, 
         node_id: &BlockId, 
         block_map: &HashMap<BlockId, &SSABlock>, 
@@ -107,7 +159,7 @@ impl HIRStructurizer {
         // Get node neighbour
         let node = block_map.get(node_id).unwrap();
 
-        let mut curr_phis: Vec<(&Temp, &[PhiArgs])> = Vec::new();
+        let mut curr_phis: Vec<(&Temp, &[PhiArg])> = Vec::new();
         let mut curr_instrs = Vec::with_capacity(node.instrs.len());
 
         for instr in &node.instrs {
@@ -180,50 +232,37 @@ impl HIRStructurizer {
                         curr_instrs.push(if_stmt);
                         DFSResult::ForwardEdge(curr_instrs)
                     }, 
-                    (DFSResult::BackEdge { pointing_to_id, mut instrs },
-                    DFSResult::ForwardEdge(mut after)) => {
-                        if pointing_to_id == *node_id {
-                            // Loop is true body
-                            let for_stmt = HIRStmt::While { 
-                                cond, 
-                                block: instrs,
-                            };
-                            curr_instrs.push(for_stmt);
-                            curr_instrs.append(&mut after);
-                            DFSResult::ForwardEdge(curr_instrs)
-                        } else {
-                            curr_instrs.append(&mut instrs);
-                            curr_instrs.append(&mut after);
-                            DFSResult::BackEdge { 
-                                pointing_to_id, 
-                                instrs: curr_instrs 
-                            }
-                        }
+                    (DFSResult::BackEdge { pointing_to_id, instrs },
+                    DFSResult::ForwardEdge(after)) => {
+                        // Loop is true body
+                        self.process_loop_edge(
+                            *node_id, 
+                            pointing_to_id, 
+                            instrs, 
+                            after, 
+                            curr_instrs, 
+                            cond, 
+                            &curr_phis, 
+                            block_map
+                        )
                     },
-                    (DFSResult::ForwardEdge(mut after), 
-                    DFSResult::BackEdge { pointing_to_id, mut instrs }) => {
+                    (DFSResult::ForwardEdge(after), 
+                    DFSResult::BackEdge { pointing_to_id, instrs }) => {
                         // This code shouldn't occurs, but will handle it anyway 
                         let cond = HIRExpr::UnOp { 
                             op: UnOpKind::Not, 
                             value: Box::new(cond),
                         };
-                        if pointing_to_id == *node_id {
-                            // Loop is false body
-                            let for_stmt = HIRStmt::While { 
-                                cond, 
-                                block: instrs
-                            };
-                            curr_instrs.push(for_stmt);
-                            curr_instrs.append(&mut after);
-                            DFSResult::ForwardEdge(curr_instrs)
-                        } else {
-                            curr_instrs.append(&mut instrs);
-                            curr_instrs.append(&mut after);
-                            DFSResult::BackEdge { 
-                                pointing_to_id, 
-                                instrs: curr_instrs 
-                            }
-                        }
+                        self.process_loop_edge(
+                            *node_id, 
+                            pointing_to_id, 
+                            instrs, 
+                            after, 
+                            curr_instrs, 
+                            cond, 
+                            &curr_phis, 
+                            block_map
+                        )
                     }, 
                     _ => unreachable!("should be taken care by BFS")
                 };
@@ -380,7 +419,7 @@ impl HIRStructurizer {
     /// Otherwise, if a block yields more decision, 
     /// recurse and construct a nested if statement, 
     /// containing the in question divergence path
-    fn resolve_phi_value(&self, label: BlockId, phi_args: &[PhiArgs], block_map: &HashMap<BlockId, &SSABlock>) -> HIRExpr {
+    fn resolve_phi_value(&self, label: BlockId, phi_args: &[PhiArg], block_map: &HashMap<BlockId, &SSABlock>) -> HIRExpr {
         // Base case 
         if let Some(arg) = phi_args.iter()
             .find(|arg| arg.from_id == label) {

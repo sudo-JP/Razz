@@ -112,12 +112,12 @@ impl fmt::Display for SSATerminator {
 }
 
 #[derive(Debug, Clone)]
-pub struct PhiArgs {
+pub struct PhiArg {
     pub from_id: BlockId, 
     pub operand: SSAOperand,
 }
 
-impl fmt::Display for PhiArgs {
+impl fmt::Display for PhiArg {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} from block_{}", self.operand, self.from_id)
     }
@@ -203,7 +203,7 @@ pub enum SSAInstruction {
     /// 2 or 3, depending on the runtime of x
     Phi {
         target: Dest, 
-        args: Vec<PhiArgs>,
+        args: Vec<PhiArg>,
     },
 }
 
