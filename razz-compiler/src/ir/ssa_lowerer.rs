@@ -66,6 +66,7 @@ impl<'ast> SSALowerer<'ast> {
             self.write_variable(&param.name.node, fn_id, SSAOperand::Temp(t));
         }
         
+        self.seal_block(fn_id);
         self.lower_block(&fn_decl.body);
 
         let blocks = mem::take(&mut self.blocks);
@@ -236,7 +237,7 @@ impl<'ast> SSALowerer<'ast> {
         // Undefined since semantic make sure variables 
         // are defined 
         let Some(same) = same else {
-            unreachable!()
+            return None;
         };
 
         let users = self.replace_uses(&SSAOperand::Temp(*target), &same);

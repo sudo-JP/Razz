@@ -4,7 +4,7 @@
 //! Since my target languages doesn't have goto, like 
 //! Rust or Python, this pass is needed
 
-use std::{collections::{HashMap, HashSet, VecDeque}, ops::Deref};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::{ast::expression::UnOpKind, ir::
     {Temp, basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, 
@@ -93,7 +93,8 @@ impl HIRStructurizer {
         mut curr_instrs: Vec<HIRStmt>,
         cond: HIRExpr,
         curr_phis: &[(&Temp, &[PhiArg])],
-        block_map: &HashMap<BlockId, &SSABlock> 
+        block_map: &HashMap<BlockId, &SSABlock>,
+        true_label: BlockId
     ) -> DFSResult {
         if pointing_to_id == node_id {
             // This means we in a loop
@@ -104,7 +105,7 @@ impl HIRStructurizer {
                 for arg in *args {
                     let expr = self.structurize_operand(&arg.operand);
                     let target = **target;
-                    if !self.is_reachable(block_map, arg.from_id, node_id) {
+                    if !self.is_reachable(block_map, true_label, arg.from_id) {
                         decl.push(HIRStmt::Assign { target, expr });
                     } else {
                         updates.push(HIRStmt::Assign { target, expr });
@@ -197,6 +198,29 @@ impl HIRStructurizer {
                 }
             }
             SSATerminator::IfGoto { cond, true_label, false_label } => {
+                // Inlining conditions
+                let cond = if let SSAOperand::Temp(t) = cond {
+                    let option_idx = curr_instrs.iter()
+                        .position(|stmt| 
+                        if let HIRStmt::Assign { target, .. } = stmt {
+                                *t == *target
+                            } else { false }
+                        );
+
+                    match option_idx {
+                        Some(idx) => {
+                            let HIRStmt::Assign { expr, .. } = curr_instrs.remove(idx) else {
+                                unreachable!("Must resolved as above")
+                            };
+                            expr
+                        },
+                        None => self.structurize_operand(cond)
+                    }
+                } else {
+                    self.structurize_operand(cond)
+                };
+
+                // BFS to find convergence path
                 let mut queue: VecDeque<(BlockId, bool)> = VecDeque::new();
                 queue.push_back((*true_label, true));
                 queue.push_back((*false_label, false));
@@ -205,6 +229,7 @@ impl HIRStructurizer {
                     block_map, 
                     *node_id
                 );
+                eprintln!("node={:?} convergence={:?}", node_id, convergence_path);
 
                 let mut res = |label| self.dfs(
                     label, 
@@ -217,7 +242,6 @@ impl HIRStructurizer {
                 let true_res = res(true_label);
                 let false_res = res(false_label);
 
-                let cond = self.structurize_operand(cond);
                 let cond_phi = cond.clone();
 
                 let combined = match (true_res, false_res) {
@@ -243,7 +267,8 @@ impl HIRStructurizer {
                             curr_instrs, 
                             cond, 
                             &curr_phis, 
-                            block_map
+                            block_map,
+                            *true_label
                         )
                     },
                     (DFSResult::ForwardEdge(after), 
@@ -261,7 +286,8 @@ impl HIRStructurizer {
                             curr_instrs, 
                             cond, 
                             &curr_phis, 
-                            block_map
+                            block_map,
+                            *false_label
                         )
                     }, 
                     _ => unreachable!("should be taken care by BFS")

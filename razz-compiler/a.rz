@@ -1,11 +1,15 @@
-fn main() null {
+fn main(coord: Vec3, mat: Lambertian) null {
     for i = 0; i < 2; i += 1 {
         b = 1; 
+        /*if b > 3 {
+            POST /hittable Sphere { coord: coord, radius: 0.5, material: mat };
+        }*/
         if b > 2 {
             a = GET /camera;
         } else {
             a = GET /background;
         }
+        a;
     }
     return null;
 }
