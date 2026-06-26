@@ -18,6 +18,7 @@ pub struct HIRStructurizer {
     program: HIRProgram,
 }
 
+#[derive(Debug)]
 enum DFSResult {
     ForwardEdge(Vec<HIRStmt>),
     BackEdge {
@@ -133,6 +134,8 @@ impl HIRStructurizer {
         }
     }
 
+    /// DFS to detect cycle to check if it's a regular 
+    /// flow statement, or loop 
     fn dfs(&mut self, 
         node_id: &BlockId, 
         block_map: &HashMap<BlockId, &SSABlock>, 
@@ -182,7 +185,7 @@ impl HIRStructurizer {
 
             // Recursive case
             SSATerminator::Goto(id) => {
-                let neigh_res = self.dfs(id, block_map, visited, visiting, None);
+                let neigh_res = self.dfs(id, block_map, visited, visiting, stop_at);
                 match neigh_res {
                     DFSResult::ForwardEdge(mut stmts) => {
                         curr_instrs.append(&mut stmts);
@@ -229,7 +232,6 @@ impl HIRStructurizer {
                     block_map, 
                     *node_id
                 );
-                eprintln!("node={:?} convergence={:?}", node_id, convergence_path);
 
                 let mut res = |label| self.dfs(
                     label, 
@@ -322,9 +324,8 @@ impl HIRStructurizer {
                             }
                         })
                         .collect::<Vec<_>>();
-
                     let conv_res = self.dfs(&conv_label, block_map, visited, visiting, stop_at);
-                    let conv_res = self.prepend_stmt_to_result(phi_assigns, conv_res);
+                    let combined = self.append_stmt_to_result(combined, phi_assigns);
                     self.merge_results(combined, conv_res)
                 } else {
                     combined
@@ -341,14 +342,14 @@ impl HIRStructurizer {
         res
     }
 
-    fn prepend_stmt_to_result(&self, stmts: Vec<HIRStmt>, res: DFSResult) -> DFSResult {
+    fn append_stmt_to_result(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
         match res {
             DFSResult::ForwardEdge(mut fwd_stmts) => {
-                fwd_stmts.splice(..0, stmts);
+                fwd_stmts.append(&mut stmts);
                 DFSResult::ForwardEdge(fwd_stmts)
             }
             DFSResult::BackEdge { pointing_to_id, mut instrs } => {
-                instrs.splice(..0, stmts);
+                instrs.append(&mut stmts);
                 DFSResult::BackEdge { pointing_to_id, instrs }
             }
         }
@@ -365,7 +366,7 @@ impl HIRStructurizer {
             },
             (DFSResult::ForwardEdge(mut first_fwd),
             DFSResult::BackEdge { pointing_to_id, mut instrs }) => {
-                instrs.append(&mut first_fwd);
+                first_fwd.append(&mut instrs);
                 DFSResult::BackEdge { pointing_to_id, instrs: first_fwd }
             },
             (DFSResult::BackEdge { pointing_to_id, mut instrs },

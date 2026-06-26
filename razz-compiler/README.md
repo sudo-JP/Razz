@@ -33,6 +33,8 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - I Initially wanted to write TAC lowering. However, I saw that SSA provides a better optimization passes for things like DCE, etc so now I have to read a paper to transform AST -> SSA. 
 - This is the part that I wish to write the compiler in OCaml, or Haskell. I genuinely hates the borrow checker in this part, usually I'm fine (and happy with it being around), but this time, the borrow checker hinders me write the code accordingly to the paper. 
 - The greatest test of patience. 
+- This by far the greatest pain to do in this project. I'm constantly coming back here to fix bugs and I hate it. I want to write a part, fix bugs, move on and forget about it. But SSA lowerer is unforgiving. 
+- To reiterate, this is part really, REALLY demotivates me. It is the part holding me back, yet I have to admit, very rewarding to get it working. 
 
 ### HIR 
 - The reason why HIR is needed is because my target language is high level language, like Rust, or Python. With SSA, there are bunch of gotos so it doesn't translate well to these languages. Though I think codegen to C would be easy compared to Rust from SSA, but I'm not doing that yet. 

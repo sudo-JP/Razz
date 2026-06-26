@@ -194,6 +194,7 @@ impl<'ast> SSALowerer<'ast> {
         val
     }
 
+    /// Determine operands from predecessors
     fn add_phi_operands(&mut self, 
         variable: &'ast str, variable_id: NodeId,   // Variables
         block_id: BlockId,                          // Blocks for preds
@@ -237,7 +238,7 @@ impl<'ast> SSALowerer<'ast> {
         // Undefined since semantic make sure variables 
         // are defined 
         let Some(same) = same else {
-            return None;
+            unreachable!()
         };
 
         let users = self.replace_uses(&SSAOperand::Temp(*target), &same);
@@ -266,7 +267,8 @@ impl<'ast> SSALowerer<'ast> {
                     None
                 }
             };
-            if let Some((target, args)) = phi_data {
+            if let Some((target, args)) = phi_data
+            && !args.is_empty() {
                 self.try_remove_trivial_phi(&target, &args);
             }
         }
@@ -285,66 +287,49 @@ impl<'ast> SSALowerer<'ast> {
             } else { false }   
         };
 
-        let replace_temp = |temp: &mut Temp| {
-            if let SSAOperand::Temp(t) = old 
-                && t == temp {
-                if let SSAOperand::Temp(new_t) = new {
-                    *temp = *new_t;
-                    return true; 
-                }
-                false
-            } else { false }
-        };
-
 
         for block in self.blocks.as_mut_slice() {
             for (instr_id, instr) in block.instrs.iter_mut().enumerate() {
                 let should_push = match instr {
-                    SSAInstruction::BinOp { target, lhs, rhs, .. } => {
-                        replace_temp(target) ||
+                    SSAInstruction::BinOp { lhs, rhs, .. } => {
                         replace_op(lhs) || 
                         replace_op(rhs) 
                     },
-                    SSAInstruction::UnOp { target, value, .. } => {
-                        replace_temp(target) ||
+                    SSAInstruction::UnOp { value, .. } => {
                         replace_op(value)
                     },
-                    SSAInstruction::Call { target, args, .. } => {
-                        let mut has_phi = if let Some(t) = target {
-                            replace_temp(t)
-                        } else { false };
+                    SSAInstruction::Call { args, .. } => {
+                        let mut has_phi = false;
                         for arg in args {
                             has_phi |= replace_op(arg);
                         }
                         has_phi
                     },
-                    SSAInstruction::FieldLoad { target, obj, .. } => {
-                        replace_temp(target) ||
+                    SSAInstruction::FieldLoad { obj, .. } => {
                         replace_op(obj)
                     },
                     SSAInstruction::FieldStore { obj, value, .. } => {
                         replace_op(obj) ||
                         replace_op(value)
                     },
-                    SSAInstruction::Copy { target, value } => {
-                        replace_temp(target) ||
+                    SSAInstruction::Copy { value, .. } => {
                         replace_op(value)
                     },
-                    SSAInstruction::Construct { target, fields, .. } => {
-                        let mut has_phi = replace_temp(target);
+                    SSAInstruction::Construct { fields, .. } => {
+                        let mut has_phi = false;
                         for field in fields {
                             has_phi |= replace_op(&mut field.value);
                         }
                         has_phi
                     },
-                    SSAInstruction::HTTPGet { target, .. } => {
-                        replace_temp(target)
+                    SSAInstruction::HTTPGet { .. } => {
+                        false
                     },
                     SSAInstruction::HTTPWrite { value, .. } => {
                         replace_op(value)
                     }, 
-                    SSAInstruction::Phi { target, args } => {
-                        let mut has_phi = replace_temp(target);
+                    SSAInstruction::Phi { args, .. } => {
+                        let mut has_phi = false;
                         for arg in args {
                             has_phi |= replace_op(&mut arg.operand);
                         }
