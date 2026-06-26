@@ -1,6 +1,6 @@
 use crate::{
     ast::{TypeKind, expression::EndpointKind, statement::HTTPMethodKind},
-    ir::{Temp, hir::{HIRBlock, HIRFunctionParam}, hir_expression::HIRExpr},
+    ir::{Temp, hir::hir::{HIRBlock, HIRFunctionParam}, hir::hir_expression::HIRExpr},
 };
 
 #[derive(Debug)]

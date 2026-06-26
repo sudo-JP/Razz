@@ -5,13 +5,13 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 
-use crate::ir::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
+use crate::ir::ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
     statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
     NodeId, Program, TypeKind}, 
     ir::{basic_block::{BasicBlock, BlockId}, 
-    ssa::{SSAFieldInit, SSAInstruction, SSAOperand, SSATerminator}}};
+    ssa::ssa::{SSAFieldInit, SSAInstruction, SSAOperand, SSATerminator}}};
 
 
 pub struct SSALowerer<'ast> {

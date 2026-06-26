@@ -5,7 +5,7 @@ use razz_compiler::compiler::{
     compiler::{Compiler, CompilerOutput, CompilerStage},
     error::CompilerError,
 };
-use razz_compiler::ir::ssa::SSAProgram;
+use razz_compiler::ir::ssa::ssa::SSAProgram;
 
 #[cfg(test)]
 mod common;

@@ -6,12 +6,8 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::{ast::expression::UnOpKind, ir::
-    {Temp, basic_block::BlockId, hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, 
-        hir_statement::
-        {HIRFunction, HIRProgram, HIRStmt}, 
-        ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}
-}};
+use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}}
+};
 
 
 pub struct HIRStructurizer {
@@ -446,7 +442,11 @@ impl HIRStructurizer {
     /// Otherwise, if a block yields more decision, 
     /// recurse and construct a nested if statement, 
     /// containing the in question divergence path
-    fn resolve_phi_value(&self, label: BlockId, phi_args: &[PhiArg], block_map: &HashMap<BlockId, &SSABlock>) -> HIRExpr {
+    fn resolve_phi_value(&self, 
+        label: BlockId, 
+        phi_args: &[PhiArg], 
+        block_map: &HashMap<BlockId, &SSABlock>
+    ) -> HIRExpr {
         // Base case 
         if let Some(arg) = phi_args.iter()
             .find(|arg| arg.from_id == label) {
@@ -462,6 +462,7 @@ impl HIRStructurizer {
                 self.resolve_phi_value(*goto_label, phi_args, block_map)
             },
             SSATerminator::IfGoto { cond, true_label, false_label } => {
+
                 let if_expr = self.resolve_phi_value(*true_label, phi_args, block_map);
                 let else_expr = self.resolve_phi_value(*false_label, phi_args, block_map);
 
@@ -575,7 +576,7 @@ impl HIRStructurizer {
                 let struct_lit = HIRExpr::StructLiteral{ 
                     ty: *ty, 
                     fields: fields.iter()
-                        .map(|ssa_field| HIRFieldInit{
+                        .map(|ssa_field| HIRFieldInit {
                             name: ssa_field.name.to_string(),
                             value: self.structurize_operand(&ssa_field.value),
                         })

@@ -4,11 +4,7 @@ use crate::ast::TypeKind;
 
 pub mod basic_block;
 pub mod ssa;
-pub mod ssa_lowerer;
 pub mod hir;
-pub mod hir_expression;
-pub mod hir_statement;
-pub mod hir_structurizer;
 
 pub type TempId = u32;
 pub type Dest = Temp;

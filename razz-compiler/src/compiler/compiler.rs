@@ -3,10 +3,10 @@ use std::collections::{HashMap, HashSet};
 use clap::ValueEnum;
 use crate::ast::{NodeId, Program, TypeKind};
 use crate::compiler::error::CompilerError;
-use crate::ir::hir_statement::HIRProgram;
-use crate::ir::hir_structurizer::HIRStructurizer;
-use crate::ir::ssa::SSAProgram;
-use crate::ir::ssa_lowerer::SSALowerer;
+use crate::ir::hir::hir_statement::HIRProgram;
+use crate::ir::hir::hir_structurizer::HIRStructurizer;
+use crate::ir::ssa::ssa::SSAProgram;
+use crate::ir::ssa::ssa_lowerer::SSALowerer;
 use crate::lexer::tokens::Token;
 
 use crate::lexer::lexer::Lexer;

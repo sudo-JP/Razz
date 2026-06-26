@@ -1,4 +1,4 @@
-use crate::{ast::TypeKind, ir::hir_statement::HIRStmt};
+use crate::{ast::TypeKind, ir::hir::hir_statement::HIRStmt};
 
 
 #[derive(Debug)]
