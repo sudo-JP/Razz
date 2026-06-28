@@ -1,7 +1,7 @@
 use crate::ast::{expression::{Arg, BinOp, Endpoint, Expr, ExprKind, Literal, StructField, UnOp}, statement::{Block, CompoundOp, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, Program, Spanned, SpecificType, Type};
 
-/// Walkable trait, used to traverse the AST tree
-pub trait Walkable {
+/// ASTWalkable trait, used to traverse the AST tree
+pub trait ASTWalkable {
     // ====== EXPRRESSION ====== 
     fn visit_expr(&mut self, expr: &Expr) {
         walk_expr(self, expr);
@@ -109,7 +109,7 @@ pub trait Walkable {
 }
 
 /// Walk on only expr 
-pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
+pub fn walk_expr<W: ASTWalkable + ?Sized>(walker: &mut W, expr: &Expr) {
     match &expr.kind {
         ExprKind::BinOp { lhs, op, rhs } => walker.visit_bin_op(expr, &lhs, op, &rhs),
         ExprKind::UnOp { op, value } => walker.visit_un_op(expr, op, &value),
@@ -126,7 +126,7 @@ pub fn walk_expr<W: Walkable + ?Sized>(walker: &mut W, expr: &Expr) {
 }
 
 /// Walk on only stmt 
-pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
+pub fn walk_stmt<W: ASTWalkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
     match &stmt.kind {
         StmtKind::Assign { target, type_ann, expr } => walker.visit_assign(stmt, target, type_ann, expr),
         StmtKind::CompoundAssign { target, op, expr } => walker.visit_compound_assign(stmt, target, op, expr),
@@ -143,18 +143,18 @@ pub fn walk_stmt<W: Walkable + ?Sized>(walker: &mut W, stmt: &Stmt) {
     }
 }
 
-pub fn walk_block<W: Walkable + ?Sized>(walker: &mut W, block: &Block) {
+pub fn walk_block<W: ASTWalkable + ?Sized>(walker: &mut W, block: &Block) {
     block.stmts
         .iter()
         .for_each(|s| walker.visit_stmt(s));
 }
 
-pub fn walk_program<W: Walkable + ?Sized>(walker: &mut W, prog: &Program) {
+pub fn walk_program<W: ASTWalkable + ?Sized>(walker: &mut W, prog: &Program) {
     prog.funcs
         .iter()
         .for_each(|f| walker.visit_fn_decl(&f.node));
 }
 
-pub fn walk_fn_decl<W: Walkable + ?Sized>(walker: &mut W, func: &FnDecl) {
+pub fn walk_fn_decl<W: ASTWalkable + ?Sized>(walker: &mut W, func: &FnDecl) {
     walker.visit_block(&func.body);
 }

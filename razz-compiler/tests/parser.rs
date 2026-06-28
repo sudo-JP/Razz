@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use razz_compiler::ast::{
     expression::{Arg, BinOpKind, EndpointKind, Expr, ExprKind, Literal, StructField, UnOpKind}, statement::{
         Block, CompoundOpKind, ElseIf, FnDecl, HTTPMethodKind, Param, Stmt, StmtKind,
-    }, traversal::{walk_expr, walk_fn_decl, walk_stmt, Walkable}, NodeId, Program, Spanned, SpecificTypeKind, TypeKind
+    }, traversal::{walk_expr, walk_fn_decl, walk_stmt, ASTWalkable}, NodeId, Program, Spanned, SpecificTypeKind, TypeKind
 };
 use razz_compiler::common::{Position, Span};
 use razz_compiler::compiler::{
@@ -259,7 +259,7 @@ impl IdCollector {
     }
 }
 
-impl Walkable for IdCollector {
+impl ASTWalkable for IdCollector {
     fn visit_expr(&mut self, expr: &Expr) {
         self.insert(expr.id, "Expr");
         walk_expr(self, expr);

@@ -13,7 +13,7 @@ use crate::common::Span;
 use crate::semantic::error::SemanticErrorKind;
 use crate::semantic::rules::{BINOP_MAP, ENDPOINT_MAP, FIELD_ACCESS_MAP};
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
-    traversal::{walk_program, Walkable}, NodeId, Program, TypeKind}, 
+    traversal::{walk_program, ASTWalkable}, NodeId, Program, TypeKind}, 
     semantic::{error::SemanticError, symbols::SymbolTable}};
 
 /// Keep life time of ast nodes so I don't clone it every time 
@@ -105,7 +105,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
 }
 
 /// Walk the AST tree, declaring types along each node
-impl<'ast> Walkable for SemanticAnalyzer<'ast> {
+impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
 
     // Leaf nodes Expr
     /// Check constant in type table 
