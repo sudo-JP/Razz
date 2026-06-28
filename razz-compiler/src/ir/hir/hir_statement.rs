@@ -39,8 +39,7 @@ pub enum HIRStmt {
     /// while <cond> <block>
     While { 
         cond: HIRExpr, 
-        block: 
-        HIRBlock 
+        block: HIRBlock 
     },
     /// if <cond> <body>
     /// <else_ifs>
