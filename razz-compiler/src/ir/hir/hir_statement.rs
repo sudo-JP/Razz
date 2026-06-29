@@ -3,13 +3,13 @@ use crate::{
     ir::{Temp, hir::hir::{HIRBlock, HIRFunctionParam}, hir::hir_expression::HIRExpr},
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HIRElseIf {
     pub cond: HIRExpr,
     pub body: HIRBlock,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HIRFunction {
     pub name: String,
     pub params: Vec<HIRFunctionParam>,
@@ -17,13 +17,13 @@ pub struct HIRFunction {
     pub return_ty: TypeKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HIRProgram {
     pub functions: Vec<HIRFunction>,
 }
 
 // No for loop btw, its all desugared to while
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HIRStmt {
     /// <temp> = <expr>
     Assign { 

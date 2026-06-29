@@ -1,6 +1,6 @@
 use crate::{ast::{SpecificTypeKind, 
     expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind}, 
-    ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::HIRStmt}}
+    ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}}
 };
 
 
@@ -84,6 +84,18 @@ pub trait HIRWalkable {
     fn visit_stmt_expr(&mut self, expr: &HIRExpr) {
         walk_hir_expr(self, expr);
     }
+
+    fn visit_program(&mut self, prog: &HIRProgram) {
+        walk_hir_program(self, prog);
+    }
+
+    fn visit_fn_decl(&mut self, fn_decl: &HIRFunction) {
+        walk_hir_fn_decl(self, fn_decl);
+    }
+
+    fn visit_block(&mut self, block: &HIRBlock) {
+        walk_hir_block(self, block);
+    }
 }
 
 pub fn walk_hir_expr<W: HIRWalkable + ?Sized>(walker: &mut W, expr: &HIRExpr) {
@@ -115,4 +127,13 @@ pub fn walk_hir_stmt<W: HIRWalkable + ?Sized>(walker: &mut W, stmt: &HIRStmt) {
 pub fn walk_hir_block<W: HIRWalkable + ?Sized>(walker: &mut W, block: &HIRBlock) {
     block.iter()
         .for_each(|stmt| walker.visit_stmt(stmt));
+}
+
+pub fn walk_hir_program<W: HIRWalkable + ?Sized>(walker: &mut W, prog: &HIRProgram) {
+    prog.functions.iter()
+        .for_each(|f| walker.visit_fn_decl(f));
+}
+
+pub fn walk_hir_fn_decl<W: HIRWalkable + ?Sized>(walker: &mut W, func: &HIRFunction) {
+    walker.visit_block(&func.block);
 }

@@ -1,7 +1,7 @@
 use crate::{ast::TypeKind, ir::hir::hir_statement::HIRStmt};
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct HIRFunctionParam {
     pub name: String, 
     pub ty: TypeKind,

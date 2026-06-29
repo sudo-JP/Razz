@@ -226,7 +226,8 @@ impl HIRStructurizer {
                 let convergence_path = self.find_convergence_path(
                     &mut queue, 
                     block_map, 
-                    *node_id
+                    *node_id,
+                    stop_at
                 );
 
                 let mut res = |label| self.dfs(
@@ -246,13 +247,30 @@ impl HIRStructurizer {
                     (DFSResult::ForwardEdge(then), 
                     DFSResult::ForwardEdge(else_)) => {
                         // Regular if 
-                        let if_stmt = HIRStmt::If { 
-                            cond, 
-                            body: then, 
-                            else_body: else_,
-                        };
-                        curr_instrs.push(if_stmt);
-                        DFSResult::ForwardEdge(curr_instrs)
+                        if then.is_empty() && else_.is_empty() {
+                            DFSResult::ForwardEdge(curr_instrs)
+                        } else if then.is_empty() && !else_.is_empty() {
+                            // Flip conditions, only keep if 
+                            let cond = HIRExpr::UnOp { 
+                                op: UnOpKind::Not, 
+                                value: Box::new(cond) 
+                            };
+                            let if_stmt = HIRStmt::If {
+                                cond, 
+                                body: else_, 
+                                else_body: then,
+                            };
+                            curr_instrs.push(if_stmt);
+                            DFSResult::ForwardEdge(curr_instrs)
+                        } else {
+                            let if_stmt = HIRStmt::If { 
+                                cond, 
+                                body: then, 
+                                else_body: else_,
+                            };
+                            curr_instrs.push(if_stmt);
+                            DFSResult::ForwardEdge(curr_instrs)
+                        }
                     }, 
                     (DFSResult::BackEdge { pointing_to_id, instrs },
                     DFSResult::ForwardEdge(after)) => {
@@ -321,7 +339,7 @@ impl HIRStructurizer {
                         })
                         .collect::<Vec<_>>();
                     let conv_res = self.dfs(&conv_label, block_map, visited, visiting, stop_at);
-                    let combined = self.append_stmt_to_result(combined, phi_assigns);
+                    let combined = self.append_result_to_stmt(combined, phi_assigns);
                     self.merge_results(combined, conv_res)
                 } else {
                     combined
@@ -338,15 +356,15 @@ impl HIRStructurizer {
         res
     }
 
-    fn append_stmt_to_result(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
+    fn append_result_to_stmt(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
         match res {
             DFSResult::ForwardEdge(mut fwd_stmts) => {
-                fwd_stmts.append(&mut stmts);
-                DFSResult::ForwardEdge(fwd_stmts)
+                stmts.append(&mut fwd_stmts);
+                DFSResult::ForwardEdge(stmts)
             }
             DFSResult::BackEdge { pointing_to_id, mut instrs } => {
-                instrs.append(&mut stmts);
-                DFSResult::BackEdge { pointing_to_id, instrs }
+                stmts.append(&mut instrs);
+                DFSResult::BackEdge { pointing_to_id, instrs: stmts }
             }
         }
     }
@@ -388,7 +406,8 @@ impl HIRStructurizer {
     fn find_convergence_path(&self,
         queue: &mut VecDeque<(BlockId, bool)>,
         block_map: &HashMap<BlockId, &SSABlock>,
-        parent: BlockId
+        parent: BlockId,
+        stop_at: Option<BlockId>
     ) -> Option<BlockId> {
 
         // Boolean is used to find mismatching flag 
@@ -412,6 +431,9 @@ impl HIRStructurizer {
                     continue;
                 }
             } else if parent == node_id {
+                continue;
+            } else if let Some(stop) = stop_at 
+            && stop == node_id {
                 continue;
             }
 
