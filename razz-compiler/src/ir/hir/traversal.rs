@@ -44,9 +44,9 @@ pub trait HIRWalkable {
             .for_each(|f| walk_hir_expr(self, &f.value));
     }
 
-    fn visit_http_get(&mut self, _ep: &EndpointKind);
-    fn visit_temp(&mut self, temp: &Temp);
-    fn visit_literal(&mut self, literal: &Literal);
+    fn visit_http_get(&mut self, _ep: &EndpointKind) {}
+    fn visit_temp(&mut self, _temp: &Temp) {}
+    fn visit_literal(&mut self, _literal: &Literal) {}
 
     // ====== STATEMENT ====== 
     fn visit_stmt(&mut self, stmt: &HIRStmt) {
