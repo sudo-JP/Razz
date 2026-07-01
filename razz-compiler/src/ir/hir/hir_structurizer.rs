@@ -9,9 +9,19 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}}
 };
 
+struct CFGContext<'a> {
+    block_map: &'a HashMap<BlockId, &'a SSABlock>,
+    node_id: BlockId, 
+    pointing_to_id: BlockId, 
+    true_label: BlockId,
+}
 
-pub struct HIRStructurizer {
-    program: HIRProgram,
+struct LoopBodyContent<'a> {
+    instrs: Vec<HIRStmt>,
+    after: Vec<HIRStmt>,
+    curr_instrs: Vec<HIRStmt>, 
+    cond: HIRExpr, 
+    curr_phis: &'a [(&'a Temp, &'a [PhiArg])],
 }
 
 #[derive(Debug)]
@@ -24,6 +34,10 @@ enum DFSResult {
 }
 
 const BLOCK_MAP_ERR: &str = "all blocks must live in block map";
+
+pub struct HIRStructurizer {
+    program: HIRProgram,
+}
 
 impl HIRStructurizer {
     pub fn new() -> Self {
@@ -83,16 +97,24 @@ impl HIRStructurizer {
 
     fn process_loop_edge(
         &mut self,
-        node_id: BlockId,
-        pointing_to_id: BlockId,
-        mut instrs: Vec<HIRStmt>,
-        mut after: Vec<HIRStmt>,
-        mut curr_instrs: Vec<HIRStmt>,
-        cond: HIRExpr,
-        curr_phis: &[(&Temp, &[PhiArg])],
-        block_map: &HashMap<BlockId, &SSABlock>,
-        true_label: BlockId
+        cfg_ctx: CFGContext,
+        loop_body_content: LoopBodyContent
     ) -> DFSResult {
+        let CFGContext { 
+            block_map, 
+            node_id, 
+            pointing_to_id, 
+            true_label 
+        } = cfg_ctx;
+
+        let LoopBodyContent { 
+            mut instrs, 
+            mut after, 
+            mut curr_instrs, 
+            cond, 
+            curr_phis, 
+        } = loop_body_content;
+
         if pointing_to_id == node_id {
             // This means we in a loop
             let mut decl: Vec<HIRStmt> = vec![];
@@ -275,35 +297,46 @@ impl HIRStructurizer {
                     (DFSResult::BackEdge { pointing_to_id, instrs },
                     DFSResult::ForwardEdge(after)) => {
                         // Loop is true body
-                        self.process_loop_edge(
-                            *node_id, 
+                        let cfg_ctx = CFGContext { 
+                            block_map, 
+                            node_id: *node_id, 
                             pointing_to_id, 
-                            instrs, 
-                            after, 
-                            curr_instrs, 
+                            true_label: *true_label 
+                        };
+                        let loop_content = LoopBodyContent {
+                            instrs,
+                            after,
+                            curr_instrs,
                             cond, 
-                            &curr_phis, 
-                            block_map,
-                            *true_label
+                            curr_phis: &curr_phis,
+                        };
+                        self.process_loop_edge(
+                            cfg_ctx, 
+                            loop_content,
                         )
                     },
                     (DFSResult::ForwardEdge(after), 
                     DFSResult::BackEdge { pointing_to_id, instrs }) => {
-                        // This code shouldn't occurs, but will handle it anyway 
                         let cond = HIRExpr::UnOp { 
                             op: UnOpKind::Not, 
                             value: Box::new(cond),
                         };
-                        self.process_loop_edge(
-                            *node_id, 
+                        let cfg_ctx = CFGContext { 
+                            block_map, 
+                            node_id: *node_id, 
                             pointing_to_id, 
-                            instrs, 
-                            after, 
-                            curr_instrs, 
+                            true_label: *true_label 
+                        };
+                        let loop_content = LoopBodyContent {
+                            instrs,
+                            after,
+                            curr_instrs,
                             cond, 
-                            &curr_phis, 
-                            block_map,
-                            *false_label
+                            curr_phis: &curr_phis,
+                        };
+                        self.process_loop_edge(
+                            cfg_ctx, 
+                            loop_content,
                         )
                     }, 
                     _ => unreachable!("should be taken care by BFS")
