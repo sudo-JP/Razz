@@ -1,4 +1,4 @@
-use crate::{ast::expression::BinOpKind, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}}}};
+use crate::{ast::{expression::{BinOpKind, EndpointKind, UnOpKind}, statement::HTTPMethodKind}, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}}}};
 
 pub struct HIRDebug {
     indent: usize,
@@ -64,6 +64,56 @@ impl HIRWalkable for HIRDebug {
         println!("\n}} else {{");
         walk_hir_block(self, else_body);
         print!("}}");
+    }
+
+    fn visit_return(&mut self, value: &HIRExpr) {
+        print!("return ");
+        walk_hir_expr(self, value);
+    }
+
+    fn visit_http_request(&mut self, method: &HTTPMethodKind, ep: &EndpointKind, body: &HIRExpr) {
+        print!("{method} {ep} ");
+        walk_hir_expr(self, body);
+    }
+
+    fn visit_bin_op(&mut self, 
+        lhs: &HIRExpr, 
+        op: &BinOpKind, 
+        rhs: &HIRExpr
+    )
+    {
+        walk_hir_expr(self, lhs); 
+        print!(" {op} ");
+        walk_hir_expr(self, rhs); 
+    }
+
+    fn visit_un_op(&mut self, op: &UnOpKind, value: &HIRExpr) {
+        print!("{op}");
+        walk_hir_expr(self, value);
+    }
+
+    fn visit_expr_if(&mut self, cond: &HIRExpr, then: &HIRExpr, else_: &HIRExpr) {
+        print!("if ");
+        walk_hir_expr(self, cond);
+        print!(" {{ ");
+        walk_hir_expr(self, then);
+        print!(" }} else {{ ");
+        walk_hir_expr(self, else_);
+        print!(" }}");
+    }
+
+    fn visit_fn_call(&mut self, name: &str, args: &[HIRExpr]) {
+        print!("{name}(");
+        let mut first = true;
+        for arg in args {
+            if first {
+                walk_hir_expr(self, arg);
+                first = false;
+            } else {
+                print!(", ");
+                walk_hir_expr(self, arg);
+            }
+        }
     }
 }
 
