@@ -1,4 +1,4 @@
-use crate::{ast::{expression::{BinOpKind, EndpointKind, UnOpKind}, statement::HTTPMethodKind}, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}}}};
+use crate::{ast::{SpecificTypeKind, expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind}, ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRStmt}, traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}}}};
 
 pub struct HIRDebug {
     indent: usize,
@@ -107,13 +107,43 @@ impl HIRWalkable for HIRDebug {
         let mut first = true;
         for arg in args {
             if first {
-                walk_hir_expr(self, arg);
                 first = false;
             } else {
                 print!(", ");
-                walk_hir_expr(self, arg);
             }
+            walk_hir_expr(self, arg);
         }
+    }
+
+    fn visit_field_access(&mut self, obj: &HIRExpr, key: &str) {
+        walk_hir_expr(self, obj);
+        print!("->{key}") 
+    }
+
+    fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
+        print!("{ty} ");
+        let mut first = true; 
+        for field in fields {
+            if first {
+                first = false;
+            } else {
+                print!(", ");
+            }
+            print!("{}: ", field.name);
+            walk_hir_expr(self, &field.value);
+        }
+    }
+
+    fn visit_http_get(&mut self, ep: &EndpointKind) {
+        print!("GET {ep}");
+    }
+
+    fn visit_temp(&mut self, temp: &Temp) {
+        print!("{temp}");
+    }
+
+    fn visit_literal(&mut self, literal: &Literal) {
+        print!("{literal}");
     }
 }
 

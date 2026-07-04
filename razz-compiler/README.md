@@ -6,6 +6,9 @@ Please see `docs/` for documentation on the language and `examples/` for sample 
 
 Yes I handwrote all of this myself, even the docs and the `====== LEXER =====`
 
+## TODO: 
+- Fix unordered functions param to actually map to it correctly
+
 ## Journal 
 I should've written this earlier. 
 
