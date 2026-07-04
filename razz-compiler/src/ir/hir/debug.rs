@@ -1,7 +1,25 @@
-use crate::{ast::{SpecificTypeKind, expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind}, ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRStmt}, traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}}}};
+use crate::{ast::{SpecificTypeKind, expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
+    statement::HTTPMethodKind}, 
+    ir::{Temp, hir::{
+        hir::HIRBlock, 
+        hir_expression::{HIRExpr, HIRFieldInit}, 
+        hir_statement::{HIRFunction, HIRStmt}, 
+        traversal::{HIRWalkable, walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_stmt}
+    }}
+};
 
 pub struct HIRDebug {
     indent: usize,
+}
+
+impl HIRDebug {
+    pub fn new() -> Self {
+        Self { indent: 0 }
+    }
+
+    pub fn get_ident_str(&self) -> String {
+        " ".repeat(self.indent)
+    }
 }
 
 impl HIRWalkable for HIRDebug {
@@ -31,7 +49,7 @@ impl HIRWalkable for HIRDebug {
     }
 
     fn visit_stmt(&mut self, stmt: &HIRStmt) {
-        let indent = " ".repeat(self.indent);
+        let indent = self.get_ident_str();
         print!("{indent}");
         walk_hir_stmt(self, stmt);
         println!("");
@@ -52,18 +70,20 @@ impl HIRWalkable for HIRDebug {
         print!("while ");
         walk_hir_expr(self, cond);
         println!(" {{");
-        walk_hir_block(self, block);
-        print!("\n}}");
+        self.visit_block(block);
+        let ident = self.get_ident_str();
+        print!("\n{ident}}}");
     }
 
     fn visit_if_stmt(&mut self, cond: &HIRExpr, body: &HIRBlock, else_body: &HIRBlock) {
+        let ident = self.get_ident_str();
         print!("if ");
         walk_hir_expr(self, cond);
         println!(" {{");
-        walk_hir_block(self, body);
-        println!("\n}} else {{");
-        walk_hir_block(self, else_body);
-        print!("}}");
+        self.visit_block(body);
+        println!("\n{ident}}} else {{");
+        self.visit_block(else_body);
+        print!("\n{ident}}}");
     }
 
     fn visit_return(&mut self, value: &HIRExpr) {
@@ -113,6 +133,7 @@ impl HIRWalkable for HIRDebug {
             }
             walk_hir_expr(self, arg);
         }
+        print!(")");
     }
 
     fn visit_field_access(&mut self, obj: &HIRExpr, key: &str) {

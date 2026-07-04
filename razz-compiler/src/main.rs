@@ -1,7 +1,7 @@
 use std::{fs, io};
 
 use clap::Parser;
-use razz_compiler::{cli::Cli, compiler::{compiler::{Compiler,CompilerOutput}, error::CompilerError}};
+use razz_compiler::{cli::Cli, compiler::{compiler::{Compiler,CompilerOutput}, error::CompilerError}, ir::hir::{debug::HIRDebug, traversal::HIRWalkable}};
 use owo_colors::OwoColorize;
 
 fn main() -> io::Result<()> {
@@ -41,9 +41,12 @@ fn main() -> io::Result<()> {
             }
         }
 
-        Ok(CompilerOutput::SSAIR(ir_prog)) => print!("{}", ir_prog),
+        Ok(CompilerOutput::SSAIR(ir_prog)) => println!("{}", ir_prog),
 
-        Ok(CompilerOutput::HIR(hir_prog)) => println!("{:?}", hir_prog),
+        Ok(CompilerOutput::HIR(hir_prog)) => {
+            let mut debugger = HIRDebug::new();
+            debugger.visit_program(&hir_prog);
+        }
 
         // Add more when the compiler grows 
         _ => {}

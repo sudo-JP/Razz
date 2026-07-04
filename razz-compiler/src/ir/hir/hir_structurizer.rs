@@ -22,6 +22,7 @@ struct LoopBodyContent<'a> {
     curr_instrs: Vec<HIRStmt>, 
     cond: HIRExpr, 
     curr_phis: &'a [(&'a Temp, &'a [PhiArg])],
+    phi_assigns: Vec<HIRStmt>,
 }
 
 #[derive(Debug)]
@@ -113,8 +114,10 @@ impl HIRStructurizer {
             mut curr_instrs, 
             cond, 
             curr_phis, 
+            phi_assigns,
         } = loop_body_content;
 
+        instrs.splice(..0, phi_assigns);
         if pointing_to_id == node_id {
             // This means we in a loop
             let mut decl: Vec<HIRStmt> = vec![];
@@ -265,11 +268,43 @@ impl HIRStructurizer {
 
                 let cond_phi = cond.clone();
 
+                let mut phi_assigns = if let Some(conv_label) = convergence_path {
+                    let conv_node = block_map.get(&conv_label)
+                        .expect(BLOCK_MAP_ERR);
+
+                    let phis = conv_node.instrs.iter()
+                        .filter_map(|instr| match instr {
+                            SSAInstruction::Phi { target, args } => 
+                                Some((target, args)),
+                                _ => None,
+                        })
+                        .collect::<Vec<_>>();
+
+                    phis.iter()
+                        .map(|(target, args)| {
+                            let then_val = self.resolve_phi_value(*true_label, args, block_map);
+                            let else_val = self.resolve_phi_value(*false_label, args, block_map);
+
+                            let if_expr = HIRExpr::If { 
+                                cond: Box::new(cond_phi.clone()), 
+                                then: Box::new(then_val), 
+                                else_: Box::new(else_val),
+                            };
+
+                            HIRStmt::Assign { 
+                                target: **target, 
+                                expr: if_expr 
+                            }
+                        })
+                        .collect::<Vec<_>>() 
+                } else { vec![] };
+
                 let combined = match (true_res, false_res) {
                     (DFSResult::ForwardEdge(then), 
                     DFSResult::ForwardEdge(else_)) => {
                         // Regular if 
                         if then.is_empty() && else_.is_empty() {
+                            curr_instrs.append(&mut phi_assigns);
                             DFSResult::ForwardEdge(curr_instrs)
                         } else if then.is_empty() && !else_.is_empty() {
                             // Flip conditions, only keep if 
@@ -283,6 +318,7 @@ impl HIRStructurizer {
                                 else_body: then,
                             };
                             curr_instrs.push(if_stmt);
+                            curr_instrs.append(&mut phi_assigns);
                             DFSResult::ForwardEdge(curr_instrs)
                         } else {
                             let if_stmt = HIRStmt::If { 
@@ -291,6 +327,7 @@ impl HIRStructurizer {
                                 else_body: else_,
                             };
                             curr_instrs.push(if_stmt);
+                            curr_instrs.append(&mut phi_assigns);
                             DFSResult::ForwardEdge(curr_instrs)
                         }
                     }, 
@@ -309,6 +346,7 @@ impl HIRStructurizer {
                             curr_instrs,
                             cond, 
                             curr_phis: &curr_phis,
+                            phi_assigns,
                         };
                         self.process_loop_edge(
                             cfg_ctx, 
@@ -333,6 +371,7 @@ impl HIRStructurizer {
                             curr_instrs,
                             cond, 
                             curr_phis: &curr_phis,
+                            phi_assigns,
                         };
                         self.process_loop_edge(
                             cfg_ctx, 
@@ -343,36 +382,8 @@ impl HIRStructurizer {
                 };
 
                 if let Some(conv_label) = convergence_path {
-                    let conv_node = block_map.get(&conv_label)
-                        .expect(BLOCK_MAP_ERR);
-
-                    let phis = conv_node.instrs.iter()
-                        .filter_map(|instr| match instr {
-                            SSAInstruction::Phi { target, args } => 
-                                Some((target, args)),
-                                _ => None,
-                        })
-                        .collect::<Vec<_>>();
-
-                    let phi_assigns = phis.iter()
-                        .map(|(target, args)| {
-                            let then_val = self.resolve_phi_value(*true_label, args, block_map);
-                            let else_val = self.resolve_phi_value(*false_label, args, block_map);
-
-                            let if_expr = HIRExpr::If { 
-                                cond: Box::new(cond_phi.clone()), 
-                                then: Box::new(then_val), 
-                                else_: Box::new(else_val),
-                            };
-
-                            HIRStmt::Assign { 
-                                target: **target, 
-                                expr: if_expr 
-                            }
-                        })
-                        .collect::<Vec<_>>();
                     let conv_res = self.dfs(&conv_label, block_map, visited, visiting, stop_at);
-                    let combined = self.append_result_to_stmt(combined, phi_assigns);
+                    //let combined = self.prepend_result_to_stmt(combined, phi_assigns);
                     self.merge_results(combined, conv_res)
                 } else {
                     combined
@@ -389,7 +400,7 @@ impl HIRStructurizer {
         res
     }
 
-    fn append_result_to_stmt(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
+    fn prepend_result_to_stmt(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
         match res {
             DFSResult::ForwardEdge(mut fwd_stmts) => {
                 stmts.append(&mut fwd_stmts);
@@ -571,6 +582,10 @@ impl HIRStructurizer {
             SSAOperand::Temp(t) => HIRExpr::Temp(*t),
             SSAOperand::Const(c) => HIRExpr::Const(c.clone()),
         }
+    }
+
+    fn extract_expr_for_opr(&self, opr: &SSAOperand, block: &SSABlock) -> HIRExpr {
+        todo!()
     }
 
     fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> HIRStmt {
