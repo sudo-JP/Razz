@@ -274,3 +274,19 @@ impl fmt::Display for SSAInstruction {
         }
     }
 }
+
+pub fn dest_of(instr: &SSAInstruction) -> Option<Temp> {
+    match instr {
+        SSAInstruction::BinOp { target, .. } 
+        | SSAInstruction::UnOp { target, .. }
+        | SSAInstruction::FieldLoad { target, .. }
+        | SSAInstruction::Copy { target, .. }
+        | SSAInstruction::Construct { target, .. }
+        | SSAInstruction::HTTPGet { target, .. }
+        => Some(*target), 
+        SSAInstruction::Call { target, .. } => 
+            if let Some(temp) = target { Some(*temp) }
+            else { None },
+        _ => None,
+    }
+}

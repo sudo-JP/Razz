@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator}}
+use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator, dest_of}}
 };
 
 struct CFGContext<'a> {
@@ -39,6 +39,7 @@ const BLOCK_MAP_ERR: &str = "all blocks must live in block map";
 pub struct HIRStructurizer {
     program: HIRProgram,
 }
+
 
 impl HIRStructurizer {
     pub fn new() -> Self {
@@ -400,18 +401,6 @@ impl HIRStructurizer {
         res
     }
 
-    fn prepend_result_to_stmt(&self, res: DFSResult, mut stmts: Vec<HIRStmt>) -> DFSResult {
-        match res {
-            DFSResult::ForwardEdge(mut fwd_stmts) => {
-                stmts.append(&mut fwd_stmts);
-                DFSResult::ForwardEdge(stmts)
-            }
-            DFSResult::BackEdge { pointing_to_id, mut instrs } => {
-                stmts.append(&mut instrs);
-                DFSResult::BackEdge { pointing_to_id, instrs: stmts }
-            }
-        }
-    }
 
     /// First contains orignal result
     /// Second contains the convergence path result
@@ -516,7 +505,9 @@ impl HIRStructurizer {
         // Base case 
         if let Some(arg) = phi_args.iter()
             .find(|arg| arg.from_id == label) {
-            return self.structurize_operand(&arg.operand);
+            let block = block_map.get(&arg.from_id)
+                .expect(BLOCK_MAP_ERR);
+            return self.extract_expr_for_opr(&arg.operand, *block);
         }
 
         // If does not exist in the phi, recurse
@@ -533,7 +524,7 @@ impl HIRStructurizer {
                 let else_expr = self.resolve_phi_value(*false_label, phi_args, block_map);
 
                 HIRExpr::If { 
-                    cond: Box::new(self.structurize_operand(cond)), 
+                    cond: Box::new(self.extract_expr_for_opr(cond, block)), 
                     then: Box::new(if_expr), 
                     else_: Box::new(else_expr), 
                 }
@@ -584,8 +575,69 @@ impl HIRStructurizer {
         }
     }
 
+    fn instr_to_expr(&self, instr: &SSAInstruction) -> HIRExpr {
+        match instr {
+            SSAInstruction::BinOp { lhs, op, rhs, .. } => {
+                let lhs = Box::new(self.structurize_operand(lhs));
+                let rhs = Box::new(self.structurize_operand(rhs));
+                HIRExpr::BinOp{ 
+                    lhs,
+                    op: *op,
+                    rhs, 
+                }
+            }, 
+            SSAInstruction::UnOp { op, value, .. } => {
+                let value = Box::new(self.structurize_operand(value));
+                HIRExpr::UnOp{ 
+                    op: *op, 
+                    value 
+                }
+            },
+            SSAInstruction::Call { args, func, .. } => {
+                HIRExpr::FunctionCall{ 
+                    name: func.to_string(), 
+                    args: args.iter()
+                        .map(|arg| self.structurize_operand(arg))
+                        .collect(),
+                }
+            },
+            SSAInstruction::FieldLoad { obj, key, .. } => {
+                let obj = Box::new(self.structurize_operand(obj));
+                HIRExpr::FieldAccess{ 
+                    obj: obj, 
+                    key: key.to_string() 
+                }
+            },
+            SSAInstruction::Construct { ty, fields, .. } => {
+                HIRExpr::StructLiteral{ 
+                    ty: *ty, 
+                    fields: fields.iter()
+                        .map(|ssa_field| HIRFieldInit {
+                            name: ssa_field.name.to_string(),
+                            value: self.structurize_operand(&ssa_field.value),
+                        })
+                        .collect()
+                }
+            },
+            SSAInstruction::Copy { value, .. } => {
+                self.structurize_operand(value)
+            },
+            SSAInstruction::HTTPGet { ep, .. } => {
+                HIRExpr::HTTPRequest(*ep)
+            },
+            _ => unreachable!("not expression, guarded by temp search")
+        }
+    }
+
     fn extract_expr_for_opr(&self, opr: &SSAOperand, block: &SSABlock) -> HIRExpr {
-        todo!()
+        let SSAOperand::Temp(temp) = opr else {
+            return self.structurize_operand(opr);
+        };
+
+        block.instrs.iter()
+            .find(|instr| dest_of(instr) == Some(*temp))
+            .map(|instr| self.instr_to_expr(instr))
+            .unwrap_or_else(|| self.structurize_operand(opr))
     }
 
     fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> HIRStmt {
