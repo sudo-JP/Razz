@@ -598,7 +598,7 @@ impl<'ast> SSALowerer<'ast> {
         // Like while loop
         self.add_pred(header_id, preheader_id);
         self.add_pred(header_id, update_block_id);
-        self.add_pred(update_block_id, body_id);
+        //self.add_pred(update_block_id, body_id);
         self.add_pred(body_id, header_id);
         self.add_pred(exit_id, header_id);
 
@@ -629,6 +629,8 @@ impl<'ast> SSALowerer<'ast> {
         self.seal_block(body_id);
         self.lower_block(body);
         self.finish_block(SSATerminator::Goto(update_block_id));
+        
+        self.add_pred(update_block_id, self.curr_block);
 
         // Insert update after body 
         self.seal_block(update_block_id);
@@ -656,12 +658,10 @@ impl<'ast> SSALowerer<'ast> {
             let body_id = self.next_block_id();
             else_if_blocks.push((header, body_id));
             self.add_pred(body_id, header);
-            self.add_pred(exit_id, body_id);
         }
     
         let else_id = if else_body.is_some() {
             let id = self.next_block_id();
-            self.add_pred(exit_id, id);
             Some(id)
         } else {
             None
@@ -669,7 +669,6 @@ impl<'ast> SSALowerer<'ast> {
     
         // preds from header
         self.add_pred(if_body_id, header_id);
-        self.add_pred(exit_id, if_body_id);
     
         if let Some((first_header, _)) = else_if_blocks.first() {
             self.add_pred(*first_header, header_id);
@@ -710,6 +709,8 @@ impl<'ast> SSALowerer<'ast> {
         self.seal_block(if_body_id);
         self.lower_block(body);
         self.finish_block(SSATerminator::Goto(exit_id));
+        
+        self.add_pred(exit_id, self.curr_block);
     
         // Else-if chain
         for (i, (elif_header, elif_body)) in else_if_blocks.iter().enumerate() {
@@ -734,6 +735,8 @@ impl<'ast> SSALowerer<'ast> {
             self.seal_block(*elif_body);
             self.lower_block(&else_ifs[i].body);
             self.finish_block(SSATerminator::Goto(exit_id));
+
+            self.add_pred(exit_id, self.curr_block);
         }
     
         // Else body
@@ -742,6 +745,7 @@ impl<'ast> SSALowerer<'ast> {
             self.seal_block(else_id);
             self.lower_block(else_block);
             self.finish_block(SSATerminator::Goto(exit_id));
+            self.add_pred(exit_id, self.curr_block);
         }
     
         self.curr_block = exit_id;

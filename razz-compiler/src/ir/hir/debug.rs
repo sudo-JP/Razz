@@ -37,7 +37,7 @@ impl HIRWalkable for HIRDebug {
             }
         }
 
-        println!("fn {}({}) {{", fn_decl.name, params_str);
+        println!("fn {}({}) {} {{", fn_decl.name, params_str, fn_decl.return_ty);
         walk_hir_fn_decl(self, fn_decl);
         println!("}}");
     }

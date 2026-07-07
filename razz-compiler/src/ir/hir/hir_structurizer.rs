@@ -505,9 +505,7 @@ impl HIRStructurizer {
         // Base case 
         if let Some(arg) = phi_args.iter()
             .find(|arg| arg.from_id == label) {
-            let block = block_map.get(&arg.from_id)
-                .expect(BLOCK_MAP_ERR);
-            return self.extract_expr_for_opr(&arg.operand, *block);
+            return self.extract_expr_for_opr(&arg.operand, &arg.from_id, label, block_map);
         }
 
         // If does not exist in the phi, recurse
@@ -524,7 +522,7 @@ impl HIRStructurizer {
                 let else_expr = self.resolve_phi_value(*false_label, phi_args, block_map);
 
                 HIRExpr::If { 
-                    cond: Box::new(self.extract_expr_for_opr(cond, block)), 
+                    cond: Box::new(self.structurize_operand(cond)), 
                     then: Box::new(if_expr), 
                     else_: Box::new(else_expr), 
                 }
@@ -575,6 +573,8 @@ impl HIRStructurizer {
         }
     }
 
+    /// Literally the stmt version but only extracting 
+    /// expr. Used for resolve phi to inlining expression
     fn instr_to_expr(&self, instr: &SSAInstruction) -> HIRExpr {
         match instr {
             SSAInstruction::BinOp { lhs, op, rhs, .. } => {
@@ -629,14 +629,27 @@ impl HIRStructurizer {
         }
     }
 
-    fn extract_expr_for_opr(&self, opr: &SSAOperand, block: &SSABlock) -> HIRExpr {
+    /// Unpack operand to expression, defaulting to structurized operand if not a temp
+    fn extract_expr_for_opr(&self, 
+        opr: &SSAOperand, 
+        node_id: &BlockId,
+        pred_id: BlockId,
+        block_map: &HashMap<BlockId, &SSABlock>
+    ) -> HIRExpr {
         let SSAOperand::Temp(temp) = opr else {
             return self.structurize_operand(opr);
         };
 
+        let block = block_map.get(node_id)
+            .expect(BLOCK_MAP_ERR);
+
         block.instrs.iter()
             .find(|instr| dest_of(instr) == Some(*temp))
-            .map(|instr| self.instr_to_expr(instr))
+            .map(|instr| if let SSAInstruction::Phi { args, .. } = instr {
+                self.resolve_phi_value(pred_id, args, block_map)
+            } else {
+                self.instr_to_expr(instr)
+            })
             .unwrap_or_else(|| self.structurize_operand(opr))
     }
 
