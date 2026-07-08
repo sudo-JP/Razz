@@ -1,0 +1,16 @@
+fn main() null {
+    if 1 > 0 {
+        POST /hittable Sphere {
+            coord: Vec3 { x: 1.0, y: 2.0, z: 3.0 },
+            radius: 0.5,
+            material: Lambertian { albedo: Color { r: 10, g: 20, b: 30 } }
+        };
+    } else {
+        POST /hittable Sphere {
+            coord: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            radius: 1.0,
+            material: Lambertian { albedo: Color { r: 1, g: 2, b: 3 } }
+        };
+    }
+    return null;
+}

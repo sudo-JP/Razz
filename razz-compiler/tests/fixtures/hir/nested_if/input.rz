@@ -1,0 +1,13 @@
+fn main() int {
+    dummy = 0;
+    if false {
+        if true {
+            dummy = 1;
+        } else {
+            dummy = 3;
+        }
+    } else {
+        dummy = 2;
+    }
+    return dummy;
+}

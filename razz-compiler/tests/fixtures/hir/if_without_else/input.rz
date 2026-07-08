@@ -1,0 +1,6 @@
+fn main() null {
+    if true {
+        dummy = 1;
+    }
+    return null;
+}

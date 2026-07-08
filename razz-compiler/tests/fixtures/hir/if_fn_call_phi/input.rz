@@ -1,0 +1,13 @@
+fn add(a: int, b: int) int {
+    return a + b;
+}
+
+fn main() int {
+    x = 0;
+    if 1 > 0 {
+        x = add(a: x, b: 1);
+    } else {
+        x = 2;
+    }
+    return x;
+}

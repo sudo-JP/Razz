@@ -1,0 +1,5 @@
+fn main() float {
+    x = 1.5;
+    y = -x + 2.5;
+    return y;
+}

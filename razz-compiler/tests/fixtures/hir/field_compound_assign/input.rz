@@ -1,0 +1,6 @@
+fn main() null {
+    cam = GET /camera;
+    cam->vfov = 90;
+    cam->vfov += 10;
+    return null;
+}

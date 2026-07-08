@@ -1,0 +1,9 @@
+fn main() bool {
+    flag = false;
+    if 1 > 0 {
+        flag = true;
+    } else {
+        flag = false;
+    }
+    return flag;
+}

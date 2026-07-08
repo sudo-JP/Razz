@@ -1,0 +1,8 @@
+fn main() null {
+    for i = 0; false; dummy = 0 {
+        for j = 0; false; dummy = 1 {
+            dummy = 2;
+        }
+    }
+    return null;
+}

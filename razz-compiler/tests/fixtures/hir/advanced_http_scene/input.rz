@@ -1,0 +1,19 @@
+fn main() null {
+    cam = GET /camera;
+    cam->vfov = 60.5;
+    PATCH /camera Camera { vfov: cam->vfov };
+
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.0, y: 2.0, z: 3.0 },
+        radius: 0.5,
+        material: Lambertian { albedo: Color { r: 10, g: 20, b: 30 } }
+    };
+
+    PUT /background Background {
+        top: Vec3 { x: 0.1, y: 0.2, z: 0.3 },
+        bottom: Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+    };
+
+    PATCH /output Output { file: "scene.ppm" };
+    return null;
+}

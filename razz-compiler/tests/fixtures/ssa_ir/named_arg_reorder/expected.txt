@@ -1,0 +1,10 @@
+fn sub#0(a: int, b: int) int {
+  block_0:
+    t2 = t0 - t1
+    ret t2
+}
+fn main#1() int {
+  block_1:
+    t3 = sub(10, 1)
+    ret t3
+}
