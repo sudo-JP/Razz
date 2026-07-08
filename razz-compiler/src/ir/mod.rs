@@ -9,7 +9,7 @@ pub mod hir;
 pub type TempId = u32;
 pub type Dest = Temp;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Hash, Eq)]
 pub struct Temp {
     pub id: TempId, 
     pub ty: TypeKind,

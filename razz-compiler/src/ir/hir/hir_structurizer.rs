@@ -38,6 +38,7 @@ const BLOCK_MAP_ERR: &str = "all blocks must live in block map";
 
 pub struct HIRStructurizer {
     program: HIRProgram,
+    expr_if_map: HashMap<Temp, HIRExpr>,
 }
 
 
@@ -45,6 +46,7 @@ impl HIRStructurizer {
     pub fn new() -> Self {
         Self {
             program: HIRProgram { functions: vec![] },
+            expr_if_map: HashMap::new(),
         }
     }
 
@@ -283,14 +285,17 @@ impl HIRStructurizer {
 
                     phis.iter()
                         .map(|(target, args)| {
-                            let then_val = self.resolve_phi_value(*true_label, args, block_map);
-                            let else_val = self.resolve_phi_value(*false_label, args, block_map);
+                            let then_val = self.resolve_phi_value(*true_label, args, Some(true), block_map);
+                            let else_val = self.resolve_phi_value(*false_label, args, Some(false), block_map);
 
                             let if_expr = HIRExpr::If { 
                                 cond: Box::new(cond_phi.clone()), 
                                 then: Box::new(then_val), 
                                 else_: Box::new(else_val),
                             };
+                            
+                            // PERF: Not clone it 
+                            self.expr_if_map.insert(**target, if_expr.clone());
 
                             HIRStmt::Assign { 
                                 target: **target, 
@@ -500,12 +505,13 @@ impl HIRStructurizer {
     fn resolve_phi_value(&self, 
         label: BlockId, 
         phi_args: &[PhiArg], 
+        branch: Option<bool>,
         block_map: &HashMap<BlockId, &SSABlock>
     ) -> HIRExpr {
         // Base case 
         if let Some(arg) = phi_args.iter()
             .find(|arg| arg.from_id == label) {
-            return self.extract_expr_for_opr(&arg.operand, &arg.from_id, label, block_map);
+            return self.extract_expr_for_opr(&arg.operand, &arg.from_id, branch, block_map);
         }
 
         // If does not exist in the phi, recurse
@@ -514,15 +520,15 @@ impl HIRStructurizer {
         match &block.term {
             SSATerminator::Return(_) => unreachable!("phi resolution should never walk into a return"),
             SSATerminator::Goto(goto_label) => {
-                self.resolve_phi_value(*goto_label, phi_args, block_map)
+                self.resolve_phi_value(*goto_label, phi_args, branch, block_map)
             },
             SSATerminator::IfGoto { cond, true_label, false_label } => {
 
-                let if_expr = self.resolve_phi_value(*true_label, phi_args, block_map);
-                let else_expr = self.resolve_phi_value(*false_label, phi_args, block_map);
+                let if_expr = self.resolve_phi_value(*true_label, phi_args, Some(true), block_map);
+                let else_expr = self.resolve_phi_value(*false_label, phi_args, Some(false), block_map);
 
                 HIRExpr::If { 
-                    cond: Box::new(self.structurize_operand(cond)), 
+                    cond: Box::new(self.extract_expr_for_opr(cond, &label, None, block_map)), 
                     then: Box::new(if_expr), 
                     else_: Box::new(else_expr), 
                 }
@@ -633,7 +639,7 @@ impl HIRStructurizer {
     fn extract_expr_for_opr(&self, 
         opr: &SSAOperand, 
         node_id: &BlockId,
-        pred_id: BlockId,
+        branch: Option<bool>,
         block_map: &HashMap<BlockId, &SSABlock>
     ) -> HIRExpr {
         let SSAOperand::Temp(temp) = opr else {
@@ -643,14 +649,21 @@ impl HIRStructurizer {
         let block = block_map.get(node_id)
             .expect(BLOCK_MAP_ERR);
 
-        block.instrs.iter()
-            .find(|instr| dest_of(instr) == Some(*temp))
-            .map(|instr| if let SSAInstruction::Phi { args, .. } = instr {
-                self.resolve_phi_value(pred_id, args, block_map)
-            } else {
-                self.instr_to_expr(instr)
-            })
-            .unwrap_or_else(|| self.structurize_operand(opr))
+        if let Some(if_expr) = self.expr_if_map.get(temp) {
+            if let Some(branch_cond) = branch {
+                let HIRExpr::If { then, else_, .. } = if_expr else {
+                    unreachable!("if expr map must only contain if expr")
+                };
+                // PERF: Really need to optimize..
+                if branch_cond { *then.clone()} 
+                else { *else_.clone() }
+            } else { if_expr.clone() }
+        } else {
+            block.instrs.iter()
+                .find(|instr| dest_of(instr) == Some(*temp))
+                .map(|instr| self.instr_to_expr(instr))
+                .unwrap_or_else(|| self.structurize_operand(opr))
+        }
     }
 
     fn structurize_instr(&mut self, ssa_instr: &SSAInstruction) -> HIRStmt {

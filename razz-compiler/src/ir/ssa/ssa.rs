@@ -283,6 +283,7 @@ pub fn dest_of(instr: &SSAInstruction) -> Option<Temp> {
         | SSAInstruction::Copy { target, .. }
         | SSAInstruction::Construct { target, .. }
         | SSAInstruction::HTTPGet { target, .. }
+        | SSAInstruction::Phi { target, .. }
         => Some(*target), 
         SSAInstruction::Call { target, .. } => 
             if let Some(temp) = target { Some(*temp) }
