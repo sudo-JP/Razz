@@ -36,6 +36,7 @@ pub enum SemanticErrorKind {
     InvalidFieldAccess(TypeKind),
     InvalidFieldAccessKey(String),
     DuplicateArg(String),
+    DuplicateFn(String),
     InvalidTypeAnnotation(TypeKind),
     InvalidConditionType(TypeKind),
     InvalidBinaryAssign{

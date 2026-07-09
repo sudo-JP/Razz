@@ -108,20 +108,4 @@ ssa_fixture_test!(nested_while, "tests/fixtures/ssa_ir/nested_while");
 ssa_fixture_test!(nested_for, "tests/fixtures/ssa_ir/nested_for");
 ssa_fixture_test!(nested_if, "tests/fixtures/ssa_ir/nested_if");
 ssa_fixture_test!(multiple_phis_merging_path, "tests/fixtures/ssa_ir/multiple_phis_merging_path");
-
-// KNOWN BUG in `ssa_lowerer.rs`: named-argument call sites are lowered in the
-// ORDER THEY'RE WRITTEN at the call site, not reordered to match the callee's
-// declared parameter order. Semantic analysis (`analyzer.rs`) validates arg
-// names/types/duplicates via a name->type map and explicitly allows any
-// argument order (that's the entire point of Swift-style named args), but
-// that name info is discarded before SSA lowering, which just does
-// `args.iter().map(|arg| self.lower_expr(&arg.expr))` positionally.
-//
-// Fixture: `fn sub(a: int, b: int) int { return a - b; }` called as
-// `sub(b: 1, a: 10)` (a=10, b=1 by name, so the correct result is 10-1=9).
-// It currently lowers to `t3 = sub(1, 10)` -- silently swapping the values
-// bound to `a` and `b` -- instead of the correct `t3 = sub(10, 1)`.
-// This test asserts the correct/reordered lowering and will FAIL until the
-// lowerer resolves each arg's target parameter index by name before emitting
-// the `Call` instruction's `args` list.
 ssa_fixture_test!(named_arg_reorder, "tests/fixtures/ssa_ir/named_arg_reorder");

@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 
+use crate::ast::statement::Param;
 use crate::ir::ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
@@ -14,6 +15,7 @@ use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind},
     ssa::ssa::{SSAFieldInit, SSAInstruction, SSAOperand, SSATerminator}}};
 
 
+// TODO: wtf is this...make to smaller structs
 pub struct SSALowerer<'ast> {
     temp_counter: u32, 
     block_counter: u32, 
@@ -22,6 +24,7 @@ pub struct SSALowerer<'ast> {
     curr_instrs: Vec<SSAInstruction>,
     curr_block: BlockId,
     ir_prog: SSAProgram,
+    fn_def: HashMap<&'ast str, &'ast [Param]>,
 
     // Braun's stuff
     current_def: HashMap<&'ast str, HashMap<BlockId, SSAOperand>>,
@@ -41,6 +44,7 @@ impl<'ast> SSALowerer<'ast> {
             blocks: vec![],
             type_table,
             ir_prog,
+            fn_def: HashMap::new(),
             curr_instrs: vec![],
             current_def: HashMap::new(),
             sealed_block: HashSet::new(),
@@ -52,6 +56,7 @@ impl<'ast> SSALowerer<'ast> {
 
     pub fn lower(mut self, prog: &'ast Program) -> SSAProgram {
         for f in &prog.funcs {
+            self.fn_def.insert(&f.node.name.node, &f.node.params);
             self.lower_fn_decl(&f.node);
         }
         self.ir_prog
@@ -384,8 +389,23 @@ impl<'ast> SSALowerer<'ast> {
             },
             ExprKind::FunctionCall { name, args } => {
                 let temp = self.expr_temp(expr);
-                let args_opr = args.iter()
-                    .map(|arg| self.lower_expr(&arg.expr))
+                let mut arg_map: HashMap<&str, &Expr> = HashMap::with_capacity(args.len());
+
+                args.iter()
+                    .for_each(|arg| { arg_map.insert(&arg.name.node, &arg.expr); } );
+
+                let err = "Semantic resolves this";
+
+                let arranged_expr = self.fn_def.get(&name.node.as_str())
+                    .expect(err)
+                    .iter()
+                    .map(|param| *arg_map.get(&param.name.node.as_str())
+                        .expect(err)
+                    )
+                    .collect::<Vec<_>>();
+
+                let args_opr = arranged_expr.iter()
+                    .map(|expr| self.lower_expr(expr))
                     .collect();
                 self.emit(SSAInstruction::Call { 
                     target: Some(temp), 

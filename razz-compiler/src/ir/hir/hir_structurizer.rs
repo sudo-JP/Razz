@@ -257,7 +257,7 @@ impl HIRStructurizer {
                     *node_id,
                     stop_at
                 );
-
+                println!("conv path for block {:?}: {:?}", node_id, convergence_path);
                 let mut res = |label| self.dfs(
                     label, 
                     block_map, 

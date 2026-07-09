@@ -44,7 +44,9 @@ impl<'ast> SemanticAnalyzer<'ast> {
             .iter()
             .for_each(|f| {
                 self.fn_table.insert(&f.node.name.node, &f.node);
-                self.type_table.insert(f.node.id, f.node.return_type.node);
+                if let Some(_) = self.type_table.insert(f.node.id, f.node.return_type.node) {
+                    self.error(SemanticErrorKind::DuplicateFn(f.node.name.node.to_string()), f.span);
+                }
             });
         walk_program(self, prog);
 

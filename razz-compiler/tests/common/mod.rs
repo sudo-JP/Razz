@@ -14,6 +14,7 @@ pub fn load_fixture(path: &str) -> (String, String) {
     (input, expected)
 }
 
+#[allow(dead_code)]
 pub fn colored_assert(actual: &str, expected: &str) {
     if actual != expected {
         let diff = TextDiff::from_lines(actual, expected);
@@ -33,6 +34,7 @@ pub fn colored_assert(actual: &str, expected: &str) {
     }
 }
 
+#[allow(dead_code)]
 pub fn colored_assert_debug<T: std::fmt::Debug>(actual: &T, expected: &T) {
     let actual_str = format!("{:#?}", actual);
     let expected_str = format!("{:#?}", expected);

@@ -10,7 +10,7 @@ pub mod debug;
 /// The biggest refactor ever.
 pub type NodeId = u32;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Spanned<T> {
     pub node: T,
     pub span: Span,
