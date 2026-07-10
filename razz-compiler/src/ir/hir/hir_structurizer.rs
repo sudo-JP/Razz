@@ -104,6 +104,7 @@ impl HIRStructurizer {
         cfg_ctx: CFGContext,
         loop_body_content: LoopBodyContent
     ) -> DFSResult {
+        println!("pointing_to_id: {}, node_id: {}", cfg_ctx.pointing_to_id, cfg_ctx.node_id);
         let CFGContext { 
             block_map, 
             node_id, 
@@ -257,7 +258,6 @@ impl HIRStructurizer {
                     *node_id,
                     stop_at
                 );
-                println!("conv path for block {:?}: {:?}", node_id, convergence_path);
                 let mut res = |label| self.dfs(
                     label, 
                     block_map, 
@@ -304,7 +304,6 @@ impl HIRStructurizer {
                         })
                         .collect::<Vec<_>>() 
                 } else { vec![] };
-
                 let combined = match (true_res, false_res) {
                     (DFSResult::ForwardEdge(then), 
                     DFSResult::ForwardEdge(else_)) => {
@@ -384,7 +383,42 @@ impl HIRStructurizer {
                             loop_content,
                         )
                     }, 
-                    _ => unreachable!("should be taken care by BFS")
+                    (DFSResult::BackEdge { pointing_to_id: point_id_1, instrs: mut instrs_1, },
+                    DFSResult::BackEdge { pointing_to_id: point_id_2, instrs: instrs_2 }) => 
+                    {
+                        println!("instr1: {:?}, instrs2: {:?}", instrs_1, instrs_2);
+                        println!("point_id_1: {point_id_1}, point_id_2: {point_id_2}");
+                        let cfg_ctx = CFGContext {
+                            block_map, 
+                            node_id: *node_id,
+                            pointing_to_id: point_id_1, 
+                            true_label: *true_label, 
+                        };
+
+                        let loop_content = LoopBodyContent {
+                            instrs: instrs_2, 
+                            after: vec![], 
+                            curr_instrs, 
+                            cond, 
+                            curr_phis: &curr_phis, 
+                            phi_assigns, 
+                        };
+                        let inner_loop = self.process_loop_edge(cfg_ctx, loop_content);
+                        let a = match inner_loop {
+                            DFSResult::ForwardEdge(fwd_instr) => {
+                                println!("fwd: {:?}", fwd_instr);
+                                instrs_1.splice(0.., fwd_instr);
+                                DFSResult::BackEdge { pointing_to_id: point_id_1, instrs: instrs_1 }
+                            }
+                            DFSResult::BackEdge { pointing_to_id, instrs } => {
+                                println!("back edge instrs: {:?}, pointing to id: {pointing_to_id}", instrs);
+                                instrs_1.splice(0.., instrs);
+                                DFSResult::BackEdge { pointing_to_id, instrs: instrs_1 }
+                            }
+                        };
+                        println!("inner loop matched {:?}", a);
+                        a
+                    },
                 };
 
                 if let Some(conv_label) = convergence_path {
@@ -472,6 +506,11 @@ impl HIRStructurizer {
                 continue;
             } else if let Some(stop) = stop_at 
             && stop == node_id {
+                if let Some(stop_flag) = visited.get(&stop) 
+                && *stop_flag != curr_flag {
+                    return Some(stop);
+                }
+                visited.insert(stop, curr_flag);
                 continue;
             }
 

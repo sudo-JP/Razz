@@ -46,6 +46,9 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - This is where I learn compiler is the greatest test of patience, as said above. A lot of the IR stuff, I have to take 2, or even 3 steps back, just so I can jump 4 steps ahead. 
 - Nuances like readjusting Phi args, where it came from, resolving the entire structure, etc. Supporting arrays for this language will be a great pain.
 - Although I gotta admit, it's pretty fun to see my algorithms knowledges (specifically graph) are being applied here. If you read through the code for structurizing, it's filled with BFS/DFS. 
+- Genuinely the best compiler eng ever. 
+- The above is a lie, I have to pair program with Claude to figure out some stuff. Hats off to people who wrote compiler from scratch, they are the insane one.  
+- But that being said, it's not like I don't think at all. I had tons of fun performing some cool tricks to structurize, such as inlining phi to if expr, DFS to find loop, BFS to find conv path etc. Truly toxic relationship between me and compiler. Though I think that goes for ever complex program if I wanna make them. Gonna plan to write an OS for this next, why? I hate myself ofc. But asides from hating myself, I really -- yes really -- enjoys the fun of solving some puzzle that randomly came up in my code. 
 
 ## Summary overall feelings throughout this journey
 

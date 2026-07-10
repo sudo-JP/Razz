@@ -222,19 +222,6 @@ fn if_else() {
     assert_hir_fixture("tests/fixtures/hir/if_else", expected);
 }
 
-/// KNOWN BUG in `HIRStructurizer` for else-if chains (3+ way phi merges): the SSA
-/// for this program is correct (a clean 3-way `Phi` at the merge block followed by
-/// `ret`), but structurization emits a spurious leftover `HIRStmt::If` with an
-/// erroneously negated condition (`UnOp::Not` wrapping the first branch's cond),
-/// and leaks a `Return` into the deepest nested branch instead of after the phi
-/// assign. The function's top-level block ends up with NO top-level `Return` at
-/// all - two of the three branches fall off the end of the function.
-///
-/// This test asserts the CORRECT expected tree (single phi assign, no leftover
-/// `If`, cond not negated, a single top-level `Return` after the phi assign) and
-/// currently FAILS against the buggy structurizer output. TODO: fix
-/// `hir_structurizer.rs` for else-if chains (see also `multiple_phis_merging_path`
-/// below, which hits the same bug) so this test passes.
 #[test]
 fn else_if_chain() {
     let expected = program(vec![func(
