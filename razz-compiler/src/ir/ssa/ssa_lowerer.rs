@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::mem;
 
 
+use crate::ast::expression::Literal;
 use crate::ast::statement::Param;
 use crate::ir::ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
@@ -632,17 +633,16 @@ impl<'ast> SSALowerer<'ast> {
         self.seal_block(preheader_id);
 
 
-        if let Some(condition) = cond {
-            let cond_op = self.lower_expr(condition);
-            self.finish_block(SSATerminator::IfGoto{ 
-                cond: cond_op,
-                true_label: body_id, 
-                false_label: exit_id, 
-            });
+        let cond_op = if let Some(condition) = cond {
+            self.lower_expr(condition)
         } else {
-            // No codition, infinite loop
-            self.finish_block(SSATerminator::Goto(body_id));
-        }
+            SSAOperand::Const(Literal::Bool(true))
+        };
+        self.finish_block(SSATerminator::IfGoto{ 
+            cond: cond_op,
+            true_label: body_id, 
+            false_label: exit_id, 
+        });
 
         // Body 
         self.curr_block = body_id;

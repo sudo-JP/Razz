@@ -99,12 +99,14 @@ impl HIRStructurizer {
         self.program.functions.push(function_stmt);
     }
 
+    /// If the back edge result is the same as node
+    /// return the loop processed, otherwise bubble 
+    /// up the result. 
     fn process_loop_edge(
         &mut self,
         cfg_ctx: CFGContext,
         loop_body_content: LoopBodyContent
     ) -> DFSResult {
-        println!("pointing_to_id: {}, node_id: {}", cfg_ctx.pointing_to_id, cfg_ctx.node_id);
         let CFGContext { 
             block_map, 
             node_id, 
@@ -383,11 +385,9 @@ impl HIRStructurizer {
                             loop_content,
                         )
                     }, 
-                    (DFSResult::BackEdge { pointing_to_id: point_id_1, instrs: mut instrs_1, },
-                    DFSResult::BackEdge { pointing_to_id: point_id_2, instrs: instrs_2 }) => 
+                    (DFSResult::BackEdge { pointing_to_id: point_id_1, instrs: instrs_1, },
+                    DFSResult::BackEdge { pointing_to_id: point_id_2, instrs: mut instrs_2 }) => 
                     {
-                        println!("instr1: {:?}, instrs2: {:?}", instrs_1, instrs_2);
-                        println!("point_id_1: {point_id_1}, point_id_2: {point_id_2}");
                         let cfg_ctx = CFGContext {
                             block_map, 
                             node_id: *node_id,
@@ -396,28 +396,26 @@ impl HIRStructurizer {
                         };
 
                         let loop_content = LoopBodyContent {
-                            instrs: instrs_2, 
+                            instrs: instrs_1, 
                             after: vec![], 
                             curr_instrs, 
                             cond, 
                             curr_phis: &curr_phis, 
                             phi_assigns, 
                         };
-                        let inner_loop = self.process_loop_edge(cfg_ctx, loop_content);
-                        let a = match inner_loop {
-                            DFSResult::ForwardEdge(fwd_instr) => {
-                                println!("fwd: {:?}", fwd_instr);
-                                instrs_1.splice(0.., fwd_instr);
-                                DFSResult::BackEdge { pointing_to_id: point_id_1, instrs: instrs_1 }
+                        let inner_code = self.process_loop_edge(cfg_ctx, loop_content);
+                        match inner_code {
+                            // If the inner code successfully converted to loop 
+                            DFSResult::ForwardEdge(mut fwd_instr) => {
+                                instrs_2.append(&mut fwd_instr);
+                                DFSResult::BackEdge { pointing_to_id: point_id_2, instrs: instrs_2 }
                             }
-                            DFSResult::BackEdge { pointing_to_id, instrs } => {
-                                println!("back edge instrs: {:?}, pointing to id: {pointing_to_id}", instrs);
-                                instrs_1.splice(0.., instrs);
-                                DFSResult::BackEdge { pointing_to_id, instrs: instrs_1 }
+                            // Otherwise bubble up 
+                            DFSResult::BackEdge { pointing_to_id, mut instrs } => {
+                                instrs_2.append(&mut instrs);
+                                DFSResult::BackEdge { pointing_to_id, instrs: instrs_2 }
                             }
-                        };
-                        println!("inner loop matched {:?}", a);
-                        a
+                        }
                     },
                 };
 

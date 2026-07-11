@@ -785,13 +785,6 @@ fn if_without_else() {
     assert_hir_fixture("tests/fixtures/hir/if_without_else", expected);
 }
 
-/// KNOWN CRASH in `HIRStructurizer`: nesting one `while` inside another panics
-/// with "should be taken care by BFS" at `hir_structurizer.rs:387`, even though
-/// the SSA CFG for this program is well-formed (both loop conditions are the
-/// constant `false`, and the unused `dummy` assign is pruned at the SSA stage,
-/// leaving genuinely empty loop bodies). The expected tree below is the
-/// straightforward structural reading of that SSA CFG; this test currently
-/// FAILS (panics) until the structurizer's nested-loop handling is fixed.
 #[test]
 fn nested_while() {
     let expected = program(vec![func(
@@ -806,11 +799,6 @@ fn nested_while() {
     assert_hir_fixture("tests/fixtures/hir/nested_while", expected);
 }
 
-/// KNOWN CRASH in `HIRStructurizer`: same panic as `nested_while` ("should be
-/// taken care by BFS" at `hir_structurizer.rs:387`), triggered by a `for` loop
-/// nested inside another `for` loop (both desugar to `while`). All of `i`, `j`,
-/// and `dummy` are unused, so the SSA CFG carries no instructions at all inside
-/// either loop - this test currently FAILS (panics) until fixed.
 #[test]
 fn nested_for() {
     let expected = program(vec![func(
@@ -825,15 +813,6 @@ fn nested_for() {
     assert_hir_fixture("tests/fixtures/hir/nested_for", expected);
 }
 
-/// KNOWN CRASH in `HIRStructurizer`: a `for` loop with no condition (`for i = 0;
-/// ; dummy = 0 { ... }`, i.e. an unconditional infinite loop) panics with
-/// "function block must be a forward edge" at `hir_structurizer.rs:83`. The SSA
-/// CFG's trailing `ret null` block is genuinely unreachable (no edge reaches it
-/// at all), which the structurizer isn't yet equipped to handle gracefully. The
-/// expected tree below models "no condition" as `while true { }` per the
-/// language's for-loop semantics; this test currently FAILS (panics), and the
-/// exact ideal shape may need revisiting once the crash is fixed and the
-/// compiler's chosen encoding for unreachable trailing code is known.
 #[test]
 fn for_no_condition() {
     let expected = program(vec![func(
