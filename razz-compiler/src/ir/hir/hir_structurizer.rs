@@ -6,8 +6,11 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator, dest_of}}
-};
+use crate::{ast::expression::UnOpKind, ir::{Temp, basic_block::BlockId, 
+    hir::{hir::HIRFunctionParam, hir_expression::{HIRExpr, HIRFieldInit}, 
+    hir_statement::{HIRFunction, HIRProgram, HIRStmt}}, 
+    ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram, SSATerminator, dest_of}
+}};
 
 struct CFGContext<'a> {
     block_map: &'a HashMap<BlockId, &'a SSABlock>,
@@ -40,7 +43,66 @@ pub struct HIRStructurizer {
     program: HIRProgram,
     expr_if_map: HashMap<Temp, HIRExpr>,
 }
+fn inline_expr(expr: &HIRExpr, curr_instrs: &mut Vec<HIRStmt>) -> HIRExpr {
+    match expr {
+        // Recursive case
+        HIRExpr::BinOp { lhs, op, rhs } => {
+            let lhs = Box::new(inline_expr(lhs, curr_instrs));
+            let rhs = Box::new(inline_expr(rhs, curr_instrs));
+            HIRExpr::BinOp { lhs, op: *op, rhs }
+        },
+        HIRExpr::UnOp { op, value } => {
+            let value = Box::new(inline_expr(value, curr_instrs));
+            HIRExpr::UnOp { op: *op, value }
+        },
+        HIRExpr::If { cond, then, else_ } => {
+            let cond = Box::new(inline_expr(cond, curr_instrs));
+            let then = Box::new(inline_expr(then, curr_instrs));
+            let else_ = Box::new(inline_expr(else_, curr_instrs));
+            HIRExpr::If { cond, then, else_ }
+        },
+        HIRExpr::FunctionCall { name, args } => {
+            let args = args.iter()
+                .map(|arg| inline_expr(arg, curr_instrs))
+                .collect();
+            HIRExpr::FunctionCall { name:name.to_string() , args }
+        },
+        HIRExpr::FieldAccess { obj, key } => {
+            let obj = Box::new(inline_expr(obj, curr_instrs));
+            HIRExpr::FieldAccess { obj, key: key.to_string() }
+        },
+        HIRExpr::StructLiteral { ty, fields } => {
+            let fields = fields.iter()
+                .map(|field| HIRFieldInit {
+                    name: field.name.to_string(),
+                    value: inline_expr(&field.value, curr_instrs)
+                })
+                .collect();
+            HIRExpr::StructLiteral { ty: *ty, fields }
+        },
+        HIRExpr::Temp(t) => {
+            let idx = curr_instrs.iter()
+                .position(|stmt| 
+                if let HIRStmt::Assign { target, .. } = stmt {
+                    *t == *target
+                } else { false });
 
+            match idx {
+                Some(idx) => {
+                    let HIRStmt::Assign { expr, .. } = curr_instrs.remove(idx) else {
+                        unreachable!("Must resolved as above")
+                    };
+                    inline_expr(&expr, curr_instrs)
+                }, 
+                None => HIRExpr::Temp(*t),
+            }
+        },
+        // Base case
+        HIRExpr::HTTPRequest(ep) => HIRExpr::HTTPRequest(*ep),
+        // PERF: Somehow optimize this
+        HIRExpr::Const(c) => HIRExpr::Const(c.clone()),
+    }
+}
 
 impl HIRStructurizer {
     pub fn new() -> Self {
@@ -146,7 +208,7 @@ impl HIRStructurizer {
                 cond,
                 block: instrs,
             };
-            curr_instrs.append(&mut decl);
+            curr_instrs.splice(0..0, decl);
             curr_instrs.push(for_stmt);
             curr_instrs.append(&mut after);
             DFSResult::ForwardEdge(curr_instrs)
@@ -229,26 +291,7 @@ impl HIRStructurizer {
             }
             SSATerminator::IfGoto { cond, true_label, false_label } => {
                 // Inlining conditions
-                let cond = if let SSAOperand::Temp(t) = cond {
-                    let option_idx = curr_instrs.iter()
-                        .position(|stmt| 
-                        if let HIRStmt::Assign { target, .. } = stmt {
-                                *t == *target
-                            } else { false }
-                        );
-
-                    match option_idx {
-                        Some(idx) => {
-                            let HIRStmt::Assign { expr, .. } = curr_instrs.remove(idx) else {
-                                unreachable!("Must resolved as above")
-                            };
-                            expr
-                        },
-                        None => self.structurize_operand(cond)
-                    }
-                } else {
-                    self.structurize_operand(cond)
-                };
+                let cond = inline_expr(&self.structurize_operand(cond), &mut curr_instrs);
 
                 // BFS to find convergence path
                 let mut queue: VecDeque<(BlockId, bool)> = VecDeque::new();

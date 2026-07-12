@@ -1024,20 +1024,6 @@ fn both_branches_return() {
     assert_hir_fixture("tests/fixtures/hir/both_branches_return", expected);
 }
 
-/// KNOWN BUG in `HIRStructurizer`: a `while` loop with a compound (`&&`)
-/// condition misorders statements. The condition's sub-comparisons (`i < 5`,
-/// `j > 0`) get hoisted into standalone `Assign`s placed BEFORE the loop
-/// variables' initial assignments (`i = 0`, `j = 10`), even though they read
-/// those very variables - using them before they're defined. Every
-/// single-condition while loop tested elsewhere (`while_loop`,
-/// `nested_loop_if`, etc.) correctly inlines its condition directly into
-/// `HIRStmt::While`'s `cond` field with no such hoisting, so the fix should
-/// make compound conditions behave the same way.
-///
-/// The expected tree below inlines the full `&&` expression directly into the
-/// `While`'s `cond` (consistent with every other passing while-loop test) and
-/// drops the erroneous pre-loop boolean temps entirely. This test currently
-/// FAILS; exact temp numbering may shift once fixed - update as needed.
 #[test]
 fn while_compound_cond() {
     let expected = program(vec![func(
