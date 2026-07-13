@@ -250,7 +250,8 @@ impl HIRStructurizer {
         visiting.insert(*node_id);
 
         // Get node neighbour
-        let node = block_map.get(node_id).unwrap();
+        let node = block_map.get(node_id)
+            .expect(BLOCK_MAP_ERR);
 
         let mut curr_phis: Vec<(&Temp, &[PhiArg])> = Vec::new();
         let mut curr_instrs = Vec::with_capacity(node.instrs.len());
@@ -557,7 +558,8 @@ impl HIRStructurizer {
 
             // Get neighbour
             // Precondition that block map populates with node ids
-            let node = block_map.get(&node_id).unwrap();
+            let node = block_map.get(&node_id)
+                .expect(BLOCK_MAP_ERR);
             match &node.term {
                 SSATerminator::Return(_) => {}, 
                 SSATerminator::Goto(neigh_id) => {

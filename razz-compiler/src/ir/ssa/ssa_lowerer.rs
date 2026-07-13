@@ -26,6 +26,7 @@ pub struct SSALowerer<'ast> {
     curr_block: BlockId,
     ir_prog: SSAProgram,
     fn_def: HashMap<&'ast str, &'ast [Param]>,
+    block_finished: bool,
 
     // Braun's stuff
     current_def: HashMap<&'ast str, HashMap<BlockId, SSAOperand>>,
@@ -45,6 +46,7 @@ impl<'ast> SSALowerer<'ast> {
             blocks: vec![],
             type_table,
             ir_prog,
+            block_finished: false,
             fn_def: HashMap::new(),
             curr_instrs: vec![],
             current_def: HashMap::new(),
@@ -65,7 +67,7 @@ impl<'ast> SSALowerer<'ast> {
 
     fn lower_fn_decl(&mut self, fn_decl: &'ast FnDecl) {
         let fn_id = self.next_block_id();
-        self.curr_block = fn_id; 
+        self.set_curr_block(fn_id);
         for param in &fn_decl.params {
             let t = self.new_temp(param.ty.node);
             self.var_table.insert(&param.name.node, param.id);
@@ -585,7 +587,7 @@ impl<'ast> SSALowerer<'ast> {
         self.add_pred(exit_id, header_id);
 
         self.finish_block(SSATerminator::Goto(header_id));
-        self.curr_block = header_id;
+        self.set_curr_block(header_id);
         self.seal_block(preheader_id);
 
         let cond_op = self.lower_expr(cond);
@@ -595,14 +597,14 @@ impl<'ast> SSALowerer<'ast> {
             false_label: exit_id,
         });
 
-        self.curr_block = body_id;
+        self.set_curr_block(body_id);
         self.seal_block(body_id);
         self.lower_block(body);
         let back_edge_block = self.curr_block;
         self.add_pred(header_id, back_edge_block);
         self.finish_block(SSATerminator::Goto(header_id));
 
-        self.curr_block = exit_id;
+        self.set_curr_block(exit_id);
         self.seal_block(exit_id);
 
         self.seal_block(header_id);
@@ -629,7 +631,7 @@ impl<'ast> SSALowerer<'ast> {
         }
 
         self.finish_block(SSATerminator::Goto(header_id));
-        self.curr_block = header_id;
+        self.set_curr_block(header_id);
         self.seal_block(preheader_id);
 
 
@@ -645,7 +647,7 @@ impl<'ast> SSALowerer<'ast> {
         });
 
         // Body 
-        self.curr_block = body_id;
+        self.set_curr_block(body_id);
         self.seal_block(body_id);
         self.lower_block(body);
         self.finish_block(SSATerminator::Goto(update_block_id));
@@ -654,13 +656,13 @@ impl<'ast> SSALowerer<'ast> {
 
         // Insert update after body 
         self.seal_block(update_block_id);
-        self.curr_block = update_block_id;
+        self.set_curr_block(update_block_id);
         for stmt in update {
             self.lower_stmt(stmt);
         }
         self.finish_block(SSATerminator::Goto(header_id));
 
-        self.curr_block = exit_id;
+        self.set_curr_block(exit_id);
         self.seal_block(exit_id);
 
         self.seal_block(header_id);
@@ -725,7 +727,7 @@ impl<'ast> SSALowerer<'ast> {
         });
     
         // If body
-        self.curr_block = if_body_id;
+        self.set_curr_block(if_body_id);
         self.seal_block(if_body_id);
         self.lower_block(body);
         self.finish_block(SSATerminator::Goto(exit_id));
@@ -734,7 +736,7 @@ impl<'ast> SSALowerer<'ast> {
     
         // Else-if chain
         for (i, (elif_header, elif_body)) in else_if_blocks.iter().enumerate() {
-            self.curr_block = *elif_header;
+            self.set_curr_block(*elif_header);
             self.seal_block(*elif_header);
             let cond_op = self.lower_expr(&else_ifs[i].cond);
             let false_target = if i + 1 < else_if_len {
@@ -751,7 +753,7 @@ impl<'ast> SSALowerer<'ast> {
                 false_label: false_target,
             });
     
-            self.curr_block = *elif_body;
+            self.set_curr_block(*elif_body);
             self.seal_block(*elif_body);
             self.lower_block(&else_ifs[i].body);
             self.finish_block(SSATerminator::Goto(exit_id));
@@ -761,14 +763,14 @@ impl<'ast> SSALowerer<'ast> {
     
         // Else body
         if let (Some(else_id), Some(else_block)) = (else_id, else_body) {
-            self.curr_block = else_id;
+            self.set_curr_block(else_id);
             self.seal_block(else_id);
             self.lower_block(else_block);
             self.finish_block(SSATerminator::Goto(exit_id));
             self.add_pred(exit_id, self.curr_block);
         }
     
-        self.curr_block = exit_id;
+        self.set_curr_block(exit_id);
         self.seal_block(exit_id);
     }
 
@@ -787,13 +789,21 @@ impl<'ast> SSALowerer<'ast> {
         }
     }
 
+    fn set_curr_block(&mut self, new_block: BlockId) {
+        self.block_finished = false;
+        self.curr_block = new_block;
+    }
+
     fn finish_block(&mut self, term: SSATerminator) {
-        let block = BasicBlock{
-            id: self.curr_block,
-            instrs: mem::take(&mut self.curr_instrs), 
-            term: term,
-        };
-        self.blocks.push(block);
+        if !self.block_finished {
+            let block = BasicBlock{
+                id: self.curr_block,
+                instrs: mem::take(&mut self.curr_instrs), 
+                term: term,
+            };
+            self.block_finished = true; 
+            self.blocks.push(block);
+        }
     }
 
 }

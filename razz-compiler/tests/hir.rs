@@ -994,21 +994,6 @@ fn struct_field_local() {
     assert_hir_fixture("tests/fixtures/hir/struct_field_local", expected);
 }
 
-/// KNOWN CRASH in `HIRStructurizer`: both branches of an if/else return
-/// (`if 1 > 0 { return 1; } else { return 2; }`), a very common early-return
-/// pattern with no merge point at all. This panics with `unwrap() on a None
-/// value` at `hir_structurizer.rs:480`. The root cause traces back further than
-/// the structurizer: the SSA builder itself emits a malformed CFG for this
-/// program - once a branch ends in `ret`, the builder still appends a
-/// `goto`-to-merge block reusing the SAME block id as the return block (`ssair`
-/// output shows `block_1` and `block_3` each defined twice), which then trips up
-/// the structurizer's block/edge lookups.
-///
-/// The expected tree below is the obviously-correct reading (a single
-/// `HIRStmt::If` with a `Return` in each branch, no leftover statements after
-/// since both paths already terminate). This test currently FAILS (panics)
-/// until both the SSA block-numbering bug and the structurizer's handling of
-/// it are fixed.
 #[test]
 fn both_branches_return() {
     let expected = program(vec![func(
