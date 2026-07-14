@@ -1,0 +1,23 @@
+fn pick#0(n: int) int {
+  block_0:
+    goto block_2
+  block_2:
+    t1 = Phi(0 from block_0, t7 from block_1)
+    t3 = t1 < t0
+    t5 = Phi(0 from block_0, t8 from block_1)
+    if t3 goto block_3 else block_4
+  block_3:
+    t4 = t1 > 2
+    if t4 goto block_5 else block_6
+  block_5:
+    t6 = t5 + t1
+    goto block_6
+  block_6:
+    t8 = Phi(t5 from block_3, t6 from block_5)
+    goto block_1
+  block_1:
+    t7 = t1 + 1
+    goto block_2
+  block_4:
+    ret t5
+}

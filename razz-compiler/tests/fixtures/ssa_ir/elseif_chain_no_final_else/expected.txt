@@ -1,0 +1,15 @@
+fn pick#0(n: int) int {
+  block_0:
+    t1 = t0 > 10
+    if t1 goto block_1 else block_3
+  block_1:
+    goto block_2
+  block_3:
+    t2 = t0 > 5
+    if t2 goto block_4 else block_2
+  block_4:
+    goto block_2
+  block_2:
+    t3 = Phi(1 from block_1, 2 from block_4, 0 from block_3)
+    ret t3
+}

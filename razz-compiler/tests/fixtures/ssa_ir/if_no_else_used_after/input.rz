@@ -1,0 +1,7 @@
+fn pick(n: int) int {
+    dummy = 0;
+    if n > 3 {
+        dummy = 1;
+    }
+    return dummy;
+}

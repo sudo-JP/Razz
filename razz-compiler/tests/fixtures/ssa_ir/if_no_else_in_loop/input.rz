@@ -1,0 +1,9 @@
+fn pick(n: int) int {
+    total = 0;
+    for i = 0; i < n; i += 1 {
+        if i > 2 {
+            total = total + i;
+        }
+    }
+    return total;
+}

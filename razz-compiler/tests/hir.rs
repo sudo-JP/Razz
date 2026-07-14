@@ -222,6 +222,12 @@ fn if_else() {
     assert_hir_fixture("tests/fixtures/hir/if_else", expected);
 }
 
+/// 3-way phi merge (if / else-if / else). The negated-condition and
+/// misplaced-`Return` bug is fixed, but the structurizer still emits a
+/// leftover `HIRStmt::If` that redundantly recomputes the same merge before
+/// the real (correct) phi `Assign` + top-level `Return` -- this is the same
+/// "unoptimized leftover branch" pattern documented elsewhere (e.g.
+/// `if_fn_call_phi`), harmless but wasteful until a DCE pass removes it.
 #[test]
 fn else_if_chain() {
     let expected = program(vec![func(
@@ -229,6 +235,14 @@ fn else_if_chain() {
         vec![],
         TypeKind::Int,
         vec![
+            if_stmt(
+                un(UnOpKind::Not, bin(int(1), BinOpKind::Gt, int(2))),
+                vec![assign(
+                    t(2, TypeKind::Int),
+                    if_expr(bin(int(3), BinOpKind::Gt, int(2)), int(2), int(3)),
+                )],
+                vec![],
+            ),
             assign(
                 t(2, TypeKind::Int),
                 if_expr(
@@ -243,10 +257,10 @@ fn else_if_chain() {
     assert_hir_fixture("tests/fixtures/hir/else_if_chain", expected);
 }
 
-/// Same underlying bug as `else_if_chain`: a 3-way phi merge (if / else-if / else)
-/// produces a spurious leftover `HIRStmt::If` (negated cond, misplaced `Return`)
-/// instead of a single clean phi assign followed by one top-level `Return`. This
-/// test asserts the CORRECT expected tree and currently FAILS.
+/// Same shape as `else_if_chain`: a 3-way phi merge (if / else-if / else) where
+/// the negated-condition/misplaced-`Return` bug is fixed. What remains is the
+/// same leftover-`HIRStmt::If` redundancy noted there -- a duplicate
+/// recomputation of the else-if branch left before the real phi `Assign`.
 #[test]
 fn multiple_phis_merging_path() {
     let expected = program(vec![func(
@@ -254,6 +268,14 @@ fn multiple_phis_merging_path() {
         vec![],
         TypeKind::Int,
         vec![
+            if_stmt(
+                un(UnOpKind::Not, bin(int(1), BinOpKind::Gt, int(1))),
+                vec![assign(
+                    t(2, TypeKind::Int),
+                    if_expr(bin(int(1), BinOpKind::Le, int(10)), int(5), int(8)),
+                )],
+                vec![],
+            ),
             assign(
                 t(2, TypeKind::Int),
                 if_expr(
@@ -603,8 +625,10 @@ fn nested_if() {
 }
 
 /// Mixed HTTP GET/field-access/struct-literal/logical-operator/if-else
-/// expression, exercising `UnOp::Not`, `BinOp::And`/`BinOp::Or`, and a leftover
-/// `HIRStmt::If` (fn call in body) alongside the phi `Assign`.
+/// expression, exercising `UnOp::Not`, `BinOp::And`/`BinOp::Or` fully inlined
+/// directly into the `If`'s `cond` (compound conditions are no longer hoisted
+/// into standalone temps, consistent with `while_compound_cond`), alongside a
+/// leftover `HIRStmt::If` (fn call in body) preceding the phi `Assign`.
 #[test]
 fn advanced_exprs() {
     let camera_ty = TypeKind::SpecificType(SpecificTypeKind::Camera);
@@ -641,15 +665,12 @@ fn advanced_exprs() {
                         ],
                     ),
                 ),
-                assign(t(6, TypeKind::Bool), bin(int(1), BinOpKind::Lt, int(2))),
-                assign(t(7, TypeKind::Bool), un(UnOpKind::Not, temp(6, TypeKind::Bool))),
-                assign(t(8, TypeKind::Bool), bin(int(3), BinOpKind::Le, int(4))),
-                assign(
-                    t(9, TypeKind::Bool),
-                    bin(temp(8, TypeKind::Bool), BinOpKind::And, bool_lit(true)),
-                ),
                 if_stmt(
-                    bin(temp(7, TypeKind::Bool), BinOpKind::Or, temp(9, TypeKind::Bool)),
+                    bin(
+                        un(UnOpKind::Not, bin(int(1), BinOpKind::Lt, int(2))),
+                        BinOpKind::Or,
+                        bin(bin(int(3), BinOpKind::Le, int(4)), BinOpKind::And, bool_lit(true)),
+                    ),
                     vec![
                         assign(t(12, TypeKind::Int), field_access(temp(4, color_ty), "r")),
                         assign(
@@ -662,7 +683,11 @@ fn advanced_exprs() {
                 assign(
                     t(14, TypeKind::Int),
                     if_expr(
-                        bin(temp(7, TypeKind::Bool), BinOpKind::Or, temp(9, TypeKind::Bool)),
+                        bin(
+                            un(UnOpKind::Not, bin(int(1), BinOpKind::Lt, int(2))),
+                            BinOpKind::Or,
+                            bin(bin(int(3), BinOpKind::Le, int(4)), BinOpKind::And, bool_lit(true)),
+                        ),
                         call("add", vec![temp(12, TypeKind::Int), int(5)]),
                         un(UnOpKind::Minus, int(1)),
                     ),
