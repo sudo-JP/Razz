@@ -10,6 +10,6 @@ fn pick#0(n: int) int {
   block_4:
     goto block_2
   block_2:
-    t3 = Phi(1 from block_1, 2 from block_4, 0 from block_3)
+    t3 = Phi(1 from block_1, 0 from block_3, 2 from block_4)
     ret t3
 }

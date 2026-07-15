@@ -1,20 +1,7 @@
-fn add(a: int, b: int) int {
-    return a + b;
-}
-
 fn main() int {
-    a = 0;
-    add(b: 0, a: 1);
-    for i = 0; i < 3; i += 1 {
-        if a > 5 {
-            if a > 10 {
-                a = 1;
-            } else {
-                a = 2;
-            }
-        } else {
-            a = 3;
-        }
+    a = 0; 
+    if true {
+        a = 4;
     }
     return a;
 }

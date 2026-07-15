@@ -108,8 +108,9 @@ impl HIRWalkable for HIRDebug {
     }
 
     fn visit_un_op(&mut self, op: &UnOpKind, value: &HIRExpr) {
-        print!("{op}");
+        print!("{op}(");
         walk_hir_expr(self, value);
+        print!(")");
     }
 
     fn visit_expr_if(&mut self, cond: &HIRExpr, then: &HIRExpr, else_: &HIRExpr) {

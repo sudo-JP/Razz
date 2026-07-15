@@ -109,56 +109,6 @@ ssa_fixture_test!(nested_for, "tests/fixtures/ssa_ir/nested_for");
 ssa_fixture_test!(nested_if, "tests/fixtures/ssa_ir/nested_if");
 ssa_fixture_test!(multiple_phis_merging_path, "tests/fixtures/ssa_ir/multiple_phis_merging_path");
 ssa_fixture_test!(named_arg_reorder, "tests/fixtures/ssa_ir/named_arg_reorder");
-
-// KNOWN BUG in `ssa_lowerer.rs`'s `lower_if` (around lines 671-775): whenever a
-// conditional has no final `else` (a bare `if` with no else, OR an else-if
-// chain that doesn't end in `else`), the "false" edge that skips straight to
-// the merge block (`exit_id`) is never registered as a CFG predecessor via
-// `add_pred`. Every `add_pred(exit_id, ...)` call in that function happens
-// AFTER a taken-branch body finishes (the `if`-body, each `else-if`-body, or
-// the `else`-body) -- there is no `add_pred(exit_id, header_id)` (or
-// `add_pred(exit_id, last_elif_header)`) for the direct "condition was false,
-// nothing ran" path. Since SSA's `read_variable_recursive` walks predecessors
-// to build phi nodes, this missing edge makes it blind to the "branch not
-// taken" value: it either fabricates NO phi at all (silently returning
-// whatever the taken branch computed, unconditionally -- see
-// `if_no_else_used_after` below) or an INCOMPLETE phi missing one incoming
-// value (see `elseif_chain_no_final_else`, which currently crashes further
-// downstream in the HIR structurizer as a direct consequence). This is one
-// root-cause bug with several distinct symptoms across the 3 tests below --
-// fixing `lower_if` to register the missing predecessor edge(s) should
-// resolve all three at once.
-
-/// Simplest reproduction: `if n > 3 { dummy = 1; } return dummy;` with a
-/// genuinely runtime (non-constant) condition and `dummy` used afterward.
-/// Currently compiles to an unconditional `ret 1` (see the SSA dump: no phi
-/// is generated at all), silently discarding the initial `dummy = 0` value
-/// whenever the condition is false. This is a SILENT CORRECTNESS bug (no
-/// panic) -- the most dangerous kind, since it produces wrong output with no
-/// indication anything failed.
 ssa_fixture_test!(if_no_else_used_after, "tests/fixtures/ssa_ir/if_no_else_used_after");
-
-/// Else-if chain with no final `else`: `if n>10 {result=1} else if n>5
-/// {result=2}` then `return result`. The middle else-if header's own
-/// direct-false-edge to the merge block is missing the same way, so the
-/// generated phi is missing its third incoming value (the "neither branch
-/// taken" case, `result` staying `0`). Confirmed via `--debug ssair` that the
-/// SSA here already carries a malformed/incomplete `Phi` (only 2 of 3
-/// possible incoming values), which then makes the HIR structurizer PANIC
-/// with `"phi resolution should never walk into a return"`
-/// (`hir_structurizer.rs:603`) trying to resolve it. Root cause is upstream in
-/// SSA, same as `if_no_else_used_after`.
 ssa_fixture_test!(elseif_chain_no_final_else, "tests/fixtures/ssa_ir/elseif_chain_no_final_else");
-
-/// Same root cause, nested inside a `for` loop: `if i > 2 { total = total +
-/// i; }` inside the loop body, with `total` also being the loop-carried
-/// accumulator. The inner if's exit block is missing the phi merging "total
-/// unchanged" (condition false) vs "total + i" (condition true), so the loop
-/// back-edge's phi for `total` incorrectly reads the inner-if-body's temp
-/// directly instead of a properly merged value -- meaning the accumulator can
-/// silently use a stale/wrong value on iterations where the inner condition
-/// is false. The expected SSA below is a best-effort ideal reconstruction
-/// (adding the missing phi at the inner if's exit block); exact temp
-/// numbering may shift once the underlying `lower_if` fix lands -- update as
-/// needed.
 ssa_fixture_test!(if_no_else_in_loop, "tests/fixtures/ssa_ir/if_no_else_in_loop");

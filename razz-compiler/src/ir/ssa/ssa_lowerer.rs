@@ -284,6 +284,7 @@ impl<'ast> SSALowerer<'ast> {
         Some(same)
     }
 
+    /// Find all old operand and replace it with new operand 
     fn replace_uses(&mut self, old: &SSAOperand, new: &SSAOperand) -> Vec<(BlockId, usize)> {
         let mut users = vec![];
 
@@ -696,6 +697,8 @@ impl<'ast> SSALowerer<'ast> {
             self.add_pred(*first_header, header_id);
         } else if let Some(else_id) = else_id {
             self.add_pred(else_id, header_id);
+        } else {
+            self.add_pred(exit_id, header_id);
         }
     
         // else-if header chain
@@ -746,6 +749,11 @@ impl<'ast> SSALowerer<'ast> {
             } else {
                 exit_id
             };
+
+            // If final target
+            if false_target == exit_id {
+                self.add_pred(exit_id, *elif_header);
+            }
     
             self.finish_block(SSATerminator::IfGoto {
                 cond: cond_op,

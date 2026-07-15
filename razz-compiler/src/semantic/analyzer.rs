@@ -392,6 +392,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
         self.symbol_table.push_scope();
         for param in &fn_decl.params {
+            self.type_table.insert(param.id, param.ty.node);
             self.symbol_table.declare_variable(param.name.node.to_string(), param.ty.node, param.id);
         }
         self.curr_return_ty = Some(fn_decl.return_type.node);
