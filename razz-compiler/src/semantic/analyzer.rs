@@ -494,15 +494,12 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
         let Some(&expr_ty) = self.type_table.get(&body.id) else {
             return;
         };
-        let ExprKind::StructLiteral{ fields, .. } = &body.kind else {
-            self.error(SemanticErrorKind::ExpectedStructLiteral, body.span);
-            return;
-        };
 
         let TypeKind::SpecificType(sp_ty) = expr_ty else {
             self.error(SemanticErrorKind::InvalidRequestBody(expr_ty), body.span);
             return;
         };
+
         let valid_body = ENDPOINT_MAP.get(&method.node)
             .expect("Endpoint map has to cover all methods");
 
@@ -515,6 +512,15 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
             self.error(SemanticErrorKind::InvalidRequestBody(expr_ty), body.span);
             return;
         }
+
+        if let ExprKind::Ident(_) = body.kind {
+            return;
+        }
+
+        let ExprKind::StructLiteral{ fields, .. } = &body.kind else {
+            self.error(SemanticErrorKind::ExpectedStructLiteral, body.span);
+            return;
+        };
 
         let err = "Field map has to cover all specific types";
         match &method.node {

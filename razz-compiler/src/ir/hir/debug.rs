@@ -8,16 +8,13 @@ use crate::{ast::{SpecificTypeKind, expression::{BinOpKind, EndpointKind, Litera
     }}
 };
 
+#[derive(Default)]
 pub struct HIRDebug {
     indent: usize,
 }
 
 impl HIRDebug {
-    pub fn new() -> Self {
-        Self { indent: 0 }
-    }
-
-    pub fn get_ident_str(&self) -> String {
+    fn get_ident_str(&self) -> String {
         " ".repeat(self.indent)
     }
 }

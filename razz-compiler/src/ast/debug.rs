@@ -1,12 +1,52 @@
-/*use crate::ast::{expression::Expr, statement::{FnDecl, Stmt}, traversal::{walk_expr, walk_fn_decl, walk_stmt, Walkable}, Program};
+use crate::ast::{Program, Type, expression::Expr, statement::{Block, FnDecl, Stmt}, traversal::{ASTWalkable, walk_block, walk_expr, walk_fn_decl, walk_stmt}};
 
 #[derive(Default)]
 pub struct ASTDebug {
     indent: usize,
 } 
+impl ASTDebug {
+    fn get_ident_str(&self) -> String {
+        " ".repeat(self.indent)
+    }
+}
 
+impl ASTWalkable for ASTDebug {
+    fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
+        let mut params_str = String::from("");
+        let mut first = true;
+        for param in &fn_decl.params {
+            let formatted_param = format!("{}: {}", param.name.node, param.ty.node);
+            if first {
+                params_str.push_str(&formatted_param);
+                first = false;
+            } else {
+                params_str.push_str(", ");
+                params_str.push_str(&formatted_param);
+            }
+        }
 
-impl Walkable for ASTDebug {
+        println!("fn {}({}) {} {{", fn_decl.name.node, params_str, fn_decl.return_type.node);
+        walk_fn_decl(self, fn_decl);
+        println!("}}");
+    }
+
+    fn visit_block(&mut self, block: &Block) {
+        self.indent += 2;
+        walk_block(self, block);
+        self.indent -= 2;
+    }
+
+    fn visit_stmt(&mut self, stmt: &Stmt) {
+        let indent = self.get_ident_str();
+        print!("{indent}");
+        walk_stmt(self, stmt);
+        println!("");
+    }
+
+    fn visit_assign(&mut self, stmt: &Stmt, target: &Expr, ty: &Option<Type>, expr: &Expr) {
+        //print!("{target} = ");
+    }
+
     fn visit_expr(&mut self, expr: &Expr) {
         let indent = " ".repeat(self.indent);
         println!("{indent}{:?}", expr);
@@ -15,22 +55,6 @@ impl Walkable for ASTDebug {
         self.indent -= 2; 
     }
 
-    fn visit_stmt(&mut self, stmt: &Stmt) {
-        let indent = " ".repeat(self.indent);
-        println!("{indent}{:?}", stmt);
-        self.indent += 2; 
-        walk_stmt(self, stmt);
-        self.indent -= 2; 
-    }
-
-    fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
-        let indent = " ".repeat(self.indent);
-        println!("{indent}fn {:?}", fn_decl.name);
-        self.indent += 2; 
-        fn_decl.body.stmts.iter()
-            .for_each(|s| walk_stmt(self, &s.node));
-        self.indent -= 2; 
-    }
 
     fn visit_program(&mut self, prog: &Program) {
         println!("Program");
@@ -38,4 +62,4 @@ impl Walkable for ASTDebug {
         prog.funcs.iter().for_each(|s| walk_fn_decl(self, &s.node));
         self.indent -= 2; 
     }
-}*/
+}

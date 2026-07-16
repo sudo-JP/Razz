@@ -44,7 +44,7 @@ fn main() -> io::Result<()> {
         Ok(CompilerOutput::SSAIR(ir_prog)) => println!("{}", ir_prog),
 
         Ok(CompilerOutput::HIR(hir_prog)) => {
-            let mut debugger = HIRDebug::new();
+            let mut debugger = HIRDebug::default();
             debugger.visit_program(&hir_prog);
         }
 

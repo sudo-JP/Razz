@@ -8,7 +8,8 @@ pub struct Expr {
     pub span: Span,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy, Hash, Eq)]
+
+#[derive(PartialEq, Clone, Copy, Hash, Eq, Debug)]
 pub enum BinOpKind {
     // Arithmetic
     Add, 
@@ -180,4 +181,58 @@ pub enum ExprKind {
     Constant(Literal),
     /// Identifer name
     Ident(String),
+}
+
+
+impl fmt::Display for ExprKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::BinOp { lhs, op, rhs } => write!(f, "{} {} {}", lhs.kind, op.node, rhs.kind),
+            Self::UnOp { op, value } => write!(f, "{}({})", op.node, value.kind),
+            Self::FunctionCall { name, args } => {
+                let mut call = name.node.to_string();
+                let mut first = true; 
+                for arg in args {
+                    if first {
+                        call.push_str(&arg.name.node);
+                        call.push_str(": ");
+                        call.push_str(&arg.expr.kind.to_string());
+                        first = false;
+                    } else {
+                        call.push_str(", ");
+                        call.push_str(&arg.name.node);
+                        call.push_str(": ");
+                        call.push_str(&arg.expr.kind.to_string());
+                    }
+                }
+                call.push_str(")");
+                write!(f, "{call}")
+            },
+            Self::FieldAccess { obj, key } => write!(f, "{}->{}", obj.kind, key.node),
+            Self::StructLiteral { ty, fields } => {
+                let mut strct = format!("{} {{", ty.node.to_string());
+                let mut first = true; 
+
+                for field in fields {
+                    if first {
+                        strct.push_str(&field.key.node);
+                        strct.push_str(": ");
+                        strct.push_str(&field.value.kind.to_string());
+                        first = false;
+                    } else {
+                        strct.push_str(", ");
+                        strct.push_str(&field.key.node);
+                        strct.push_str(": ");
+                        strct.push_str(&field.value.kind.to_string());
+                    }
+                }
+
+                strct.push_str("}}");
+                write!(f, "{strct}")
+            }, 
+            Self::HTTPRequest(ep) => write!(f, "GET /{}", ep.node),
+            Self::Constant(lit) => write!(f, "{lit}"),
+            Self::Ident(ident) => write!(f, "{ident}"),
+        }
+    }
 }
