@@ -6,3 +6,4 @@ pub mod parser;
 pub mod common;
 pub mod semantic;
 pub mod ir;
+pub mod codegen;

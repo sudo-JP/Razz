@@ -10,6 +10,7 @@ impl ASTDebug {
     }
 }
 
+/// Who am i kidding, ill do it after
 impl ASTWalkable for ASTDebug {
     fn visit_fn_decl(&mut self, fn_decl: &FnDecl) {
         let mut params_str = String::from("");

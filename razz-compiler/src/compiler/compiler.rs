@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use clap::ValueEnum;
 use crate::ast::{NodeId, Program, TypeKind};
+use crate::codegen::rust_codegen::RustCodegen;
 use crate::compiler::error::CompilerError;
 use crate::ir::hir::hir_statement::HIRProgram;
 use crate::ir::hir::hir_structurizer::HIRStructurizer;
@@ -84,6 +85,10 @@ impl Compiler {
         if matches!(self.debug, CompilerStage::HIR) {
             return Ok(CompilerOutput::HIR(hir_structurized));
         }
+
+        //  ============= CODE GEN ============= 
+        let mut codegen = RustCodegen::new("a.txt".to_string()).unwrap();
+        codegen.generate(HIRProgram {functions:vec![]});
 
         Ok(CompilerOutput::Codegen)
     }
