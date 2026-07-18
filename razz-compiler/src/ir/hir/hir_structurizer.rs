@@ -331,8 +331,15 @@ impl HIRStructurizer {
 
                     phis.iter()
                         .map(|(target, args)| {
-                            let then_val = self.resolve_phi_value(*true_label, args, Some(true), block_map);
-                            let else_val = self.resolve_phi_value(*false_label, args, Some(false), block_map);
+                            let cmp = |cond_label: u32| if cond_label == conv_label {
+                               *node_id 
+                            } else { 
+                                cond_label
+                            };
+                            let then_label = cmp(*true_label);
+                            let then_val = self.resolve_phi_value(then_label, args, Some(true), conv_label, block_map);
+                            let else_label = cmp(*false_label);
+                            let else_val = self.resolve_phi_value(else_label, args, Some(false), conv_label, block_map);
 
                             let if_expr = HIRExpr::If { 
                                 cond: Box::new(cond_phi.clone()), 
@@ -588,6 +595,7 @@ impl HIRStructurizer {
         label: BlockId, 
         phi_args: &[PhiArg], 
         branch: Option<bool>,
+        conv_label: BlockId,
         block_map: &HashMap<BlockId, &SSABlock>
     ) -> HIRExpr {
         // Base case 
@@ -602,12 +610,19 @@ impl HIRStructurizer {
         match &block.term {
             SSATerminator::Return(_) => unreachable!("phi resolution should never walk into a return"),
             SSATerminator::Goto(goto_label) => {
-                self.resolve_phi_value(*goto_label, phi_args, branch, block_map)
+                self.resolve_phi_value(*goto_label, phi_args, branch, conv_label, block_map)
             },
             SSATerminator::IfGoto { cond, true_label, false_label } => {
+                let cmp = |cond_label: u32| if cond_label == conv_label {
+                    label 
+                } else { 
+                    cond_label
+                };
+                let then_label = cmp(*true_label);
+                let if_expr = self.resolve_phi_value(then_label, phi_args, Some(true), conv_label, block_map);
 
-                let if_expr = self.resolve_phi_value(*true_label, phi_args, Some(true), block_map);
-                let else_expr = self.resolve_phi_value(*false_label, phi_args, Some(false), block_map);
+                let else_label = cmp(*false_label);
+                let else_expr = self.resolve_phi_value(else_label, phi_args, Some(false), conv_label, block_map);
 
                 HIRExpr::If { 
                     cond: Box::new(self.extract_expr_for_opr(cond, &label, None, block_map)), 

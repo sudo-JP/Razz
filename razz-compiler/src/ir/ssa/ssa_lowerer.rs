@@ -353,7 +353,12 @@ impl<'ast> SSALowerer<'ast> {
 
     fn seal_block(&mut self, block_id: BlockId) {
         if let Some(var_map) = self.incomplete_phis.get(&block_id) {
-            for (variable, instr) in var_map.clone() {
+            // for test case to be deterministic
+            let mut entries: Vec<_> = var_map.clone()
+                .into_iter()
+                .collect();
+            entries.sort_by(|a, b| a.0.cmp(b.0));
+            for (variable, instr) in entries {
                 let node_id = self.var_table.get(variable)
                     .expect("Lower assign have to declare");
                 let SSAInstruction::Phi { target, mut args } = instr else {

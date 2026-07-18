@@ -1,4 +1,4 @@
-use crate::get_docs;
+use crate::{get_docs, ir::hir::traversal::walk_hir_program};
 use std::{fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -19,13 +19,13 @@ impl RustCodegen {
     }
 
     pub fn generate(&mut self, prog: HIRProgram) {
-        let a = get_docs!("//!");
-        write!(self.file_writer, "{a}").unwrap();
+        let docs = get_docs!("//!");
+        write!(self.file_writer, "{docs}").unwrap();
+        walk_hir_program(self, &prog);
 
         self.file_writer.flush().unwrap();
     }
 }
 
 impl HIRWalkable for RustCodegen {
-    
 }
