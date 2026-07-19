@@ -1,4 +1,4 @@
-use crate::ast::{Program, Type, expression::Expr, statement::{Block, FnDecl, Stmt}, traversal::{ASTWalkable, walk_block, walk_expr, walk_fn_decl, walk_stmt}};
+use crate::ast::{Program, expression::Expr, statement::{Block, FnDecl, Stmt}, traversal::{ASTWalkable, walk_block, walk_expr, walk_fn_decl, walk_stmt}};
 
 #[derive(Default)]
 pub struct ASTDebug {
@@ -44,9 +44,9 @@ impl ASTWalkable for ASTDebug {
         println!("");
     }
 
-    fn visit_assign(&mut self, stmt: &Stmt, target: &Expr, ty: &Option<Type>, expr: &Expr) {
+    /*fn visit_assign(&mut self, stmt: &Stmt, target: &Expr, ty: &Option<Type>, expr: &Expr) {
         //print!("{target} = ");
-    }
+    }*/
 
     fn visit_expr(&mut self, expr: &Expr) {
         let indent = " ".repeat(self.indent);
