@@ -14,7 +14,7 @@ pub struct HIRDebug {
 }
 
 impl HIRDebug {
-    fn get_ident_str(&self) -> String {
+    fn get_indent_str(&self) -> String {
         " ".repeat(self.indent)
     }
 }
@@ -46,7 +46,7 @@ impl HIRWalkable for HIRDebug {
     }
 
     fn visit_stmt(&mut self, stmt: &HIRStmt) {
-        let indent = self.get_ident_str();
+        let indent = self.get_indent_str();
         print!("{indent}");
         walk_hir_stmt(self, stmt);
         println!("");
@@ -68,19 +68,19 @@ impl HIRWalkable for HIRDebug {
         walk_hir_expr(self, cond);
         println!(" {{");
         self.visit_block(block);
-        let ident = self.get_ident_str();
-        print!("\n{ident}}}");
+        let indent = self.get_indent_str();
+        print!("\n{indent}}}");
     }
 
     fn visit_if_stmt(&mut self, cond: &HIRExpr, body: &HIRBlock, else_body: &HIRBlock) {
-        let ident = self.get_ident_str();
+        let indent = self.get_indent_str();
         print!("if ");
         walk_hir_expr(self, cond);
         println!(" {{");
         self.visit_block(body);
-        println!("\n{ident}}} else {{");
+        println!("\n{indent}}} else {{");
         self.visit_block(else_body);
-        print!("\n{ident}}}");
+        print!("\n{indent}}}");
     }
 
     fn visit_return(&mut self, value: &HIRExpr) {

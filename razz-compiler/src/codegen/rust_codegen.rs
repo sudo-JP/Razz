@@ -1,4 +1,4 @@
-use crate::{ast::{SpecificTypeKind, TypeKind}, get_docs, ir::hir::{hir::HIRBlock, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}};
+use crate::{ast::{SpecificTypeKind, TypeKind}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}};
 use std::{fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -19,7 +19,12 @@ fn get_rust_specific_type(sp_ty: &SpecificTypeKind) -> &'static str {
         SpecificTypeKind::Background => "Background",
         SpecificTypeKind::Camera => "Camera",
         SpecificTypeKind::Sphere => "Sphere",
-        _ => todo!()
+        SpecificTypeKind::Image => "Image",
+        SpecificTypeKind::Output => "Output",
+        SpecificTypeKind::PPM => "PPM",
+        SpecificTypeKind::Arduino => "Arduino",
+        SpecificTypeKind::Material => "Material",
+        SpecificTypeKind::OutputType => "OutputType",
     }
 }
 
@@ -52,7 +57,7 @@ impl RustCodegen {
         self.file_writer.flush().unwrap();
     }
 
-    fn get_ident_str(&self) -> String {
+    fn get_indent_str(&self) -> String {
         " ".repeat(self.indent)
     }
 }
@@ -77,7 +82,7 @@ impl HIRWalkable for RustCodegen {
             params_str, 
             get_rust_type(&fn_decl.return_ty)
         )
-        .unwrap();
+            .unwrap();
 
         walk_hir_fn_decl(self, fn_decl);
 
@@ -92,9 +97,46 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_stmt(&mut self, stmt: &HIRStmt) {
-        let indent = self.get_ident_str();
+        let indent = self.get_indent_str();
         write!(self.file_writer, "{indent}").unwrap();
         walk_hir_stmt(self, stmt);
         writeln!(self.file_writer).unwrap();
+    }
+
+    fn visit_assign(&mut self, target: &Temp, expr: &HIRExpr) {
+        write!(self.file_writer, "let t{} = ", target.id)
+            .unwrap();
+        walk_hir_expr(self, expr);
+        write!(self.file_writer, ";").unwrap();
+    }
+
+    fn visit_while(&mut self, cond: &HIRExpr, block: &HIRBlock) {
+        write!(self.file_writer, "while ").unwrap();
+        walk_hir_expr(self, cond);
+        writeln!(self.file_writer, " {{").unwrap();
+        self.visit_block(block);
+        let indent = self.get_indent_str();
+        write!(self.file_writer, "\n{indent}}}").unwrap();
+    }
+
+    fn visit_return(&mut self, value: &HIRExpr) {
+        write!(self.file_writer, "return ").unwrap();
+        walk_hir_expr(self, value);
+        write!(self.file_writer, ";").unwrap();
+    }
+
+    fn visit_if_stmt(&mut self, cond: &HIRExpr, body: &HIRBlock, else_body: &HIRBlock) {
+        let indent = self.get_indent_str();
+        write!(self.file_writer, "if ").unwrap();
+        walk_hir_expr(self, cond);
+        writeln!(self.file_writer, " {{").unwrap();
+        self.visit_block(body);
+        writeln!(self.file_writer, "\n{indent}}}").unwrap();
+        if else_body.is_empty() { return; }
+        todo!()
+    }
+
+    fn visit_field_store(&mut self, obj: &HIRExpr, key: &str, value: &HIRExpr) {
+        todo!()
     }
 }
