@@ -1,4 +1,4 @@
-use crate::{ast::{SpecificTypeKind, TypeKind}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}};
+use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}};
 use std::{fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -37,6 +37,42 @@ fn get_rust_type(ty: &TypeKind) -> &'static str {
         TypeKind::Null => "()", 
         TypeKind::SpecificType(sp) => get_rust_specific_type(sp),
     }
+}
+
+fn is_expr_str_ty(expr: &HIRExpr) -> Option<TypeKind> {
+    let mut stack: Vec<&HIRExpr> = vec![expr];
+
+    while let Some(node) = stack.pop() {
+        // Early return
+        match node {
+            HIRExpr::Const(c) => 
+                if let Literal::String(_) = c {
+                    return Some(TypeKind::String); 
+                }, 
+            HIRExpr::Temp(t) => {
+                if t.ty == TypeKind::String {
+                    return Some(TypeKind::String);
+                }
+            }
+            _ => {},
+        };
+
+        match node {
+            HIRExpr::BinOp { lhs, rhs, .. } => {
+                stack.push(lhs);
+                stack.push(rhs);
+            },  
+            HIRExpr::If { then, else_, .. } => {
+                stack.push(then);
+                stack.push(else_);
+            }, 
+            HIRExpr::UnOp { value, .. } => {
+                stack.push(value);
+            }, 
+            _ => todo!(),
+        }
+    }
+    None
 }
 
 impl RustCodegen {
@@ -127,16 +163,39 @@ impl HIRWalkable for RustCodegen {
 
     fn visit_if_stmt(&mut self, cond: &HIRExpr, body: &HIRBlock, else_body: &HIRBlock) {
         let indent = self.get_indent_str();
+        // If 
         write!(self.file_writer, "if ").unwrap();
         walk_hir_expr(self, cond);
         writeln!(self.file_writer, " {{").unwrap();
+
+        // If body block
         self.visit_block(body);
-        writeln!(self.file_writer, "\n{indent}}}").unwrap();
+        writeln!(self.file_writer, "{indent}}}").unwrap();
+
+        // Check if else is empty, if it is, just return,
+        // otherwise add another stmt to avoid branch miss
+        // even tho source lang optimized it idc
         if else_body.is_empty() { return; }
-        todo!()
+        writeln!(self.file_writer, "{indent}else {{").unwrap();
+        self.visit_block(else_body);
+        writeln!(self.file_writer, "{indent}}}").unwrap();
     }
 
     fn visit_field_store(&mut self, obj: &HIRExpr, key: &str, value: &HIRExpr) {
-        todo!()
+        walk_hir_expr(self, obj);
+        write!(self.file_writer, ".set_{key}(").unwrap();
+        walk_hir_expr(self, value);
+        write!(self.file_writer, ");").unwrap();
+    }
+
+    fn visit_bin_op(&mut self, 
+        lhs: &HIRExpr, 
+        op: &BinOpKind, 
+        rhs: &HIRExpr
+    )
+    {
+        walk_hir_expr(self, lhs); 
+        write!(self.file_writer, " {op} ").unwrap();
+        walk_hir_expr(self, rhs);
     }
 }
