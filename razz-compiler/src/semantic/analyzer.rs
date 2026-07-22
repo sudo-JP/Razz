@@ -11,7 +11,7 @@ use crate::ast::{expression::{BinOp, BinOpKind, Endpoint, EndpointKind},
 
 use crate::common::Span;
 use crate::semantic::error::SemanticErrorKind;
-use crate::semantic::rules::{BINOP_MAP, ENDPOINT_MAP, FIELD_ACCESS_MAP};
+use crate::semantic::rules::{BIN_OP_MAP_ERR, BINOP_MAP, ENDPOINT_MAP, ENDPOINT_MAP_ERR, FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR};
 use crate::{ast::{expression::{Expr, Literal}, statement::FnDecl, 
     traversal::{walk_program, ASTWalkable}, NodeId, Program, TypeKind}, 
     semantic::{error::SemanticError, symbols::SymbolTable}};
@@ -61,7 +61,7 @@ impl<'ast> SemanticAnalyzer<'ast> {
     /// Helper for validating fields 
     fn validate_fields(&mut self, fields: &[StructField], sp_ty: &SpecificTypeKind) {
         let mut valid_fields_map = FIELD_ACCESS_MAP.get(sp_ty)
-            .expect( "Field map has to cover all specific types")
+            .expect(FIELD_ACCESS_MAP_ERR)
             .clone();
         for field in fields {
             match valid_fields_map.remove(field.key.node.as_str()) {
@@ -174,7 +174,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
             return;
         }
         let binop_set = BINOP_MAP.get(&op.node)
-            .expect("BIN OP have to go through all operations");
+            .expect(BIN_OP_MAP_ERR);
 
         if let None = binop_set.get(lhs_ty) {
             self.error(SemanticErrorKind::InvalidBinOp{ 
@@ -286,7 +286,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
         };
 
         let fields = FIELD_ACCESS_MAP.get(&structure)
-            .expect("Map has to cover all the specific type field");
+            .expect(FIELD_ACCESS_MAP_ERR);
 
         let Some(field_ty) = fields.get(key.node.as_str()) else {
             self.error(SemanticErrorKind::InvalidFieldAccessKey(key.node.to_string()), key.span);
@@ -350,7 +350,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
                     return;
                 };
                 let field_map = FIELD_ACCESS_MAP.get(&sp_ty)
-                    .expect("Field access has to cover all specific type");
+                    .expect(FIELD_ACCESS_MAP_ERR);
 
                 let Some(ty) = field_map.get(key.node.as_str()) else {
                     self.error(SemanticErrorKind::InvalidFieldAccessKey(key.node.to_string()), key.span);
@@ -501,7 +501,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
         };
 
         let valid_body = ENDPOINT_MAP.get(&method.node)
-            .expect("Endpoint map has to cover all methods");
+            .expect(ENDPOINT_MAP_ERR);
 
         let Some(valid_ty) = valid_body.get(&endpoint.node) else {
             self.error(SemanticErrorKind::InvalidEndpoint(endpoint.node), endpoint.span);

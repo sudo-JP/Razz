@@ -1,78 +1,12 @@
-use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}};
-use std::{fs::File, io::{self, BufWriter, Write}};
+use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
+use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
 
 pub struct RustCodegen {
     indent: usize,
-    file_writer: BufWriter<File>
-}
-
-fn get_rust_specific_type(sp_ty: &SpecificTypeKind) -> &'static str {
-    match sp_ty {
-        SpecificTypeKind::Vec3 => "Vec3",
-        SpecificTypeKind::Dielectric => "Dielectric",
-        SpecificTypeKind::Lambertian => "Lambertian",
-        SpecificTypeKind::Metal => "Metal",
-        SpecificTypeKind::Point3 => "Point3",
-        SpecificTypeKind::Color => "Color",
-        SpecificTypeKind::Background => "Background",
-        SpecificTypeKind::Camera => "Camera",
-        SpecificTypeKind::Sphere => "Sphere",
-        SpecificTypeKind::Image => "Image",
-        SpecificTypeKind::Output => "Output",
-        SpecificTypeKind::PPM => "PPM",
-        SpecificTypeKind::Arduino => "Arduino",
-        SpecificTypeKind::Material => "Material",
-        SpecificTypeKind::OutputType => "OutputType",
-    }
-}
-
-fn get_rust_type(ty: &TypeKind) -> &'static str {
-    match ty {
-        TypeKind::Int => "i32",
-        TypeKind::Float => "f64",
-        TypeKind::Bool => "bool",
-        TypeKind::String => "String",
-        TypeKind::Null => "()", 
-        TypeKind::SpecificType(sp) => get_rust_specific_type(sp),
-    }
-}
-
-fn is_expr_str_ty(expr: &HIRExpr) -> Option<TypeKind> {
-    let mut stack: Vec<&HIRExpr> = vec![expr];
-
-    while let Some(node) = stack.pop() {
-        // Early return
-        match node {
-            HIRExpr::Const(c) => 
-                if let Literal::String(_) = c {
-                    return Some(TypeKind::String); 
-                }, 
-            HIRExpr::Temp(t) => {
-                if t.ty == TypeKind::String {
-                    return Some(TypeKind::String);
-                }
-            }
-            _ => {},
-        };
-
-        match node {
-            HIRExpr::BinOp { lhs, rhs, .. } => {
-                stack.push(lhs);
-                stack.push(rhs);
-            },  
-            HIRExpr::If { then, else_, .. } => {
-                stack.push(then);
-                stack.push(else_);
-            }, 
-            HIRExpr::UnOp { value, .. } => {
-                stack.push(value);
-            }, 
-            _ => todo!(),
-        }
-    }
-    None
+    file_writer: BufWriter<File>,
+    fn_def: HashMap<String, TypeKind>,
 }
 
 impl RustCodegen {
@@ -82,6 +16,7 @@ impl RustCodegen {
         Ok(Self {
             indent: 0, 
             file_writer,
+            fn_def: HashMap::new(),
         })
     }
 
@@ -96,9 +31,74 @@ impl RustCodegen {
     fn get_indent_str(&self) -> String {
         " ".repeat(self.indent)
     }
+
+    /// More DFS..Find if expr is string thru nestedness
+    fn is_expr_str_ty(&self, expr: &HIRExpr) -> Option<TypeKind> {
+        let mut stack: Vec<&HIRExpr> = vec![expr];
+
+        while let Some(node) = stack.pop() {
+
+            match node {
+                // Early return
+                HIRExpr::Const(c) => 
+                    if let Literal::String(_) = c {
+                        return Some(TypeKind::String); 
+                    }, 
+                HIRExpr::Temp(t) => {
+                    if t.ty == TypeKind::String {
+                        return Some(TypeKind::String);
+                    }
+                }, 
+                HIRExpr::FunctionCall { name, .. } => {
+                    if let Some(ty) = self.fn_def.get(name) 
+                    && *ty == TypeKind::String {
+                        return Some(TypeKind::String);
+                    }
+                },
+                HIRExpr::FieldAccess { obj, key } => {
+                    let err = "must pass type check for field access";
+                    let HIRExpr::Temp(temp) = **obj else {
+                        unreachable!("{err}")
+                    };
+
+                    let TypeKind::SpecificType(sp_ty) = temp.ty else {
+                        unreachable!("{err}")
+                    };
+                    let map = FIELD_ACCESS_MAP.get(&sp_ty)
+                        .expect(FIELD_ACCESS_MAP_ERR);
+
+                    if let TypeKind::String = map.get(key.as_str()).expect(err) {
+                        return Some(TypeKind::String);
+                    }
+                }
+                // Recursive
+                HIRExpr::BinOp { lhs, rhs, .. } => {
+                    stack.push(lhs);
+                    stack.push(rhs);
+                },  
+                HIRExpr::If { then, else_, .. } => {
+                    stack.push(then);
+                    stack.push(else_);
+                }, 
+                HIRExpr::UnOp { value, .. } => {
+                    stack.push(value);
+                }, 
+                HIRExpr::HTTPRequest(_) 
+                | HIRExpr::StructLiteral { .. }
+                => { return None; },
+            }
+        }
+        None
+    }
 }
 
 impl HIRWalkable for RustCodegen {
+    fn visit_program(&mut self, prog: &HIRProgram) {
+        prog.functions.iter()
+            .for_each(|f| {self.fn_def.insert(f.name.to_string(), f.return_ty);});
+        walk_hir_program(self, prog);
+    }
+
     fn visit_fn_decl(&mut self, fn_decl: &HIRFunction) {
         let mut params_str = String::new();
         let mut first = true; 
@@ -197,5 +197,36 @@ impl HIRWalkable for RustCodegen {
         walk_hir_expr(self, lhs); 
         write!(self.file_writer, " {op} ").unwrap();
         walk_hir_expr(self, rhs);
+    }
+}
+
+fn get_rust_specific_type(sp_ty: &SpecificTypeKind) -> &'static str {
+    match sp_ty {
+        SpecificTypeKind::Vec3 => "Vec3",
+        SpecificTypeKind::Dielectric => "Dielectric",
+        SpecificTypeKind::Lambertian => "Lambertian",
+        SpecificTypeKind::Metal => "Metal",
+        SpecificTypeKind::Point3 => "Point3",
+        SpecificTypeKind::Color => "Color",
+        SpecificTypeKind::Background => "Background",
+        SpecificTypeKind::Camera => "Camera",
+        SpecificTypeKind::Sphere => "Sphere",
+        SpecificTypeKind::Image => "Image",
+        SpecificTypeKind::Output => "Output",
+        SpecificTypeKind::PPM => "PPM",
+        SpecificTypeKind::Arduino => "Arduino",
+        SpecificTypeKind::Material => "Material",
+        SpecificTypeKind::OutputType => "OutputType",
+    }
+}
+
+fn get_rust_type(ty: &TypeKind) -> &'static str {
+    match ty {
+        TypeKind::Int => "i32",
+        TypeKind::Float => "f64",
+        TypeKind::Bool => "bool",
+        TypeKind::String => "String",
+        TypeKind::Null => "()", 
+        TypeKind::SpecificType(sp) => get_rust_specific_type(sp),
     }
 }

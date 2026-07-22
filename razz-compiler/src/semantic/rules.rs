@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
-
-
 use crate::ast::expression::{BinOpKind, EndpointKind};
 use crate::ast::statement::HTTPMethodKind;
 use crate::ast::{SpecificTypeKind, TypeKind};
+
+pub const FIELD_ACCESS_MAP_ERR: &str = "Field map has to cover all specific types";
+pub const ENDPOINT_MAP_ERR: &str = "Endpoint map has to cover all methods";
+pub const BIN_OP_MAP_ERR: &str = "BIN OP have to go through all operations";
 
 pub static ENDPOINT_MAP: LazyLock<HashMap<HTTPMethodKind, HashMap<EndpointKind, HashSet<SpecificTypeKind>>>> = LazyLock::new(|| {
     let mut m = HashMap::new(); 
@@ -158,6 +160,7 @@ pub static BINOP_MAP: LazyLock<HashMap<BinOpKind, HashSet<TypeKind>>> = LazyLock
     let mut allowed_bool = HashSet::new();
     allowed_bool.insert(TypeKind::Bool);
 
+    // Aids? Yea, i almost forgot about this monstrosity
     let mut allowed_equality = HashSet::new();
     allowed_equality.insert(TypeKind::Bool);
     allowed_equality.insert(TypeKind::Int);
