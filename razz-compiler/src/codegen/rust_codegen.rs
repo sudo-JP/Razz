@@ -1,4 +1,4 @@
-use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
+use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal, UnOpKind}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
 use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -33,7 +33,7 @@ impl RustCodegen {
     }
 
     /// More DFS..Find if expr is string thru nestedness
-    fn is_expr_str_ty(&self, expr: &HIRExpr) -> Option<TypeKind> {
+    fn is_expr_str_ty(&self, expr: &HIRExpr) -> bool {
         let mut stack: Vec<&HIRExpr> = vec![expr];
 
         while let Some(node) = stack.pop() {
@@ -42,17 +42,17 @@ impl RustCodegen {
                 // Early return
                 HIRExpr::Const(c) => 
                     if let Literal::String(_) = c {
-                        return Some(TypeKind::String); 
+                        return true;
                     }, 
                 HIRExpr::Temp(t) => {
                     if t.ty == TypeKind::String {
-                        return Some(TypeKind::String);
+                        return true;
                     }
                 }, 
                 HIRExpr::FunctionCall { name, .. } => {
                     if let Some(ty) = self.fn_def.get(name) 
                     && *ty == TypeKind::String {
-                        return Some(TypeKind::String);
+                        return true;
                     }
                 },
                 HIRExpr::FieldAccess { obj, key } => {
@@ -68,7 +68,7 @@ impl RustCodegen {
                         .expect(FIELD_ACCESS_MAP_ERR);
 
                     if let TypeKind::String = map.get(key.as_str()).expect(err) {
-                        return Some(TypeKind::String);
+                        return true;
                     }
                 }
                 // Recursive
@@ -85,10 +85,10 @@ impl RustCodegen {
                 }, 
                 HIRExpr::HTTPRequest(_) 
                 | HIRExpr::StructLiteral { .. }
-                => { return None; },
+                => { return false; },
             }
         }
-        None
+        false
     }
 }
 
@@ -194,9 +194,50 @@ impl HIRWalkable for RustCodegen {
         rhs: &HIRExpr
     )
     {
-        walk_hir_expr(self, lhs); 
-        write!(self.file_writer, " {op} ").unwrap();
-        walk_hir_expr(self, rhs);
+        if self.is_expr_str_ty(lhs) {
+            write!(self.file_writer, "format!(\"{{}}{{}}\", ")
+                .unwrap();
+            walk_hir_expr(self, lhs);
+            write!(self.file_writer, ", ").unwrap();
+            walk_hir_expr(self, rhs);
+            write!(self.file_writer, ")").unwrap();
+        } else {
+            write!(self.file_writer, "(").unwrap();
+            walk_hir_expr(self, lhs); 
+            write!(self.file_writer, " {op} ").unwrap();
+            walk_hir_expr(self, rhs);
+            write!(self.file_writer, ")").unwrap();
+        }
+    }
+
+    fn visit_un_op(&mut self, op: &UnOpKind, value: &HIRExpr) {
+        write!(self.file_writer, "{op}(").unwrap();
+        walk_hir_expr(self, value);
+        write!(self.file_writer, ")").unwrap();
+    }
+
+    fn visit_expr_if(&mut self, cond: &HIRExpr, then: &HIRExpr, else_: &HIRExpr) {
+        write!(self.file_writer, "if ").unwrap();
+        walk_hir_expr(self, cond);
+        write!(self.file_writer, " {{ ").unwrap();
+        walk_hir_expr(self, then);
+        write!(self.file_writer, " }} else {{ ").unwrap();
+        walk_hir_expr(self, else_);
+        write!(self.file_writer, " }} ").unwrap();
+    }
+
+    fn visit_fn_call(&mut self, name: &str, args: &[HIRExpr]) {
+       write!(self.file_writer, "{name}").unwrap();
+        let mut first = true; 
+        for arg in args {
+            if first {
+                first = false; 
+            } else {
+                write!(self.file_writer, ", ").unwrap();
+            }
+            walk_hir_expr(self, arg);
+        }
+        write!(self.file_writer, ")").unwrap();
     }
 }
 
