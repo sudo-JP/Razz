@@ -1,4 +1,4 @@
-use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, Literal, UnOpKind}}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::HIRExpr, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
+use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
 use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -238,6 +238,47 @@ impl HIRWalkable for RustCodegen {
             walk_hir_expr(self, arg);
         }
         write!(self.file_writer, ")").unwrap();
+    }
+    
+    fn visit_field_access(&mut self, obj: &HIRExpr, key: &str) {
+        walk_hir_expr(self, obj); 
+        write!(self.file_writer, ".get_{key}()").unwrap();
+    }
+
+    fn visit_temp(&mut self, temp: &Temp) {
+        write!(self.file_writer, "t{}", temp.id).unwrap();
+    }
+
+    fn visit_literal(&mut self, literal: &Literal) {
+        match literal {
+            Literal::Int(i) => write!(self.file_writer, "{i}").unwrap(), 
+            Literal::Float(f) => write!(self.file_writer, "{f}").unwrap(),
+            Literal::String(s) => write!(self.file_writer, "{s}").unwrap(),
+            Literal::Bool(b) => write!(self.file_writer, "{b}").unwrap(), 
+            Literal::Null => write!(self.file_writer, "()").unwrap(),
+        } 
+    }
+
+    fn visit_http_get(&mut self, ep: &EndpointKind) {
+        match ep {
+            // TODO: add the actual global obj, prob just UUID it or smth idk
+            EndpointKind::Camera => write!(self.file_writer, ".get_camera()").unwrap(),
+            EndpointKind::Image => write!(self.file_writer, ".get_image()").unwrap(),
+            EndpointKind::Background => write!(self.file_writer, ".get_background()").unwrap(), 
+            EndpointKind::Output => write!(self.file_writer, ".get_output()").unwrap(),
+            _ => unreachable!("semantic should take care of this"),
+        } 
+    }
+
+    fn visit_http_request(&mut self, method: &HTTPMethodKind, ep: &EndpointKind, body: &HIRExpr) {
+        
+    }
+
+    fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
+        match ty {
+            SpecificTypeKind::Vec3 => todo!(),
+            _ => todo!()
+        }
     }
 }
 
