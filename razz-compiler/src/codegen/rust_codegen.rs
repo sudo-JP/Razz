@@ -1,4 +1,12 @@
-use crate::{ast::{SpecificTypeKind, TypeKind, expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, statement::HTTPMethodKind}, get_docs, ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, hir_statement::{HIRFunction, HIRStmt}, traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}}}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
+use crate::{ast::{SpecificTypeKind, TypeKind, 
+    expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
+    statement::HTTPMethodKind}, 
+    get_docs, 
+    ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, 
+        hir_statement::{HIRFunction, HIRStmt}, 
+        traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}
+    }}, 
+    semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
 use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -117,15 +125,32 @@ impl HIRWalkable for RustCodegen {
 
         // Const 
         let raw_const_objs = r#"
-            static CAMERA: LazyLock<>
+            static IMAGE: LazyLock<Mutex<Image>> = LazyLock::new(|| Mutex::new(
+                Image::new(0., 0., 3)
+            ));
+
+            static CAMERA: LazyLock<Mutex<Camera>> = LazyLock::new(|| Mutex::new(
+                Camera::new(
+                   Point3::default(),
+                   Point3::default(),
+                   Vec3::default(),
+                   0.6,
+                   10., 
+                   &Image::new(0., 0., 3)
+                )
+            ));
 
             static WORLD: LazyLock<Mutex<World>> = LazyLock::new(|| Mutex::new(
                 World::new(
                     Background::new(
-                    Vec3::new(0.5, 0.7, 1.0), 
-                    Vec3::new(1., 1., 1.)
+                        Vec3::default(), 
+                        Vec3::default()
                     )
                 )
+            ));
+
+            static OUTPUT: LazyLock<Mutex<RenderOutput>> = LazyLock::new(|| Mutex::new(
+                RenderOutput::PPM
             ));
         "#;
 
@@ -307,7 +332,20 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_http_request(&mut self, method: &HTTPMethodKind, ep: &EndpointKind, body: &HIRExpr) {
-        
+        match method {
+            HTTPMethodKind::Post => {
+                match ep {
+                    EndpointKind::Hittable => {
+                        write!(self.file_writer, "WORLD.lock().unwrap").unwrap();
+                    }, 
+                    _ => todo!()
+                }
+            }, 
+            HTTPMethodKind::Put => {},
+            HTTPMethodKind::Patch => {},
+        };
+
+        walk_hir_expr(self, body);
     }
 
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
