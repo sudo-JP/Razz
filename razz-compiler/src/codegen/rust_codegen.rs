@@ -92,10 +92,46 @@ impl RustCodegen {
     }
 }
 
+fn clean_str(s: &str) -> String {
+    s.lines()
+        .map(|line| {
+            let stripped = line.trim_start_matches(|c: char| c.is_whitespace());
+            format!("{}\n", stripped)
+        })
+        .collect()
+}
+
 impl HIRWalkable for RustCodegen {
     fn visit_program(&mut self, prog: &HIRProgram) {
         prog.functions.iter()
             .for_each(|f| {self.fn_def.insert(f.name.to_string(), f.return_ty);});
+
+        // Imports 
+        let raw_import_str = r#"
+            use crate::output::{{ImageOutput}};
+            use std::sync::{{LazyLock, Mutex}};
+        "#;
+
+        let clean_import_str = clean_str(raw_import_str);
+        writeln!(self.file_writer, "{clean_import_str}").unwrap();
+
+        // Const 
+        let raw_const_objs = r#"
+            static CAMERA: LazyLock<>
+
+            static WORLD: LazyLock<Mutex<World>> = LazyLock::new(|| Mutex::new(
+                World::new(
+                    Background::new(
+                    Vec3::new(0.5, 0.7, 1.0), 
+                    Vec3::new(1., 1., 1.)
+                    )
+                )
+            ));
+        "#;
+
+        let clean_const_objs = clean_str(raw_const_objs);
+        writeln!(self.file_writer, "{clean_const_objs}").unwrap();
+
         walk_hir_program(self, prog);
     }
 
@@ -275,10 +311,21 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
-        match ty {
-            SpecificTypeKind::Vec3 => todo!(),
-            _ => todo!()
+        let mut fields_str = String::new();
+        for field in fields {
+            fields_str.push_str(&field.name);
+            fields_str.push_str(": ");
+            walk_hir_expr(self, &field.value);
+            fields_str.push_str(", ");
         }
+
+        let init_str = match ty {
+            SpecificTypeKind::Vec3 => format!("Vec3 {{ {fields_str} }}"),
+            SpecificTypeKind::Dielectric => format!("Dielectric "),
+            _ => todo!()
+        };
+
+        write!(self.file_writer, "{init_str}").unwrap();
     }
 }
 

@@ -14,6 +14,7 @@ use crate::lexer::lexer::Lexer;
 use crate::parser::parser::Parser;
 use crate::semantic::analyzer::SemanticAnalyzer;
 
+
 #[derive(ValueEnum, Clone, PartialEq)]
 pub enum CompilerStage {
     Lexer, 
