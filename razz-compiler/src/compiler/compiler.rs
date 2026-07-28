@@ -44,7 +44,7 @@ impl Compiler {
         Self { debug: c }
     }
 
-    pub fn compiles(&self, contents: &str) -> Result<CompilerOutput, CompilerError> {
+    pub fn compiles(&self, contents: &str, output: Option<String>) -> Result<CompilerOutput, CompilerError> {
         // ============= LEXER =============  
         let lexer = Lexer::new(contents);
 
@@ -88,8 +88,8 @@ impl Compiler {
         }
 
         //  ============= CODE GEN ============= 
-        let mut codegen = RustCodegen::new("a.txt".to_string()).unwrap();
-        codegen.generate(HIRProgram {functions:vec![]});
+        let mut codegen = RustCodegen::new(format!("{}.rs", output.unwrap_or_else(|| String::from("generated")))).unwrap();
+        codegen.generate(hir_structurized);
 
         Ok(CompilerOutput::Codegen)
     }

@@ -16,7 +16,7 @@ use common::load_fixture;
 
 fn run_semantic(input: &str) -> Result<(HashSet<NodeId>, HashMap<NodeId, TypeKind>), Vec<SemanticError>> {
     let compiler = Compiler::new(CompilerStage::SemanticAnalysis);
-    match compiler.compiles(input) {
+    match compiler.compiles(input, None) {
         Ok(CompilerOutput::SemanticAnalysis(mutable_set, type_table)) => Ok((mutable_set, type_table)),
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::SemanticAnalysis(errors)) => Err(errors),

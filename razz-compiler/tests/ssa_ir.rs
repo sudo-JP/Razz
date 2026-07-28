@@ -13,7 +13,7 @@ use common::{colored_assert, load_fixture};
 
 fn run_ir(input: &str) -> SSAProgram {
     let compiler = Compiler::new(CompilerStage::SSAIR);
-    match compiler.compiles(input) {
+    match compiler.compiles(input, None) {
         Ok(CompilerOutput::SSAIR(blocks)) => blocks,
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::Lexer(errors)) => panic!("Unexpected lexer error: {:?}", errors),

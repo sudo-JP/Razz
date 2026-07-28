@@ -50,6 +50,10 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 - The above is a lie, I have to pair program with Claude to figure out some stuff. Hats off to people who wrote compiler from scratch, they are the insane one.  
 - But that being said, it's not like I don't think at all. I had tons of fun performing some cool tricks to structurize, such as inlining phi to if expr, DFS to find loop, BFS to find conv path etc. Truly toxic relationship between me and compiler. Though I think that goes for ever complex program if I wanna make them. Gonna plan to write an OS for this next, why? I hate myself ofc. But asides from hating myself, I really -- yes really -- enjoys the fun of solving some puzzle that randomly came up in my code. 
 
+### Codegen 
+- At the finish line, naturally im lazy. 
+    - I hate that I have to look back at months old API, I usually just want to move up, but it is what is it. 
+
 ## Summary overall feelings throughout this journey
 
 ## AI Usage 

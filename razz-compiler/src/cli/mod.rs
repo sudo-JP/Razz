@@ -9,4 +9,7 @@ pub struct Cli {
 
     #[arg(short, long, value_enum, default_value_t = CompilerStage::Codegen)]
     pub debug: CompilerStage,
+
+    #[arg(short, long)]
+    pub output: Option<String>,
 }

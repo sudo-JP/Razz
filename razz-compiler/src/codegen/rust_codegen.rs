@@ -98,6 +98,24 @@ impl RustCodegen {
         }
         false
     }
+
+    fn apply_body(&mut self, global: &str, body: &HIRExpr) {
+        match body {
+            HIRExpr::StructLiteral { fields, .. } => {
+                for field in fields {
+                    write!(self.file_writer, "{global}.set_{}(", field.name).unwrap();
+                    walk_hir_expr(self, &field.value);
+                    write!(self.file_writer, ");").unwrap();
+                }
+            },
+            _ => {
+                write!(self.file_writer, "*{global} = ").unwrap();
+                walk_hir_expr(self, body);
+                write!(self.file_writer, ";").unwrap();
+            }
+        }
+    }
+
 }
 
 fn clean_str(s: &str) -> String {
@@ -140,12 +158,13 @@ impl HIRWalkable for RustCodegen {
                 )
             ));
 
+            static BACKGROUND: LazyLock<Mutex<Background>> = LazyLock::new(|| Mutex::new(
+                Background::default()
+            ));
+
             static WORLD: LazyLock<Mutex<World>> = LazyLock::new(|| Mutex::new(
                 World::new(
-                    Background::new(
-                        Vec3::default(), 
-                        Vec3::default()
-                    )
+                    Background::default()
                 )
             ));
 
@@ -321,12 +340,12 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_http_get(&mut self, ep: &EndpointKind) {
+        let get_global = |obj: &'static str| format!("{obj}.lock().unwrap().clone()");
         match ep {
-            // TODO: add the actual global obj, prob just UUID it or smth idk
-            EndpointKind::Camera => write!(self.file_writer, ".get_camera()").unwrap(),
-            EndpointKind::Image => write!(self.file_writer, ".get_image()").unwrap(),
-            EndpointKind::Background => write!(self.file_writer, ".get_background()").unwrap(), 
-            EndpointKind::Output => write!(self.file_writer, ".get_output()").unwrap(),
+            EndpointKind::Camera => write!(self.file_writer, "{}", get_global("CAMERA")).unwrap(),
+            EndpointKind::Image => write!(self.file_writer, "{}", get_global("IMAGE")).unwrap(),
+            EndpointKind::Background => write!(self.file_writer, "{}", get_global("BACKGROUND")).unwrap(), 
+            EndpointKind::Output => write!(self.file_writer, "{}", get_global("OUTPUT")).unwrap(),
             _ => unreachable!("semantic should take care of this"),
         } 
     }

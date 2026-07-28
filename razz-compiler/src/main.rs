@@ -8,7 +8,7 @@ fn main() -> io::Result<()> {
     let cli = Cli::parse();
     let contents = fs::read_to_string(cli.path)?;
     let compiler = Compiler::new(cli.debug);
-    let output = compiler.compiles(&contents);
+    let output = compiler.compiles(&contents, cli.output);
     let mut is_err = false;
     match output {
         Ok(CompilerOutput::Lexer(tokens)) => {

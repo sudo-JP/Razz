@@ -26,7 +26,7 @@ use common::{colored_assert_debug, load_fixture};
 
 fn run_hir(input: &str) -> HIRProgram {
     let compiler = Compiler::new(CompilerStage::HIR);
-    match compiler.compiles(input) {
+    match compiler.compiles(input, None) {
         Ok(CompilerOutput::HIR(prog)) => prog,
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::Lexer(errors)) => panic!("Unexpected lexer error: {:?}", errors),

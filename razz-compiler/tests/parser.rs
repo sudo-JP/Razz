@@ -21,7 +21,7 @@ use common::{colored_assert_debug, load_fixture};
 
 fn run_parser(input: &str) -> Result<Program, Vec<ParserError>> {
     let compiler = Compiler::new(CompilerStage::Parser);
-    match compiler.compiles(input) {
+    match compiler.compiles(input, None) {
         Ok(CompilerOutput::Parser(p)) => Ok(p),
         Ok(_) => panic!("Compiler flag mismatch"),
         Err(CompilerError::Parser(e)) => Err(e),

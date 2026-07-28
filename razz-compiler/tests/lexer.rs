@@ -11,7 +11,7 @@ use common::{colored_assert, load_fixture};
 
 fn run_lexer(input: &str) -> String {
     let compiler = Compiler::new(CompilerStage::Lexer);
-    match compiler.compiles(input) {
+    match compiler.compiles(input, None) {
         Ok(CompilerOutput::Lexer(tokens)) => tokens
             .iter()
             .map(|t| t.to_string())
