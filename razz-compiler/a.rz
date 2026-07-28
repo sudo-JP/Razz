@@ -1,7 +1,19 @@
-fn main() int {
-    a = 0; 
-    if true {
-        a = 4;
+/*fn main() int {
+    for i = 0; i < 5; i += 1 {
+        a = 0; 
+        if true {
+            a = 4;
+        }
     }
     return a;
+}*/
+
+fn main() int {
+    i = 0;
+    j = 10;
+    while i < 5 && j > 0 {
+        i += 1;
+        j -= 1;
+    }
+    return i;
 }

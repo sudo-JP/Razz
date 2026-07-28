@@ -31,7 +31,7 @@ impl RustCodegen {
     pub fn generate(&mut self, prog: HIRProgram) {
         let docs = get_docs!("//!");
         write!(self.file_writer, "{docs}").unwrap();
-        walk_hir_program(self, &prog);
+        self.visit_program(&prog);
 
         self.file_writer.flush().unwrap();
     }
@@ -134,8 +134,12 @@ impl HIRWalkable for RustCodegen {
 
         // Imports 
         let raw_import_str = r#"
-            use crate::output::{{ImageOutput}};
-            use std::sync::{{LazyLock, Mutex}};
+            use razz_renderer::output::{ImageOutput};
+            use std::sync::{LazyLock, Mutex};
+            use razz_renderer::render::Image;
+            use razz_renderer::world::Background;
+            use razz_core::math::{random_f64, random_range, vec3::{Color3, Point3, Vec3}};
+            use razz_renderer::{Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World};
         "#;
 
         let clean_import_str = clean_str(raw_import_str);
@@ -143,9 +147,7 @@ impl HIRWalkable for RustCodegen {
 
         // Const 
         let raw_const_objs = r#"
-            static IMAGE: LazyLock<Mutex<Image>> = LazyLock::new(|| Mutex::new(
-                Image::new(0., 0., 3)
-            ));
+            static IMAGE: LazyLock<Mutex<Image>> = LazyLock::new(|| Mutex::new(Image::new(0., 0., 3)));
 
             static CAMERA: LazyLock<Mutex<Camera>> = LazyLock::new(|| Mutex::new(
                 Camera::new(
@@ -303,7 +305,7 @@ impl HIRWalkable for RustCodegen {
         walk_hir_expr(self, then);
         write!(self.file_writer, " }} else {{ ").unwrap();
         walk_hir_expr(self, else_);
-        write!(self.file_writer, " }} ").unwrap();
+        write!(self.file_writer, " }}").unwrap();
     }
 
     fn visit_fn_call(&mut self, name: &str, args: &[HIRExpr]) {
@@ -351,20 +353,25 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_http_request(&mut self, method: &HTTPMethodKind, ep: &EndpointKind, body: &HIRExpr) {
+        let err = "semantic should take care this";
         match method {
-            HTTPMethodKind::Post => {
-                match ep {
-                    EndpointKind::Hittable => {
-                        write!(self.file_writer, "WORLD.lock().unwrap").unwrap();
-                    }, 
-                    _ => todo!()
-                }
-            }, 
-            HTTPMethodKind::Put => {},
-            HTTPMethodKind::Patch => {},
-        };
-
-        walk_hir_expr(self, body);
+            HTTPMethodKind::Post => match ep {
+                EndpointKind::Hittable => {
+                    write!(self.file_writer, "WORLD.lock().unwrap().push(Box::new(").unwrap();
+                    walk_hir_expr(self, body);
+                    write!(self.file_writer, "));").unwrap();
+                }, 
+                _ => unreachable!("{err}")
+            },
+            HTTPMethodKind::Put
+            | HTTPMethodKind::Patch => match ep {
+                EndpointKind::Camera => self.apply_body("CAMERA.lock().unwrap()", body),
+                EndpointKind::Background => self.apply_body("BACKGROUND.lock().unwrap()", body),
+                EndpointKind::Image => self.apply_body("IMAGE.lock().unwrap()", body),
+                EndpointKind::Output => self.apply_body("OUTPUT.lock().unwrap()", body),
+                _ => unreachable!("{err}")
+            },
+        }
     }
 
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
