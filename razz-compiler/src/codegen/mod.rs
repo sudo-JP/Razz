@@ -1,4 +1,5 @@
 pub mod rust_codegen;
+pub(crate) mod rust_preprocess;
 
 #[macro_export]
 macro_rules! cat {

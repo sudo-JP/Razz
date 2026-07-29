@@ -443,7 +443,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
         update.iter()
             .for_each(|upd| walk_stmt(self, upd));
 
-        walk_block(self, body);
+        self.visit_block(body);
     }
 
     /// Condition on while loop must be boolean
@@ -456,7 +456,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
             self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
         }
 
-        walk_block(self, body);
+        self.visit_block(body);
     }
 
     fn visit_if(&mut self, _stmt: &Stmt, cond: &Expr, body: &Block, else_ifs: &[ElseIf], else_body: &Option<Block>) {
@@ -467,7 +467,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
         if !matches!(cond_ty, TypeKind::Bool) {
             self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
         }
-        walk_block(self, body);
+        self.visit_block(body);
 
         for elif in else_ifs {
             walk_expr(self, &elif.cond);
@@ -479,11 +479,11 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
                 self.error(SemanticErrorKind::InvalidConditionType(*cond_ty), cond.span);
             }
 
-            walk_block(self, &elif.body);
+            self.visit_block(&elif.body);
         }
 
         if let Some(block) = else_body {
-            walk_block(self, block);
+            self.visit_block(block);
         }
     }
 

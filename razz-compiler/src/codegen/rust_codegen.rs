@@ -1,12 +1,9 @@
 use crate::{ast::{SpecificTypeKind, TypeKind, 
     expression::{BinOpKind, EndpointKind, Literal, UnOpKind}, 
-    statement::HTTPMethodKind}, 
-    get_docs, 
-    ir::{Temp, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, 
+    statement::HTTPMethodKind}, codegen::rust_preprocess::HIRRustPreprocess, get_docs, ir::{Temp, TempId, hir::{hir::HIRBlock, hir_expression::{HIRExpr, HIRFieldInit}, 
         hir_statement::{HIRFunction, HIRStmt}, 
         traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}
-    }}, 
-    semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
+    }}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
 use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
@@ -15,6 +12,8 @@ pub struct RustCodegen {
     indent: usize,
     file_writer: BufWriter<File>,
     fn_def: HashMap<String, TypeKind>,
+    is_loop: bool,
+    need_loop_mut: HashMap<TempId, bool>,
 }
 
 impl RustCodegen {
@@ -25,10 +24,15 @@ impl RustCodegen {
             indent: 0, 
             file_writer,
             fn_def: HashMap::new(),
+            need_loop_mut: HashMap::new(),
+            is_loop: false,
         })
     }
 
     pub fn generate(&mut self, prog: HIRProgram) {
+        let preprocesser = HIRRustPreprocess::default();
+        let need_loop_set = preprocesser.get_mut_set(&prog);
+        self.need_loop_mut = need_loop_set;
         let docs = get_docs!("//!");
         write!(self.file_writer, "{docs}").unwrap();
         self.visit_program(&prog);
