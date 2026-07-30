@@ -226,6 +226,9 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_assign(&mut self, target: &Temp, expr: &HIRExpr) {
+        if let Some(is_set) = self.need_loop_mut.get(&target.id) {
+
+        }
         write!(self.file_writer, "let t{} = ", target.id)
             .unwrap();
         walk_hir_expr(self, expr);

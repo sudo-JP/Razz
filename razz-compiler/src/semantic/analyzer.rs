@@ -368,7 +368,7 @@ impl<'ast> ASTWalkable for SemanticAnalyzer<'ast> {
                 }
             },
             ExprKind::Ident(t) => {
-                let Some((t_ty, id)) = self.symbol_table.lookup_current_scope(&t) else {
+                let Some((t_ty, id)) = self.symbol_table.lookup_variable(&t) else {
                     self.error(SemanticErrorKind::UndeclaredVariable(t.to_string()), target.span);
                     return;
                 };
