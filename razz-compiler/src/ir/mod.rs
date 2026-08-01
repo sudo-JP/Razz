@@ -5,6 +5,7 @@ use crate::ast::TypeKind;
 pub mod basic_block;
 pub mod ssa;
 pub mod hir;
+pub mod type_ordering;
 
 pub type TempId = u32;
 pub type Dest = Temp;
@@ -20,4 +21,3 @@ impl fmt::Display for Temp {
         write!(f, "t{}", self.id)
     }
 }
-

@@ -4,7 +4,7 @@ use crate::{ast::{SpecificTypeKind, TypeKind,
         hir_statement::{HIRFunction, HIRStmt}, 
         traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}
     }}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
-use std::{collections::HashMap, fmt::format, fs::File, io::{self, BufWriter, Write}};
+use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
 
@@ -401,6 +401,22 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
+        let init_str = match ty {
+            SpecificTypeKind::Vec3 => format!("Vec3 {{ "),
+            SpecificTypeKind::Dielectric => format!("Dielectric {{ "),
+            SpecificTypeKind::Lambertian => format!("Lambertian {{"),
+            SpecificTypeKind::Metal => format!("Metal {{ "),
+            SpecificTypeKind::Point3 => format!("Point3 {{ "), 
+            SpecificTypeKind::Color => format!("Color3 {{ "), 
+            SpecificTypeKind::Background => format!("Background {{ "),
+            SpecificTypeKind::Camera => format!("Camera {{ "), 
+            SpecificTypeKind::Sphere => format!("Sphere {{ "), 
+            SpecificTypeKind::Image => format!("Image {{ "), 
+            SpecificTypeKind::Output => format!("OutputType "),
+            _ => todo!()
+        };
+        write!(self.file_writer, "{init_str}").unwrap();
+
         let mut fields_str = String::new();
         for field in fields {
             fields_str.push_str(&field.name);
@@ -408,14 +424,6 @@ impl HIRWalkable for RustCodegen {
             walk_hir_expr(self, &field.value);
             fields_str.push_str(", ");
         }
-
-        let init_str = match ty {
-            SpecificTypeKind::Vec3 => format!("Vec3 {{ {fields_str} }}"),
-            SpecificTypeKind::Dielectric => format!("Dielectric "),
-            _ => todo!()
-        };
-
-        write!(self.file_writer, "{init_str}").unwrap();
     }
 }
 
