@@ -143,7 +143,7 @@ impl HIRWalkable for RustCodegen {
             use razz_renderer::render::Image;
             use razz_renderer::world::Background;
             use razz_core::math::{random_f64, random_range, vec3::{Color3, Point3, Vec3}};
-            use razz_renderer::{Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World};
+            use razz_renderer::{Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World, RenderOutput};
         "#;
 
         let clean_import_str = clean_str(raw_import_str);
@@ -401,28 +401,34 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
-        let init_str = match ty {
-            SpecificTypeKind::Vec3 => format!("Vec3 {{ "),
-            SpecificTypeKind::Dielectric => format!("Dielectric {{ "),
-            SpecificTypeKind::Lambertian => format!("Lambertian {{"),
-            SpecificTypeKind::Metal => format!("Metal {{ "),
-            SpecificTypeKind::Point3 => format!("Point3 {{ "), 
-            SpecificTypeKind::Color => format!("Color3 {{ "), 
-            SpecificTypeKind::Background => format!("Background {{ "),
-            SpecificTypeKind::Camera => format!("Camera {{ "), 
-            SpecificTypeKind::Sphere => format!("Sphere {{ "), 
-            SpecificTypeKind::Image => format!("Image {{ "), 
-            SpecificTypeKind::Output => format!("OutputType "),
-            _ => todo!()
-        };
-        write!(self.file_writer, "{init_str}").unwrap();
-
-        let mut fields_str = String::new();
-        for field in fields {
-            fields_str.push_str(&field.name);
-            fields_str.push_str(": ");
-            walk_hir_expr(self, &field.value);
-            fields_str.push_str(", ");
+        match ty {
+            SpecificTypeKind::Vec3
+            | SpecificTypeKind::Point3
+            | SpecificTypeKind::Color
+            | SpecificTypeKind::Background
+            | SpecificTypeKind::Camera
+            | SpecificTypeKind::Sphere
+            | SpecificTypeKind::Image
+            | SpecificTypeKind::Output
+            | SpecificTypeKind::Dielectric
+            | SpecificTypeKind::Lambertian
+            | SpecificTypeKind::Metal => {
+                write!(self.file_writer, "{}::new(", get_rust_specific_type(ty)).unwrap();
+                let mut first = true;
+                for field in fields {
+                    if first {
+                        first = false;
+                    } else {
+                        write!(self.file_writer, ", ").unwrap();
+                    }
+                    walk_hir_expr(self, &field.value);
+                }
+                write!(self.file_writer, ")").unwrap();
+            }
+            SpecificTypeKind::Arduino => write!(self.file_writer, "RenderOutput::Arduino").unwrap(),
+            SpecificTypeKind::PPM => write!(self.file_writer, "RenderOutput::PPM").unwrap(),
+            SpecificTypeKind::Material
+            | SpecificTypeKind::OutputType => todo!(),
         }
     }
 }
