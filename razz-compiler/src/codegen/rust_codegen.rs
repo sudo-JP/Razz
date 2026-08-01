@@ -4,7 +4,7 @@ use crate::{ast::{SpecificTypeKind, TypeKind,
         hir_statement::{HIRFunction, HIRStmt}, 
         traversal::{walk_hir_block, walk_hir_expr, walk_hir_fn_decl, walk_hir_program, walk_hir_stmt}
     }}, semantic::rules::{FIELD_ACCESS_MAP, FIELD_ACCESS_MAP_ERR}};
-use std::{collections::HashMap, fs::File, io::{self, BufWriter, Write}};
+use std::{collections::HashMap, fmt::format, fs::File, io::{self, BufWriter, Write}};
 
 use crate::ir::hir::{hir_statement::HIRProgram, traversal::HIRWalkable};
 
@@ -226,22 +226,41 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_assign(&mut self, target: &Temp, expr: &HIRExpr) {
-        if let Some(is_set) = self.need_loop_mut.get(&target.id) {
+        let assign_stmt = if let Some(is_set) = self.need_loop_mut.get(&target.id) {
+            match (self.is_loop, is_set) {
+                // If in a loop, and flag is already set, meaning already mut,
+                // just reassign 
+                (true, true) => format!("t{} = ", target.id), 
 
-        }
-        write!(self.file_writer, "let t{} = ", target.id)
+                // 1. In a loop, but the flag is not set, meaning nested loop. 
+                // 2. Not in a loop but flag is set..? Shouldnt happen but its mut
+                // 3. Not in a loop and not set, so mut 
+                _ => {
+                    self.need_loop_mut.insert(target.id, true);
+                    format!("let mut t{} = ", target.id)
+                }
+            }
+        } else {
+            format!("let t{} = ", target.id)
+        }; 
+        write!(self.file_writer, "{assign_stmt}")
             .unwrap();
         walk_hir_expr(self, expr);
         write!(self.file_writer, ";").unwrap();
     }
 
     fn visit_while(&mut self, cond: &HIRExpr, block: &HIRBlock) {
+        let prev_flag = self.is_loop;
+        self.is_loop = true;
+
         write!(self.file_writer, "while ").unwrap();
         walk_hir_expr(self, cond);
         writeln!(self.file_writer, " {{").unwrap();
         self.visit_block(block);
         let indent = self.get_indent_str();
         write!(self.file_writer, "\n{indent}}}").unwrap();
+
+        self.is_loop = prev_flag
     }
 
     fn visit_return(&mut self, value: &HIRExpr) {
