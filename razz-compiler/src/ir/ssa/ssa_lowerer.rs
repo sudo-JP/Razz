@@ -9,6 +9,7 @@ use crate::ast::expression::Literal;
 use crate::ast::statement::Param;
 use crate::ir::ssa::ssa::{PhiArg, SSABlock, SSAFunction, SSAFunctionParam, SSAProgram};
 use crate::ir::Temp;
+use crate::ir::type_ordering::SPECIFIC_TYPE_ORDERING;
 use crate::{ast::{expression::{BinOpKind, Endpoint, Expr, ExprKind}, 
     statement::{Block, CompoundOp, CompoundOpKind, ElseIf, FnDecl, HTTPMethod, Stmt, StmtKind}, 
     NodeId, Program, TypeKind}, 
@@ -397,6 +398,7 @@ impl<'ast> SSALowerer<'ast> {
                 SSAOperand::Temp(temp)
             },
             ExprKind::FunctionCall { name, args } => {
+                // Reorder the call to be correct with the args 
                 let temp = self.expr_temp(expr);
                 let mut arg_map: HashMap<&str, &Expr> = HashMap::with_capacity(args.len());
 
@@ -434,12 +436,26 @@ impl<'ast> SSALowerer<'ast> {
                 SSAOperand::Temp(temp)
             },
             ExprKind::StructLiteral { ty, fields } => {
+                // Reorder fields to match with object creation
+                let sp_order_map = SPECIFIC_TYPE_ORDERING.get(&ty.node)
+                    .expect("Specific type ordering map must cover all fields");
+
+                let mut field_map: HashMap<&str, &Expr> = HashMap::with_capacity(fields.len());
+                fields.iter()
+                    .for_each(|f| { field_map.insert(&f.key.node, &f.value); });
+
                 let temp = self.expr_temp(expr);
-                let field_init_vec = fields.iter()
-                    .map(|field| {
+
+                let arranged_fields = sp_order_map.iter()
+                    .map(|f| (f, field_map.get(f).expect("Semantic should resolve this"))
+                    )
+                    .collect::<Vec<_>>();
+
+                let field_init_vec = arranged_fields.iter()
+                    .map(|(name, value)| {
                         SSAFieldInit{
-                            name: field.key.node.to_string(), 
-                            value: self.lower_expr(&field.value),
+                            name: name.to_string(), 
+                            value: self.lower_expr(value),
                         }
                     })
                     .collect();

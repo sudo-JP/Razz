@@ -37,4 +37,5 @@ pub static SPECIFIC_TYPE_ORDERING: LazyLock<HashMap<SpecificTypeKind, Vec<&'stat
         map.insert(SpecificTypeKind::Material, vec![]);
 
         map
-    });
+    }
+);

@@ -13,6 +13,7 @@ pub struct RustCodegen {
     file_writer: BufWriter<File>,
     fn_def: HashMap<String, TypeKind>,
     is_loop: bool,
+    is_main: bool,
     need_loop_mut: HashMap<TempId, bool>,
 }
 
@@ -26,6 +27,7 @@ impl RustCodegen {
             fn_def: HashMap::new(),
             need_loop_mut: HashMap::new(),
             is_loop: false,
+            is_main: false,
         })
     }
 
@@ -177,6 +179,8 @@ impl HIRWalkable for RustCodegen {
             static OUTPUT: LazyLock<Mutex<RenderOutput>> = LazyLock::new(|| Mutex::new(
                 RenderOutput::PPM
             ));
+
+            static RENDERER: LazyLock<Mutex<Renderer>> = LazyLock::new(|| Renderer::new(50));
         "#;
 
         let clean_const_objs = clean_str(raw_const_objs);
@@ -206,9 +210,12 @@ impl HIRWalkable for RustCodegen {
         )
             .unwrap();
 
-        walk_hir_fn_decl(self, fn_decl);
+        if fn_decl.name == "main" { self.is_main = true; }
 
-        write!(self.file_writer, "}}")
+        walk_hir_fn_decl(self, fn_decl);
+        self.is_main = false; 
+
+        writeln!(self.file_writer, "}}")
             .unwrap();
     }
 
@@ -264,7 +271,19 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_return(&mut self, value: &HIRExpr) {
-        write!(self.file_writer, "return ").unwrap();
+        // Entry to call renderer
+        let return_ident = if self.is_main {
+            let img = "&mut *IMAGE.lock().unwrap()";
+            let cam = "&*CAMERA.lock().unwrap()";
+            let world = "&*WORLD.lock().unwrap()";
+            let renderer_str = format!("renderer.cpu_render({img}, {cam}, {world});");
+            writeln!(self.file_writer, "{renderer_str}").unwrap();
+            self.get_indent_str()
+        } else {
+            "".to_string()
+        };
+
+        write!(self.file_writer, "{return_ident}return ").unwrap();
         walk_hir_expr(self, value);
         write!(self.file_writer, ";").unwrap();
     }
@@ -335,7 +354,7 @@ impl HIRWalkable for RustCodegen {
     }
 
     fn visit_fn_call(&mut self, name: &str, args: &[HIRExpr]) {
-       write!(self.file_writer, "{name}").unwrap();
+       write!(self.file_writer, "{name}(").unwrap();
         let mut first = true; 
         for arg in args {
             if first {
@@ -400,6 +419,7 @@ impl HIRWalkable for RustCodegen {
         }
     }
 
+    /// Precondition: Must have fields already reordered
     fn visit_struct_literal(&mut self, ty: &SpecificTypeKind, fields: &[HIRFieldInit]) {
         match ty {
             SpecificTypeKind::Vec3
@@ -428,7 +448,7 @@ impl HIRWalkable for RustCodegen {
             SpecificTypeKind::Arduino => write!(self.file_writer, "RenderOutput::Arduino").unwrap(),
             SpecificTypeKind::PPM => write!(self.file_writer, "RenderOutput::PPM").unwrap(),
             SpecificTypeKind::Material
-            | SpecificTypeKind::OutputType => todo!(),
+            | SpecificTypeKind::OutputType => unreachable!("these are generic types for compiler"),
         }
     }
 }
