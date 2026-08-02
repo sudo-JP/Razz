@@ -195,7 +195,7 @@ impl HIRStructurizer {
                 for arg in *args {
                     let expr = self.structurize_operand(&arg.operand);
                     let target = **target;
-                    if !self.is_reachable(block_map, true_label, arg.from_id) {
+                    if !self.is_reachable(block_map, arg.from_id, true_label) {
                         decl.push(HIRStmt::Assign { target, expr });
                     } else {
                         updates.push(HIRStmt::Assign { target, expr });
@@ -208,7 +208,8 @@ impl HIRStructurizer {
                 cond,
                 block: instrs,
             };
-            curr_instrs.splice(0..0, decl);
+            curr_instrs.extend(decl);
+            //curr_instrs.splice(0..0, decl);
             curr_instrs.push(for_stmt);
             curr_instrs.append(&mut after);
             DFSResult::ForwardEdge(curr_instrs)

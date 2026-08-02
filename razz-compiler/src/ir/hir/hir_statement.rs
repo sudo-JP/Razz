@@ -23,7 +23,7 @@ pub struct HIRProgram {
 }
 
 // No for loop btw, its all desugared to while
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum HIRStmt {
     /// <temp> = <expr>
     Assign { 

@@ -447,8 +447,7 @@ impl<'ast> SSALowerer<'ast> {
                 let temp = self.expr_temp(expr);
 
                 let arranged_fields = sp_order_map.iter()
-                    .map(|f| (f, field_map.get(f).expect("Semantic should resolve this"))
-                    )
+                    .filter_map(|f| field_map.get(f).map(|v| (f, v)))
                     .collect::<Vec<_>>();
 
                 let field_init_vec = arranged_fields.iter()

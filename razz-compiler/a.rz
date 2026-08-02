@@ -1,17 +1,9 @@
-fn add(a: int, b: int) int {
-    return a + b;
-}
-
-fn main() int {
-    cam = GET /camera;
-    cam->vfov = 45.5;
-    color = Color { r: add(a: 1, b: 2), g: 3, b: 4 };
-    flag = !(1 < 2) || (3 <= 4 && true);
-    result = 0;
-    if flag {
-        result = add(a: color->r, b: 5);
-    } else {
-        result = -1;
+fn foo() int {
+    dummy = 1;
+    for i = 0; false; dummy = 0 {
+        for j = 0; false; dummy = 1 {
+            dummy += 2;
+        }
     }
-    return result;
+    return dummy;
 }
