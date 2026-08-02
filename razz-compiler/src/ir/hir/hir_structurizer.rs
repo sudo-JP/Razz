@@ -208,9 +208,9 @@ impl HIRStructurizer {
                 cond,
                 block: instrs,
             };
-            curr_instrs.extend(decl);
+            //curr_instrs.extend(decl);
             curr_instrs.splice(0..0, decl);
-            //curr_instrs.push(for_stmt);
+            curr_instrs.push(for_stmt);
             curr_instrs.append(&mut after);
             DFSResult::ForwardEdge(curr_instrs)
         } else {
