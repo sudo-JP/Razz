@@ -1,7 +1,7 @@
 fn foo() int {
     dummy = 1;
-    for i = 0; false; dummy = 0 {
-        for j = 0; false; dummy = 1 {
+    for i = 0; false; i += 2 {
+        for j = 0; false; j += 1 {
             dummy += 2;
         }
     }

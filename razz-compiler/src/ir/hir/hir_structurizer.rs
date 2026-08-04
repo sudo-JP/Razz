@@ -195,7 +195,7 @@ impl HIRStructurizer {
                 for arg in *args {
                     let expr = self.structurize_operand(&arg.operand);
                     let target = **target;
-                    if !self.is_reachable(block_map, arg.from_id, true_label) {
+                    if !self.is_reachable(block_map, true_label, arg.from_id, node_id) {
                         decl.push(HIRStmt::Assign { target, expr });
                     } else {
                         updates.push(HIRStmt::Assign { target, expr });
@@ -638,18 +638,20 @@ impl HIRStructurizer {
     /// can we reach to's node
     fn is_reachable(&self, 
         block_map: &HashMap<BlockId, &SSABlock>, 
-        from_id: BlockId,
-        to_id: BlockId
+        start_id: BlockId,
+        target_id: BlockId,
+        stop_at: BlockId
     ) -> bool {
-        let mut stack = vec![from_id];
+        let mut stack = vec![start_id];
         let mut visited: HashSet<BlockId> = HashSet::new();
 
         while let Some(curr_id) = stack.pop() {
-            if curr_id == to_id {
+            if curr_id == target_id {
                 return true;
-            } else if visited.get(&curr_id).is_some() {
+            } else if visited.get(&curr_id).is_some()
+            || curr_id == stop_at {
                 continue;
-            }
+            } 
 
             let curr = block_map.get(&curr_id)
                 .expect(BLOCK_MAP_ERR);
