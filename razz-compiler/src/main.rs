@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 fn main() -> io::Result<()> {
     let cli = Cli::parse();
     let contents = fs::read_to_string(cli.path)?;
-    let compiler = Compiler::new(cli.debug);
+    let compiler = Compiler::new(cli.debug, cli.optimized);
     let output = compiler.compiles(&contents, cli.output);
     let mut is_err = false;
     match output {

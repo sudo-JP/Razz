@@ -10,7 +10,7 @@ use razz_compiler::compiler::{
 use common::{colored_assert, load_fixture};
 
 fn run_lexer(input: &str) -> String {
-    let compiler = Compiler::new(CompilerStage::Lexer);
+    let compiler = Compiler::new(CompilerStage::Lexer, false);
     match compiler.compiles(input, None) {
         Ok(CompilerOutput::Lexer(tokens)) => tokens
             .iter()

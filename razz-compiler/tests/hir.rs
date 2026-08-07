@@ -25,7 +25,7 @@ mod common;
 use common::{colored_assert_debug, load_fixture};
 
 fn run_hir(input: &str) -> HIRProgram {
-    let compiler = Compiler::new(CompilerStage::HIR);
+    let compiler = Compiler::new(CompilerStage::HIR, false);
     match compiler.compiles(input, None) {
         Ok(CompilerOutput::HIR(prog)) => prog,
         Ok(_) => panic!("Compiler flag mismatch"),

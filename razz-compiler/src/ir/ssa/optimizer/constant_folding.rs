@@ -1,13 +1,36 @@
-use std::ops::{Add, Div, Mul, Sub, };
+use std::ops::{Add, Div, Mul, Sub};
 
-use crate::{ast::expression::{BinOpKind, Literal}, ir::{Temp, ssa::{optimizer::Optimization, ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram}}}};
+use crate::{ast::expression::{BinOpKind, Literal, UnOpKind}, 
+    ir::{Temp, ssa::{optimizer::Optimization, 
+        ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram}}
+    }
+};
 
 pub struct ConstantFolding;
+
+fn expand_un_op_instr(target: &Temp, op: &UnOpKind, value: &SSAOperand) -> Option<SSAInstruction> {
+    match value  {
+        SSAOperand::Const(l) => {
+            let folded = expand_un_op_literal(op, l);
+            Some(SSAInstruction::Copy { target: *target, value: SSAOperand::Const(folded) })
+        },
+        _ => None, 
+    }
+}
+
+fn expand_un_op_literal(op: &UnOpKind, value: &Literal) -> Literal {
+    match (op, value) {
+        (UnOpKind::Not, Literal::Bool(b)) => Literal::Bool(!*b),
+        (UnOpKind::Minus, Literal::Int(i)) => Literal::Int(-*i), 
+        (UnOpKind::Minus, Literal::Float(f)) => Literal::Float(-*f),
+        _ => unreachable!("semantic problem")
+    }
+}
 
 fn expand_bin_op_instr(target: &Temp, lhs: &SSAOperand, op: &BinOpKind, rhs: &SSAOperand) -> Option<SSAInstruction> {
     match (lhs, rhs) {
         (SSAOperand::Const(l1), SSAOperand::Const(l2)) => {
-            let folded = expand_literal(l1, op, l2);
+            let folded = expand_bin_op_literal(l1, op, l2);
             Some(SSAInstruction::Copy { target: *target, value: SSAOperand::Const(folded) })
         },
         (_, _) => None, 
@@ -15,7 +38,7 @@ fn expand_bin_op_instr(target: &Temp, lhs: &SSAOperand, op: &BinOpKind, rhs: &SS
 }
 
 // This is hell to type btw 
-fn expand_literal(lhs: &Literal, op: &BinOpKind, rhs: &Literal) -> Literal {
+fn expand_bin_op_literal(lhs: &Literal, op: &BinOpKind, rhs: &Literal) -> Literal {
     match (lhs, op, rhs) {
         // Int 
         // Arithmetic
@@ -108,6 +131,7 @@ impl ConstantFolding {
         let mut mutated = false;
         for i in 0..block.instrs.len() {
             mutated = mutated || match &block.instrs[i] {
+                // Bin op 
                 SSAInstruction::BinOp { target, lhs, op, rhs } => {
                     let instr = expand_bin_op_instr(target, lhs, op, rhs);
                     let instr_mutated = instr.is_some();
@@ -116,8 +140,14 @@ impl ConstantFolding {
                     }
                     instr_mutated
                 },
+                // Un op
                 SSAInstruction::UnOp { target, op, value } => {
-                    false
+                    let instr = expand_un_op_instr(target, op, value);
+                    let instr_mutated = instr.is_some();
+                    if let Some(instr) = instr {
+                        block.instrs[i] = instr;
+                    }
+                    instr_mutated
                 },
                 _ => false,
             };

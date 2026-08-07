@@ -12,7 +12,7 @@ mod common;
 use common::{colored_assert, load_fixture};
 
 fn run_ir(input: &str) -> SSAProgram {
-    let compiler = Compiler::new(CompilerStage::SSAIR);
+    let compiler = Compiler::new(CompilerStage::SSAIR, false);
     match compiler.compiles(input, None) {
         Ok(CompilerOutput::SSAIR(blocks)) => blocks,
         Ok(_) => panic!("Compiler flag mismatch"),
