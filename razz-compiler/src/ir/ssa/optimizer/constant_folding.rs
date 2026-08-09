@@ -1,12 +1,11 @@
 use std::ops::{Add, Div, Mul, Sub};
 
 use crate::{ast::expression::{BinOpKind, Literal, UnOpKind}, 
-    ir::{Temp, ssa::{optimizer::Optimization, 
+    ir::{Temp, ssa::{
         ssa::{SSABlock, SSAFunction, SSAInstruction, SSAOperand, SSAProgram}}
     }
 };
 
-pub struct ConstantFolding;
 
 fn expand_un_op_instr(target: &Temp, op: &UnOpKind, value: &SSAOperand) -> Option<SSAInstruction> {
     match value  {
@@ -126,44 +125,40 @@ where
     }
 }
 
-impl ConstantFolding {
-    fn constant_fold_block(&self, block: &mut SSABlock) -> bool {
-        let mut mutated = false;
-        for i in 0..block.instrs.len() {
-            mutated = mutated || match &block.instrs[i] {
-                // Bin op 
-                SSAInstruction::BinOp { target, lhs, op, rhs } => {
-                    let instr = expand_bin_op_instr(target, lhs, op, rhs);
-                    let instr_mutated = instr.is_some();
-                    if let Some(instr) = instr {
-                        block.instrs[i] = instr;
-                    }
-                    instr_mutated
-                },
-                // Un op
-                SSAInstruction::UnOp { target, op, value } => {
-                    let instr = expand_un_op_instr(target, op, value);
-                    let instr_mutated = instr.is_some();
-                    if let Some(instr) = instr {
-                        block.instrs[i] = instr;
-                    }
-                    instr_mutated
-                },
-                _ => false,
-            };
-        }
-        mutated
+fn constant_fold_block(block: &mut SSABlock) -> bool {
+    let mut mutated = false;
+    for i in 0..block.instrs.len() {
+        mutated = mutated || match &block.instrs[i] {
+            // Bin op 
+            SSAInstruction::BinOp { target, lhs, op, rhs } => {
+                let instr = expand_bin_op_instr(target, lhs, op, rhs);
+                let instr_mutated = instr.is_some();
+                if let Some(instr) = instr {
+                    block.instrs[i] = instr;
+                }
+                instr_mutated
+            },
+            // Un op
+            SSAInstruction::UnOp { target, op, value } => {
+                let instr = expand_un_op_instr(target, op, value);
+                let instr_mutated = instr.is_some();
+                if let Some(instr) = instr {
+                    block.instrs[i] = instr;
+                }
+                instr_mutated
+            },
+            _ => false,
+        };
     }
-
-    fn constant_fold_fn(&self, function: &mut SSAFunction) -> bool {
-        function.blocks.iter_mut()
-            .fold(false, |acc, mut block| acc || self.constant_fold_block(&mut block))
-    }
+    mutated
 }
 
-impl Optimization for ConstantFolding {
-    fn optimize(&mut self, ssa_prog: &mut SSAProgram) -> bool {
-        ssa_prog.functions.iter_mut()
-            .fold(false, |acc, mut f| acc || self.constant_fold_fn(&mut f))
-    }
+fn constant_fold_fn(function: &mut SSAFunction) -> bool {
+    function.blocks.iter_mut()
+        .fold(false, |acc, mut block| acc || constant_fold_block(&mut block))
+}
+
+pub fn constant_folding(ssa_prog: &mut SSAProgram) -> bool {
+    ssa_prog.functions.iter_mut()
+        .fold(false, |acc, mut f| acc || constant_fold_fn(&mut f))
 }

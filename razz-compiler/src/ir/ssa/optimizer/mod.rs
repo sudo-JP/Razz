@@ -1,6 +1,12 @@
-use crate::ir::ssa::ssa::SSAProgram;
+use crate::ir::ssa::{optimizer::constant_folding::constant_folding, ssa::SSAProgram};
 pub mod constant_folding;
+pub mod constant_prop;
 
-pub trait Optimization {
-    fn optimize(&mut self, ssa_prog: &mut SSAProgram) -> bool;
+
+
+pub fn optimize_ssa(prog: &mut SSAProgram) {
+    let mut flag = true; 
+    while flag {
+        flag = constant_folding(prog);
+    }
 }

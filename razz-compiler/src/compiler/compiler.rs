@@ -6,8 +6,7 @@ use crate::codegen::rust_codegen::RustCodegen;
 use crate::compiler::error::CompilerError;
 use crate::ir::hir::hir_statement::HIRProgram;
 use crate::ir::hir::hir_structurizer::HIRStructurizer;
-use crate::ir::ssa::optimizer::Optimization;
-use crate::ir::ssa::optimizer::constant_folding::ConstantFolding;
+use crate::ir::ssa::optimizer::optimize_ssa;
 use crate::ir::ssa::ssa::SSAProgram;
 use crate::ir::ssa::ssa_lowerer::SSALowerer;
 use crate::lexer::tokens::Token;
@@ -78,13 +77,14 @@ impl Compiler {
 
         //  ============= IR LOWERING (SSA at least) ============= 
         let lowerer = SSALowerer::new(type_table);
-        let ssa_program = lowerer.lower(&prog);
+        let mut ssa_program = lowerer.lower(&prog);
         if matches!(self.debug, CompilerStage::SSAIR) {
             return Ok(CompilerOutput::SSAIR(ssa_program));
         }
 
-        /*let mut const_fol = ConstantFolding;
-        const_fol.optimize(&mut ssa_program);*/
+        if self.optimized {
+            optimize_ssa(&mut ssa_program);
+        }
 
         //  ============= HIR STRUCTURIZER ============= 
         let structurizer = HIRStructurizer::new();
