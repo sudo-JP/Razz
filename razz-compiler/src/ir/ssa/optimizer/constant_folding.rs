@@ -155,10 +155,10 @@ fn constant_fold_block(block: &mut SSABlock) -> bool {
 
 fn constant_fold_fn(function: &mut SSAFunction) -> bool {
     function.blocks.iter_mut()
-        .fold(false, |acc, mut block| acc || constant_fold_block(&mut block))
+        .fold(false, |acc, mut block| acc | constant_fold_block(&mut block))
 }
 
 pub fn constant_folding(ssa_prog: &mut SSAProgram) -> bool {
     ssa_prog.functions.iter_mut()
-        .fold(false, |acc, mut f| acc || constant_fold_fn(&mut f))
+        .fold(false, |acc, mut f| acc | constant_fold_fn(&mut f))
 }

@@ -13,6 +13,6 @@ pub struct Cli {
     #[arg(short, long)]
     pub output: Option<String>,
 
-    #[arg(short, long)]
+    #[arg(long)]
     pub optimized: bool,
 }

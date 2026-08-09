@@ -78,12 +78,12 @@ impl Compiler {
         //  ============= IR LOWERING (SSA at least) ============= 
         let lowerer = SSALowerer::new(type_table);
         let mut ssa_program = lowerer.lower(&prog);
-        if matches!(self.debug, CompilerStage::SSAIR) {
-            return Ok(CompilerOutput::SSAIR(ssa_program));
-        }
 
         if self.optimized {
             optimize_ssa(&mut ssa_program);
+        }
+        if matches!(self.debug, CompilerStage::SSAIR) {
+            return Ok(CompilerOutput::SSAIR(ssa_program));
         }
 
         //  ============= HIR STRUCTURIZER ============= 
