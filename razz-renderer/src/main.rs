@@ -1,6 +1,6 @@
 //use std::time::Duration;
 use clap::Parser;
-use razz_renderer::{cli::Cli, generated};
+use razz_renderer::{cli::Cli};
 /*use rumqttc::{MqttOptions, AsyncClient, QoS};
 use tokio::{task, time};
 
@@ -32,6 +32,5 @@ async fn main()  {
             .unwrap();
         println!("Received = {:?}", noti);
     }*/
-    generated::foo();
 }
 

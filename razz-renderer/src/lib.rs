@@ -4,7 +4,6 @@ pub mod geometry;
 pub mod scene;
 pub mod output;
 pub mod material;
-pub mod generated;
 
 pub use cli::Cli;
 pub use cli::RenderOutput;
