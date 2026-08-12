@@ -1,0 +1,8 @@
+fn main() null {
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.0, y: 0.0, z: -1.0 },
+        radius: 0.5,
+        material: Lambertian { albedo: Color { r: 200, g: 100, b: 100 } }
+    };
+    return null;
+}

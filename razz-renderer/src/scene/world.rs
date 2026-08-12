@@ -3,6 +3,7 @@ use crate::geometry::hittable::{HitRecord, Hittable};
 
 /// Background struct holds the lerp color representation.
 /// 
+#[derive(Clone, Default)]
 pub struct Background {
     pub top: Color3, 
     pub bottom: Color3, 
@@ -21,7 +22,7 @@ impl Background {
 }
 
 pub struct World {
-    pub objects: Vec<Box<dyn Hittable>>,
+    pub objects: Vec<Box<dyn Hittable + Send + Sync>>,
     pub bg: Background,
 }
 
@@ -48,7 +49,7 @@ impl Hittable for World {
 impl World {
     pub fn new(bg: Background) -> Self { Self { objects: vec![], bg }}
 
-    pub fn push(&mut self, object: Box<dyn Hittable>) {
+    pub fn push(&mut self, object: Box<dyn Hittable + Send + Sync>) {
         self.objects.push(object);
     }
 

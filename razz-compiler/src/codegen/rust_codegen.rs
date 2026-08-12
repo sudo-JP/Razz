@@ -141,11 +141,11 @@ impl HIRWalkable for RustCodegen {
         // Imports 
         let raw_import_str = r#"
             use razz_renderer::output::{ImageOutput};
-            use std::sync::{LazyLock, Mutex};
+            use std::sync::{Arc, LazyLock, Mutex};
             use razz_renderer::render::Image;
             use razz_renderer::world::Background;
             use razz_core::math::{random_f64, random_range, vec3::{Color3, Point3, Vec3}};
-            use razz_renderer::{Camera, Dielectric, Lambertian, Material, Metal, PPMOutput, Renderer, Sphere, World, RenderOutput};
+            use razz_renderer::{Camera, Dielectric, Lambertian, Material, Metal, Output, PPMOutput, Renderer, Sphere, World, RenderOutput};
         "#;
 
         let clean_import_str = clean_str(raw_import_str);
@@ -153,16 +153,17 @@ impl HIRWalkable for RustCodegen {
 
         // Const 
         let raw_const_objs = r#"
-            static IMAGE: LazyLock<Mutex<Image>> = LazyLock::new(|| Mutex::new(Image::new(0., 0., 3)));
+            static IMAGE: LazyLock<Mutex<Image>> = LazyLock::new(|| Mutex::new(Image::new(0, 0, 3)));
 
             static CAMERA: LazyLock<Mutex<Camera>> = LazyLock::new(|| Mutex::new(
                 Camera::new(
                    Point3::default(),
                    Point3::default(),
-                   Vec3::default(),
                    0.6,
+                   Vec3::default(),
                    10., 
-                   &Image::new(0., 0., 3)
+                   0.0,
+                   &Image::new(0, 0, 3)
                 )
             ));
 
@@ -176,11 +177,11 @@ impl HIRWalkable for RustCodegen {
                 )
             ));
 
-            static OUTPUT: LazyLock<Mutex<RenderOutput>> = LazyLock::new(|| Mutex::new(
-                RenderOutput::PPM
+            static OUTPUT: LazyLock<Mutex<Output>> = LazyLock::new(|| Mutex::new(
+                Output::default()
             ));
 
-            static RENDERER: LazyLock<Mutex<Renderer>> = LazyLock::new(|| Renderer::new(50));
+            static RENDERER: LazyLock<Mutex<Renderer>> = LazyLock::new(|| Mutex::new(Renderer::new(50)));
         "#;
 
         let clean_const_objs = clean_str(raw_const_objs);
@@ -276,8 +277,10 @@ impl HIRWalkable for RustCodegen {
             let img = "&mut *IMAGE.lock().unwrap()";
             let cam = "&*CAMERA.lock().unwrap()";
             let world = "&*WORLD.lock().unwrap()";
-            let renderer_str = format!("renderer.cpu_render({img}, {cam}, {world});");
+            let renderer_str = format!("RENDERER.lock().unwrap().cpu_render({img}, {cam}, {world});");
             writeln!(self.file_writer, "{renderer_str}").unwrap();
+            let indent = self.get_indent_str();
+            writeln!(self.file_writer, "{indent}OUTPUT.lock().unwrap().write(&*IMAGE.lock().unwrap()).unwrap();").unwrap();
             self.get_indent_str()
         } else {
             "".to_string()
@@ -379,7 +382,11 @@ impl HIRWalkable for RustCodegen {
     fn visit_literal(&mut self, literal: &Literal) {
         match literal {
             Literal::Int(i) => write!(self.file_writer, "{i}").unwrap(), 
-            Literal::Float(f) => write!(self.file_writer, "{f}").unwrap(),
+            // `{f}` (Display) drops the trailing `.0` for whole-number floats
+            // (e.g. 0.0 -> "0"), which Rust then parses as an integer literal
+            // and rejects in float-typed positions. `{:?}` (Debug) always
+            // keeps the decimal point.
+            Literal::Float(f) => write!(self.file_writer, "{f:?}").unwrap(),
             Literal::String(s) => write!(self.file_writer, "{s}").unwrap(),
             Literal::Bool(b) => write!(self.file_writer, "{b}").unwrap(), 
             Literal::Null => write!(self.file_writer, "()").unwrap(),
@@ -441,7 +448,27 @@ impl HIRWalkable for RustCodegen {
                     } else {
                         write!(self.file_writer, ", ").unwrap();
                     }
+                    // Sphere::new expects `Arc<dyn Material + Send + Sync>`
+                    // for its `material` field, not a bare concrete type, so
+                    // wrap the value here.
+                    let needs_arc = *ty == SpecificTypeKind::Sphere && field.name == "material";
+                    if needs_arc {
+                        write!(self.file_writer, "Arc::new(").unwrap();
+                    }
+                    // Color's r/g/b fields are `Int` (0-255) in the language,
+                    // but `Color3` is `f64` (0.0-1.0), so scale here.
+                    let needs_color_scale = *ty == SpecificTypeKind::Color
+                        && matches!(field.name.as_str(), "r" | "g" | "b");
+                    if needs_color_scale {
+                        write!(self.file_writer, "(").unwrap();
+                    }
                     walk_hir_expr(self, &field.value);
+                    if needs_color_scale {
+                        write!(self.file_writer, " as f64 / 255.0)").unwrap();
+                    }
+                    if needs_arc {
+                        write!(self.file_writer, ")").unwrap();
+                    }
                 }
                 write!(self.file_writer, ")").unwrap();
             }
@@ -460,7 +487,7 @@ fn get_rust_specific_type(sp_ty: &SpecificTypeKind) -> &'static str {
         SpecificTypeKind::Lambertian => "Lambertian",
         SpecificTypeKind::Metal => "Metal",
         SpecificTypeKind::Point3 => "Point3",
-        SpecificTypeKind::Color => "Color",
+        SpecificTypeKind::Color => "Color3",
         SpecificTypeKind::Background => "Background",
         SpecificTypeKind::Camera => "Camera",
         SpecificTypeKind::Sphere => "Sphere",

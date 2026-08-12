@@ -2,6 +2,7 @@ use crate::render::Image;
 use razz_core::math::{vec3::cross, Point3, random_f64, Ray, Vec3};
 
 
+#[derive(Clone)]
 pub struct Camera {
     pos: Point3,
     pixel00: Point3, 

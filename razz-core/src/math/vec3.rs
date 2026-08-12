@@ -6,7 +6,7 @@ use crate::math::{random_f64, random_range};
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {
     pub v: [f64; 3]
 }
