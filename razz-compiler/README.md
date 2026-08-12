@@ -6,6 +6,18 @@ Please see `docs/` for documentation on the language and `examples/` for sample 
 
 Yes I handwrote all of this myself, even the docs and the `====== LEXER =====`
 
+## Usage 
+Run 
+
+```bash
+cargo run -- ./examples/very_advanced.rz --optimized
+```
+
+There's debug mode
+```bash
+cargo run -- ./examples/sphere_demo.rz --ssair
+```
+
 ## TODO: 
 - Change String -> String Interner for perf and measure it 
 
@@ -52,9 +64,13 @@ Couple of refactorings were done to the compiler, each pipeline stage poses some
 
 ### Codegen 
 - At the finish line, naturally im lazy. 
-    - I hate that I have to look back at months old API, I usually just want to move up, but it is what is it. 
+- I hate that I have to look back at months old API, I usually just want to move up, but it is what is it. 
+
+### Optimization passes
+I'm too lazy to write more optimization passes. Just three are fine ig. Too lazy to do dead branch elim.
 
 ## Summary overall feelings throughout this journey
+Very fun, many ups and down but I learned a lot. Rust is truly THE language for compiler work. I can't image writing a switch case in other language, or missing out destructing, etc. Still love this language.
 
 ## AI Usage 
 I asks AI to help me write tests for me, code review and fix my own bugs when tests failed. I tried to tell the AI to treat it like black box. It's not like I don't use AI at all, but I'm very frugal in the sense that I'll continue to use free services until the end of time. That being said, I use Claude to basically do pair programming, where I think, implement, and ask for ideas when problems arise. 
