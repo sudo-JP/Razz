@@ -1,0 +1,9104 @@
+// Auto-generated benchmark corpus (single file, one `main`).
+// Sections, in order:
+//   1. Arithmetic / float / boolean / string helper functions
+//      plus trivial no-op functions.
+//   2. Control-flow heavy: recursion, while/for loops, nested
+//      if/else-if chains, classic numeric algorithms.
+//   3. Deep expression nesting: long chained-arithmetic/boolean
+//      functions, more trivial padding.
+//   4. HTTP-endpoint-heavy scene construction: camera/background/
+//      image/output PUT/PATCH plus a large unrolled batch of
+//      POST /hittable Sphere{...} across all material variants.
+// `main()` at the bottom exercises a slice of every section above.
+
+fn arith_0(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_1(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_2(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_3(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_4(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_5(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_6(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_7(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_8(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_9(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_10(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y - a;
+    return z;
+}
+
+fn arith_11(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_12(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_13(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_14(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_15(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_16(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_17(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_18(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_19(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_20(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_21(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_22(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_23(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y - a;
+    return z;
+}
+
+fn arith_24(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_25(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_26(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_27(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_28(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_29(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_30(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_31(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_32(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_33(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_34(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_35(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_36(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_37(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_38(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_39(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_40(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_41(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_42(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_43(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_44(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_45(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_46(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_47(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_48(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_49(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_50(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_51(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_52(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_53(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_54(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_55(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_56(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_57(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_58(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_59(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_60(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_61(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_62(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_63(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_64(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_65(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y - a;
+    return z;
+}
+
+fn arith_66(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_67(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_68(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_69(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_70(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_71(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y - a;
+    return z;
+}
+
+fn arith_72(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y - a;
+    return z;
+}
+
+fn arith_73(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_74(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_75(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_76(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y - a;
+    return z;
+}
+
+fn arith_77(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_78(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_79(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_80(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_81(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_82(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x * c;
+    z = y + a;
+    return z;
+}
+
+fn arith_83(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x + c;
+    z = y + a;
+    return z;
+}
+
+fn arith_84(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_85(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x - c;
+    z = y * a;
+    return z;
+}
+
+fn arith_86(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x + c;
+    z = y * a;
+    return z;
+}
+
+fn arith_87(a: int, b: int, c: int) int {
+    x = a + b;
+    y = x * c;
+    z = y * a;
+    return z;
+}
+
+fn arith_88(a: int, b: int, c: int) int {
+    x = a * b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn arith_89(a: int, b: int, c: int) int {
+    x = a - b;
+    y = x - c;
+    z = y + a;
+    return z;
+}
+
+fn flt_0(a: float, b: float) float {
+    x = a * 1.02;
+    y = b / 6.9;
+    return x + y;
+}
+
+fn flt_1(a: float, b: float) float {
+    x = a * 3.57;
+    y = b / 4.72;
+    return x + y;
+}
+
+fn flt_2(a: float, b: float) float {
+    x = a * 8.57;
+    y = b / 1.58;
+    return x + y;
+}
+
+fn flt_3(a: float, b: float) float {
+    x = a * 6.5;
+    y = b / 6.79;
+    return x + y;
+}
+
+fn flt_4(a: float, b: float) float {
+    x = a * 0.69;
+    y = b / 7.51;
+    return x + y;
+}
+
+fn flt_5(a: float, b: float) float {
+    x = a * 7.95;
+    y = b / 2.06;
+    return x + y;
+}
+
+fn flt_6(a: float, b: float) float {
+    x = a * 1.98;
+    y = b / 5.82;
+    return x + y;
+}
+
+fn flt_7(a: float, b: float) float {
+    x = a * 1.47;
+    y = b / 2.71;
+    return x + y;
+}
+
+fn flt_8(a: float, b: float) float {
+    x = a * 4.63;
+    y = b / 8.8;
+    return x + y;
+}
+
+fn flt_9(a: float, b: float) float {
+    x = a * 0.84;
+    y = b / 8.21;
+    return x + y;
+}
+
+fn flt_10(a: float, b: float) float {
+    x = a * 8.49;
+    y = b / 1.96;
+    return x + y;
+}
+
+fn flt_11(a: float, b: float) float {
+    x = a * 6.49;
+    y = b / 5.86;
+    return x + y;
+}
+
+fn flt_12(a: float, b: float) float {
+    x = a * 0.24;
+    y = b / 1.92;
+    return x + y;
+}
+
+fn flt_13(a: float, b: float) float {
+    x = a * 7.48;
+    y = b / 3.18;
+    return x + y;
+}
+
+fn flt_14(a: float, b: float) float {
+    x = a * 4.08;
+    y = b / 5.34;
+    return x + y;
+}
+
+fn flt_15(a: float, b: float) float {
+    x = a * 8.57;
+    y = b / 9.04;
+    return x + y;
+}
+
+fn flt_16(a: float, b: float) float {
+    x = a * 1.71;
+    y = b / 1.12;
+    return x + y;
+}
+
+fn flt_17(a: float, b: float) float {
+    x = a * 3.93;
+    y = b / 9.25;
+    return x + y;
+}
+
+fn flt_18(a: float, b: float) float {
+    x = a * 7.79;
+    y = b / 3.61;
+    return x + y;
+}
+
+fn flt_19(a: float, b: float) float {
+    x = a * 6.93;
+    y = b / 7.53;
+    return x + y;
+}
+
+fn flt_20(a: float, b: float) float {
+    x = a * 7.78;
+    y = b / 6.92;
+    return x + y;
+}
+
+fn flt_21(a: float, b: float) float {
+    x = a * 4.87;
+    y = b / 2.77;
+    return x + y;
+}
+
+fn flt_22(a: float, b: float) float {
+    x = a * 2.23;
+    y = b / 1.61;
+    return x + y;
+}
+
+fn flt_23(a: float, b: float) float {
+    x = a * 7.31;
+    y = b / 1.64;
+    return x + y;
+}
+
+fn flt_24(a: float, b: float) float {
+    x = a * 3.17;
+    y = b / 1.54;
+    return x + y;
+}
+
+fn flt_25(a: float, b: float) float {
+    x = a * 4.77;
+    y = b / 9.19;
+    return x + y;
+}
+
+fn flt_26(a: float, b: float) float {
+    x = a * 5.31;
+    y = b / 1.6;
+    return x + y;
+}
+
+fn flt_27(a: float, b: float) float {
+    x = a * 5.08;
+    y = b / 8.59;
+    return x + y;
+}
+
+fn flt_28(a: float, b: float) float {
+    x = a * 0.77;
+    y = b / 1.7;
+    return x + y;
+}
+
+fn flt_29(a: float, b: float) float {
+    x = a * 8.55;
+    y = b / 4.65;
+    return x + y;
+}
+
+fn flt_30(a: float, b: float) float {
+    x = a * 9.33;
+    y = b / 6.11;
+    return x + y;
+}
+
+fn flt_31(a: float, b: float) float {
+    x = a * 5.77;
+    y = b / 1.45;
+    return x + y;
+}
+
+fn flt_32(a: float, b: float) float {
+    x = a * 0.9;
+    y = b / 6.88;
+    return x + y;
+}
+
+fn flt_33(a: float, b: float) float {
+    x = a * 5.64;
+    y = b / 3.88;
+    return x + y;
+}
+
+fn flt_34(a: float, b: float) float {
+    x = a * 2.66;
+    y = b / 6.99;
+    return x + y;
+}
+
+fn flt_35(a: float, b: float) float {
+    x = a * 3.18;
+    y = b / 3.44;
+    return x + y;
+}
+
+fn flt_36(a: float, b: float) float {
+    x = a * 1.38;
+    y = b / 6.78;
+    return x + y;
+}
+
+fn flt_37(a: float, b: float) float {
+    x = a * 4.58;
+    y = b / 9.28;
+    return x + y;
+}
+
+fn flt_38(a: float, b: float) float {
+    x = a * 9.27;
+    y = b / 1.18;
+    return x + y;
+}
+
+fn flt_39(a: float, b: float) float {
+    x = a * 6.19;
+    y = b / 6.05;
+    return x + y;
+}
+
+fn flt_40(a: float, b: float) float {
+    x = a * 1.08;
+    y = b / 5.83;
+    return x + y;
+}
+
+fn flt_41(a: float, b: float) float {
+    x = a * 5.06;
+    y = b / 2.27;
+    return x + y;
+}
+
+fn flt_42(a: float, b: float) float {
+    x = a * 3.52;
+    y = b / 1.71;
+    return x + y;
+}
+
+fn flt_43(a: float, b: float) float {
+    x = a * 2.49;
+    y = b / 3.61;
+    return x + y;
+}
+
+fn flt_44(a: float, b: float) float {
+    x = a * 4.39;
+    y = b / 5.88;
+    return x + y;
+}
+
+fn flt_45(a: float, b: float) float {
+    x = a * 3.06;
+    y = b / 9.76;
+    return x + y;
+}
+
+fn flt_46(a: float, b: float) float {
+    x = a * 8.01;
+    y = b / 5.75;
+    return x + y;
+}
+
+fn flt_47(a: float, b: float) float {
+    x = a * 6.65;
+    y = b / 5.98;
+    return x + y;
+}
+
+fn flt_48(a: float, b: float) float {
+    x = a * 9.23;
+    y = b / 2.01;
+    return x + y;
+}
+
+fn flt_49(a: float, b: float) float {
+    x = a * 8.71;
+    y = b / 3.43;
+    return x + y;
+}
+
+fn flt_50(a: float, b: float) float {
+    x = a * 8.82;
+    y = b / 7.63;
+    return x + y;
+}
+
+fn flt_51(a: float, b: float) float {
+    x = a * 1.62;
+    y = b / 3.58;
+    return x + y;
+}
+
+fn flt_52(a: float, b: float) float {
+    x = a * 2.16;
+    y = b / 4.12;
+    return x + y;
+}
+
+fn flt_53(a: float, b: float) float {
+    x = a * 6.84;
+    y = b / 8.61;
+    return x + y;
+}
+
+fn flt_54(a: float, b: float) float {
+    x = a * 5.05;
+    y = b / 3.31;
+    return x + y;
+}
+
+fn flt_55(a: float, b: float) float {
+    x = a * 9.0;
+    y = b / 1.55;
+    return x + y;
+}
+
+fn flt_56(a: float, b: float) float {
+    x = a * 6.32;
+    y = b / 8.4;
+    return x + y;
+}
+
+fn flt_57(a: float, b: float) float {
+    x = a * 0.53;
+    y = b / 4.04;
+    return x + y;
+}
+
+fn flt_58(a: float, b: float) float {
+    x = a * 1.38;
+    y = b / 9.72;
+    return x + y;
+}
+
+fn flt_59(a: float, b: float) float {
+    x = a * 1.68;
+    y = b / 4.99;
+    return x + y;
+}
+
+fn logic_0(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_1(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_2(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_3(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_4(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_5(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_6(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_7(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_8(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_9(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_10(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_11(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_12(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_13(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_14(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_15(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_16(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_17(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_18(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_19(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_20(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_21(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_22(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_23(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_24(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_25(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_26(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_27(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_28(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_29(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_30(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_31(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_32(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_33(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_34(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_35(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_36(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_37(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_38(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_39(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_40(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_41(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_42(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_43(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_44(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_45(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_46(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_47(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_48(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_49(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_50(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_51(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_52(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_53(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_54(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_55(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_56(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_57(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_58(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn logic_59(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn str_0(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_vector";
+    return result;
+}
+
+fn str_1(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_2(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_trace";
+    return result;
+}
+
+fn str_3(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_4(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_5(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_6(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_7(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_8(name: string) string {
+    greeting = "ray_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_9(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_10(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_11(name: string) string {
+    greeting = "light_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_12(name: string) string {
+    greeting = "light_" + name;
+    result = greeting + "_trace";
+    return result;
+}
+
+fn str_13(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_pixel";
+    return result;
+}
+
+fn str_14(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_15(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_16(name: string) string {
+    greeting = "sphere_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_17(name: string) string {
+    greeting = "scene_" + name;
+    result = greeting + "_vector";
+    return result;
+}
+
+fn str_18(name: string) string {
+    greeting = "ray_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_19(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_photon";
+    return result;
+}
+
+fn str_20(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn str_21(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_22(name: string) string {
+    greeting = "camera_" + name;
+    result = greeting + "_scene";
+    return result;
+}
+
+fn str_23(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_trace";
+    return result;
+}
+
+fn str_24(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_25(name: string) string {
+    greeting = "render_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_26(name: string) string {
+    greeting = "sphere_" + name;
+    result = greeting + "_render";
+    return result;
+}
+
+fn str_27(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_28(name: string) string {
+    greeting = "sphere_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_29(name: string) string {
+    greeting = "ray_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn str_30(name: string) string {
+    greeting = "sphere_" + name;
+    result = greeting + "_vector";
+    return result;
+}
+
+fn str_31(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_32(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_33(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn str_34(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_vector";
+    return result;
+}
+
+fn str_35(name: string) string {
+    greeting = "light_" + name;
+    result = greeting + "_pixel";
+    return result;
+}
+
+fn str_36(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_37(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_38(name: string) string {
+    greeting = "scene_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_39(name: string) string {
+    greeting = "camera_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_40(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_41(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_photon";
+    return result;
+}
+
+fn str_42(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_photon";
+    return result;
+}
+
+fn str_43(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_44(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_trace";
+    return result;
+}
+
+fn str_45(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_46(name: string) string {
+    greeting = "sphere_" + name;
+    result = greeting + "_camera";
+    return result;
+}
+
+fn str_47(name: string) string {
+    greeting = "ray_" + name;
+    result = greeting + "_shadow";
+    return result;
+}
+
+fn str_48(name: string) string {
+    greeting = "vector_" + name;
+    result = greeting + "_ray";
+    return result;
+}
+
+fn str_49(name: string) string {
+    greeting = "pixel_" + name;
+    result = greeting + "_pixel";
+    return result;
+}
+
+fn str_50(name: string) string {
+    greeting = "light_" + name;
+    result = greeting + "_shadow";
+    return result;
+}
+
+fn str_51(name: string) string {
+    greeting = "shadow_" + name;
+    result = greeting + "_shadow";
+    return result;
+}
+
+fn str_52(name: string) string {
+    greeting = "light_" + name;
+    result = greeting + "_sphere";
+    return result;
+}
+
+fn str_53(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_vector";
+    return result;
+}
+
+fn str_54(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn str_55(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_world";
+    return result;
+}
+
+fn str_56(name: string) string {
+    greeting = "photon_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn str_57(name: string) string {
+    greeting = "trace_" + name;
+    result = greeting + "_shadow";
+    return result;
+}
+
+fn str_58(name: string) string {
+    greeting = "camera_" + name;
+    result = greeting + "_pixel";
+    return result;
+}
+
+fn str_59(name: string) string {
+    greeting = "camera_" + name;
+    result = greeting + "_light";
+    return result;
+}
+
+fn noop_0() null {
+    return null;
+}
+
+fn noop_1() null {
+    return null;
+}
+
+fn noop_2() null {
+    return null;
+}
+
+fn noop_3() null {
+    return null;
+}
+
+fn noop_4() null {
+    return null;
+}
+
+fn noop_5() null {
+    return null;
+}
+
+fn noop_6() null {
+    return null;
+}
+
+fn noop_7() null {
+    return null;
+}
+
+fn noop_8() null {
+    return null;
+}
+
+fn noop_9() null {
+    return null;
+}
+
+fn noop_10() null {
+    return null;
+}
+
+fn noop_11() null {
+    return null;
+}
+
+fn noop_12() null {
+    return null;
+}
+
+fn noop_13() null {
+    return null;
+}
+
+fn noop_14() null {
+    return null;
+}
+
+fn noop_15() null {
+    return null;
+}
+
+fn noop_16() null {
+    return null;
+}
+
+fn noop_17() null {
+    return null;
+}
+
+fn noop_18() null {
+    return null;
+}
+
+fn noop_19() null {
+    return null;
+}
+
+fn noop_20() null {
+    return null;
+}
+
+fn noop_21() null {
+    return null;
+}
+
+fn noop_22() null {
+    return null;
+}
+
+fn noop_23() null {
+    return null;
+}
+
+fn noop_24() null {
+    return null;
+}
+
+fn noop_25() null {
+    return null;
+}
+
+fn noop_26() null {
+    return null;
+}
+
+fn noop_27() null {
+    return null;
+}
+
+fn noop_28() null {
+    return null;
+}
+
+fn noop_29() null {
+    return null;
+}
+
+fn noop_30() null {
+    return null;
+}
+
+fn noop_31() null {
+    return null;
+}
+
+fn noop_32() null {
+    return null;
+}
+
+fn noop_33() null {
+    return null;
+}
+
+fn noop_34() null {
+    return null;
+}
+
+fn noop_35() null {
+    return null;
+}
+
+fn noop_36() null {
+    return null;
+}
+
+fn noop_37() null {
+    return null;
+}
+
+fn noop_38() null {
+    return null;
+}
+
+fn noop_39() null {
+    return null;
+}
+
+fn noop_40() null {
+    return null;
+}
+
+fn noop_41() null {
+    return null;
+}
+
+fn noop_42() null {
+    return null;
+}
+
+fn noop_43() null {
+    return null;
+}
+
+fn noop_44() null {
+    return null;
+}
+
+fn noop_45() null {
+    return null;
+}
+
+fn noop_46() null {
+    return null;
+}
+
+fn noop_47() null {
+    return null;
+}
+
+fn noop_48() null {
+    return null;
+}
+
+fn noop_49() null {
+    return null;
+}
+
+fn noop_50() null {
+    return null;
+}
+
+fn noop_51() null {
+    return null;
+}
+
+fn noop_52() null {
+    return null;
+}
+
+fn noop_53() null {
+    return null;
+}
+
+fn noop_54() null {
+    return null;
+}
+
+fn noop_55() null {
+    return null;
+}
+
+fn noop_56() null {
+    return null;
+}
+
+fn noop_57() null {
+    return null;
+}
+
+fn noop_58() null {
+    return null;
+}
+
+fn noop_59() null {
+    return null;
+}
+
+fn noop_60() null {
+    return null;
+}
+
+fn noop_61() null {
+    return null;
+}
+
+fn noop_62() null {
+    return null;
+}
+
+fn noop_63() null {
+    return null;
+}
+
+fn noop_64() null {
+    return null;
+}
+
+fn noop_65() null {
+    return null;
+}
+
+fn noop_66() null {
+    return null;
+}
+
+fn noop_67() null {
+    return null;
+}
+
+fn noop_68() null {
+    return null;
+}
+
+fn noop_69() null {
+    return null;
+}
+
+fn noop_70() null {
+    return null;
+}
+
+fn noop_71() null {
+    return null;
+}
+
+fn noop_72() null {
+    return null;
+}
+
+fn noop_73() null {
+    return null;
+}
+
+fn noop_74() null {
+    return null;
+}
+
+fn noop_75() null {
+    return null;
+}
+
+fn noop_76() null {
+    return null;
+}
+
+fn noop_77() null {
+    return null;
+}
+
+fn noop_78() null {
+    return null;
+}
+
+fn noop_79() null {
+    return null;
+}
+
+fn noop_80() null {
+    return null;
+}
+
+fn noop_81() null {
+    return null;
+}
+
+fn noop_82() null {
+    return null;
+}
+
+fn noop_83() null {
+    return null;
+}
+
+fn noop_84() null {
+    return null;
+}
+
+fn noop_85() null {
+    return null;
+}
+
+fn noop_86() null {
+    return null;
+}
+
+fn noop_87() null {
+    return null;
+}
+
+fn noop_88() null {
+    return null;
+}
+
+fn noop_89() null {
+    return null;
+}
+
+fn noop_90() null {
+    return null;
+}
+
+fn noop_91() null {
+    return null;
+}
+
+fn noop_92() null {
+    return null;
+}
+
+fn noop_93() null {
+    return null;
+}
+
+fn noop_94() null {
+    return null;
+}
+
+fn noop_95() null {
+    return null;
+}
+
+fn noop_96() null {
+    return null;
+}
+
+fn noop_97() null {
+    return null;
+}
+
+fn noop_98() null {
+    return null;
+}
+
+fn noop_99() null {
+    return null;
+}
+
+fn noop_100() null {
+    return null;
+}
+
+fn noop_101() null {
+    return null;
+}
+
+fn noop_102() null {
+    return null;
+}
+
+fn noop_103() null {
+    return null;
+}
+
+fn noop_104() null {
+    return null;
+}
+
+fn noop_105() null {
+    return null;
+}
+
+fn noop_106() null {
+    return null;
+}
+
+fn noop_107() null {
+    return null;
+}
+
+fn noop_108() null {
+    return null;
+}
+
+fn noop_109() null {
+    return null;
+}
+
+fn noop_110() null {
+    return null;
+}
+
+fn noop_111() null {
+    return null;
+}
+
+fn noop_112() null {
+    return null;
+}
+
+fn noop_113() null {
+    return null;
+}
+
+fn noop_114() null {
+    return null;
+}
+
+fn noop_115() null {
+    return null;
+}
+
+fn noop_116() null {
+    return null;
+}
+
+fn noop_117() null {
+    return null;
+}
+
+fn noop_118() null {
+    return null;
+}
+
+fn noop_119() null {
+    return null;
+}
+
+fn is_prime(n: int) bool {
+    if n < 2 {
+        return false;
+    }
+    is_p = true;
+    for i = 2; i <= 1000; i += 1 {
+        if i * i <= n {
+            if n - (n / i) * i == 0 {
+                is_p = false;
+            }
+        }
+    }
+    return is_p;
+}
+
+fn fib(n: int) int {
+    if n <= 1 {
+        return n;
+    }
+    return fib(n: n - 1) + fib(n: n - 2);
+}
+
+fn fact(n: int) int {
+    if n <= 1 {
+        return 1;
+    }
+    return n * fact(n: n - 1);
+}
+
+fn gcd(a: int, b: int) int {
+    x = a;
+    y = b;
+    while y != 0 {
+        temp = y;
+        y = x - (x / y) * y;
+        x = temp;
+    }
+    return x;
+}
+
+fn sum_to_n(n: int) int {
+    total = 0;
+    for i = 1; i <= n; i += 1 {
+        total += i;
+    }
+    return total;
+}
+
+fn max3(a: int, b: int, c: int) int {
+    m = a;
+    if b > m {
+        m = b;
+    }
+    if c > m {
+        m = c;
+    }
+    return m;
+}
+
+fn clamp(x: int, lo: int, hi: int) int {
+    if x < lo {
+        return lo;
+    } else if x > hi {
+        return hi;
+    } else {
+        return x;
+    }
+}
+
+fn collatz_len(n: int) int {
+    steps = 0;
+    cur = n;
+    while cur != 1 {
+        half = cur / 2;
+        if cur - half * 2 == 0 {
+            cur = half;
+        } else {
+            cur = cur * 3 + 1;
+        }
+        steps += 1;
+    }
+    return steps;
+}
+
+fn branch_0(a: int) int {
+    if a < 42 {
+        if a - 21 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 53 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_1(a: int) int {
+    if a < 52 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_2(a: int) int {
+    if a < 38 {
+        if a - 19 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_3(a: int) int {
+    if a < 17 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 25 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_4(a: int) int {
+    if a < 54 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 86 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_5(a: int) int {
+    if a < 49 {
+        if a - 24 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 87 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_6(a: int) int {
+    if a < 23 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_7(a: int) int {
+    if a < 73 {
+        if a - 36 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 79 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_8(a: int) int {
+    if a < 39 {
+        if a - 19 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 52 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_9(a: int) int {
+    if a < 1 {
+        if a - 0 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_10(a: int) int {
+    if a < 37 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 39 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_11(a: int) int {
+    if a < 27 {
+        if a - 13 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 56 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_12(a: int) int {
+    if a < 75 {
+        if a - 37 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 78 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_13(a: int) int {
+    if a < 42 {
+        if a - 21 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 84 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_14(a: int) int {
+    if a < 57 {
+        if a - 28 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 60 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_15(a: int) int {
+    if a < 57 {
+        if a - 28 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 87 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_16(a: int) int {
+    if a < 28 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 66 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_17(a: int) int {
+    if a < 61 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 95 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_18(a: int) int {
+    if a < 22 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 85 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_19(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 37 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_20(a: int) int {
+    if a < 66 {
+        if a - 33 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 85 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_21(a: int) int {
+    if a < 80 {
+        if a - 40 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 82 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_22(a: int) int {
+    if a < 12 {
+        if a - 6 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 43 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_23(a: int) int {
+    if a < 31 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_24(a: int) int {
+    if a < 40 {
+        if a - 20 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 87 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_25(a: int) int {
+    if a < 26 {
+        if a - 13 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 29 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_26(a: int) int {
+    if a < 4 {
+        if a - 2 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 19 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_27(a: int) int {
+    if a < 6 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 32 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_28(a: int) int {
+    if a < 61 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 79 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_29(a: int) int {
+    if a < 10 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 99 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_30(a: int) int {
+    if a < 54 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 59 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_31(a: int) int {
+    if a < 74 {
+        if a - 37 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 81 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_32(a: int) int {
+    if a < 25 {
+        if a - 12 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 92 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_33(a: int) int {
+    if a < 50 {
+        if a - 25 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_34(a: int) int {
+    if a < 52 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 64 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_35(a: int) int {
+    if a < 19 {
+        if a - 9 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 32 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_36(a: int) int {
+    if a < 84 {
+        if a - 42 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_37(a: int) int {
+    if a < 1 {
+        if a - 0 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_38(a: int) int {
+    if a < 14 {
+        if a - 7 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 99 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_39(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 55 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_40(a: int) int {
+    if a < 23 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_41(a: int) int {
+    if a < 60 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 67 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_42(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 72 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_43(a: int) int {
+    if a < 16 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 32 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_44(a: int) int {
+    if a < 18 {
+        if a - 9 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 59 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_45(a: int) int {
+    if a < 60 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 86 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_46(a: int) int {
+    if a < 68 {
+        if a - 34 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 72 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_47(a: int) int {
+    if a < 41 {
+        if a - 20 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 77 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_48(a: int) int {
+    if a < 57 {
+        if a - 28 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_49(a: int) int {
+    if a < 79 {
+        if a - 39 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 93 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_50(a: int) int {
+    if a < 55 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 65 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_51(a: int) int {
+    if a < 58 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_52(a: int) int {
+    if a < 21 {
+        if a - 10 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_53(a: int) int {
+    if a < 58 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 61 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_54(a: int) int {
+    if a < 34 {
+        if a - 17 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_55(a: int) int {
+    if a < 32 {
+        if a - 16 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 82 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_56(a: int) int {
+    if a < 36 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 99 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_57(a: int) int {
+    if a < 63 {
+        if a - 31 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 67 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_58(a: int) int {
+    if a < 31 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 81 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_59(a: int) int {
+    if a < 36 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 57 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_60(a: int) int {
+    if a < 10 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 92 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_61(a: int) int {
+    if a < 31 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 37 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_62(a: int) int {
+    if a < 35 {
+        if a - 17 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 43 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_63(a: int) int {
+    if a < 41 {
+        if a - 20 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 70 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_64(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 18 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_65(a: int) int {
+    if a < 20 {
+        if a - 10 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 30 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_66(a: int) int {
+    if a < 50 {
+        if a - 25 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_67(a: int) int {
+    if a < 20 {
+        if a - 10 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 91 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_68(a: int) int {
+    if a < 9 {
+        if a - 4 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 28 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_69(a: int) int {
+    if a < 53 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 54 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_70(a: int) int {
+    if a < 43 {
+        if a - 21 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 70 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_71(a: int) int {
+    if a < 54 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 60 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_72(a: int) int {
+    if a < 8 {
+        if a - 4 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 27 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_73(a: int) int {
+    if a < 50 {
+        if a - 25 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 54 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_74(a: int) int {
+    if a < 75 {
+        if a - 37 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 99 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_75(a: int) int {
+    if a < 3 {
+        if a - 1 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_76(a: int) int {
+    if a < 74 {
+        if a - 37 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_77(a: int) int {
+    if a < 49 {
+        if a - 24 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 62 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_78(a: int) int {
+    if a < 1 {
+        if a - 0 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 46 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_79(a: int) int {
+    if a < 39 {
+        if a - 19 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_80(a: int) int {
+    if a < 50 {
+        if a - 25 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 54 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_81(a: int) int {
+    if a < 69 {
+        if a - 34 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_82(a: int) int {
+    if a < 70 {
+        if a - 35 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 95 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_83(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 78 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_84(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 63 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_85(a: int) int {
+    if a < 35 {
+        if a - 17 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 56 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_86(a: int) int {
+    if a < 4 {
+        if a - 2 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 63 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_87(a: int) int {
+    if a < 44 {
+        if a - 22 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 50 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_88(a: int) int {
+    if a < 86 {
+        if a - 43 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 87 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_89(a: int) int {
+    if a < 52 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 93 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_90(a: int) int {
+    if a < 22 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 60 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_91(a: int) int {
+    if a < 17 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 80 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_92(a: int) int {
+    if a < 4 {
+        if a - 2 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 69 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_93(a: int) int {
+    if a < 51 {
+        if a - 25 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 76 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_94(a: int) int {
+    if a < 73 {
+        if a - 36 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 85 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_95(a: int) int {
+    if a < 4 {
+        if a - 2 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 11 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_96(a: int) int {
+    if a < 55 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 83 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_97(a: int) int {
+    if a < 18 {
+        if a - 9 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 60 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_98(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 24 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_99(a: int) int {
+    if a < 34 {
+        if a - 17 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 49 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_100(a: int) int {
+    if a < 28 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 42 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_101(a: int) int {
+    if a < 42 {
+        if a - 21 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 59 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_102(a: int) int {
+    if a < 44 {
+        if a - 22 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_103(a: int) int {
+    if a < 36 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 49 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_104(a: int) int {
+    if a < 54 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_105(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 33 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_106(a: int) int {
+    if a < 3 {
+        if a - 1 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 61 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_107(a: int) int {
+    if a < 70 {
+        if a - 35 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_108(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 45 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn branch_109(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 84 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn loopy_0() int {
+    total = 0;
+    for j = 0; j < 9; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_1() int {
+    total = 0;
+    k = 0;
+    while k < 46 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_2() int {
+    total = 1;
+    for j = 1; j <= 7; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_3() int {
+    total = 0;
+    for j = 0; j < 6; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_4() int {
+    total = 0;
+    k = 0;
+    while k < 20 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_5() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_6() int {
+    total = 0;
+    for j = 0; j < 6; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_7() int {
+    total = 0;
+    k = 0;
+    while k < 44 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_8() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_9() int {
+    total = 0;
+    for j = 0; j < 20; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_10() int {
+    total = 0;
+    k = 0;
+    while k < 13 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_11() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_12() int {
+    total = 0;
+    for j = 0; j < 47; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_13() int {
+    total = 0;
+    k = 0;
+    while k < 12 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_14() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_15() int {
+    total = 0;
+    for j = 0; j < 18; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_16() int {
+    total = 0;
+    k = 0;
+    while k < 34 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_17() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_18() int {
+    total = 0;
+    for j = 0; j < 21; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_19() int {
+    total = 0;
+    k = 0;
+    while k < 28 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_20() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_21() int {
+    total = 0;
+    for j = 0; j < 43; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_22() int {
+    total = 0;
+    k = 0;
+    while k < 43 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_23() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_24() int {
+    total = 0;
+    for j = 0; j < 12; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_25() int {
+    total = 0;
+    k = 0;
+    while k < 15 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_26() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_27() int {
+    total = 0;
+    for j = 0; j < 11; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_28() int {
+    total = 0;
+    k = 0;
+    while k < 42 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_29() int {
+    total = 1;
+    for j = 1; j <= 6; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_30() int {
+    total = 0;
+    for j = 0; j < 24; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_31() int {
+    total = 0;
+    k = 0;
+    while k < 41 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_32() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_33() int {
+    total = 0;
+    for j = 0; j < 29; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_34() int {
+    total = 0;
+    k = 0;
+    while k < 30 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_35() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_36() int {
+    total = 0;
+    for j = 0; j < 17; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_37() int {
+    total = 0;
+    k = 0;
+    while k < 9 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_38() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_39() int {
+    total = 0;
+    for j = 0; j < 49; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_40() int {
+    total = 0;
+    k = 0;
+    while k < 45 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_41() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_42() int {
+    total = 0;
+    for j = 0; j < 11; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_43() int {
+    total = 0;
+    k = 0;
+    while k < 49 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_44() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_45() int {
+    total = 0;
+    for j = 0; j < 48; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_46() int {
+    total = 0;
+    k = 0;
+    while k < 43 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_47() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_48() int {
+    total = 0;
+    for j = 0; j < 41; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_49() int {
+    total = 0;
+    k = 0;
+    while k < 7 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_50() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_51() int {
+    total = 0;
+    for j = 0; j < 39; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_52() int {
+    total = 0;
+    k = 0;
+    while k < 32 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_53() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_54() int {
+    total = 0;
+    for j = 0; j < 28; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_55() int {
+    total = 0;
+    k = 0;
+    while k < 9 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_56() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_57() int {
+    total = 0;
+    for j = 0; j < 46; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_58() int {
+    total = 0;
+    k = 0;
+    while k < 26 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_59() int {
+    total = 1;
+    for j = 1; j <= 5; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_60() int {
+    total = 0;
+    for j = 0; j < 31; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_61() int {
+    total = 0;
+    k = 0;
+    while k < 36 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_62() int {
+    total = 1;
+    for j = 1; j <= 11; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_63() int {
+    total = 0;
+    for j = 0; j < 32; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_64() int {
+    total = 0;
+    k = 0;
+    while k < 28 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_65() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_66() int {
+    total = 0;
+    for j = 0; j < 34; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_67() int {
+    total = 0;
+    k = 0;
+    while k < 50 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_68() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_69() int {
+    total = 0;
+    for j = 0; j < 32; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_70() int {
+    total = 0;
+    k = 0;
+    while k < 16 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_71() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_72() int {
+    total = 0;
+    for j = 0; j < 46; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_73() int {
+    total = 0;
+    k = 0;
+    while k < 22 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_74() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_75() int {
+    total = 0;
+    for j = 0; j < 39; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_76() int {
+    total = 0;
+    k = 0;
+    while k < 35 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_77() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_78() int {
+    total = 0;
+    for j = 0; j < 32; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_79() int {
+    total = 0;
+    k = 0;
+    while k < 42 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_80() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_81() int {
+    total = 0;
+    for j = 0; j < 25; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_82() int {
+    total = 0;
+    k = 0;
+    while k < 20 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_83() int {
+    total = 1;
+    for j = 1; j <= 10; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_84() int {
+    total = 0;
+    for j = 0; j < 22; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_85() int {
+    total = 0;
+    k = 0;
+    while k < 33 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_86() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_87() int {
+    total = 0;
+    for j = 0; j < 34; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_88() int {
+    total = 0;
+    k = 0;
+    while k < 41 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_89() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_90() int {
+    total = 0;
+    for j = 0; j < 47; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_91() int {
+    total = 0;
+    k = 0;
+    while k < 29 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_92() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_93() int {
+    total = 0;
+    for j = 0; j < 6; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_94() int {
+    total = 0;
+    k = 0;
+    while k < 36 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_95() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_96() int {
+    total = 0;
+    for j = 0; j < 16; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_97() int {
+    total = 0;
+    k = 0;
+    while k < 36 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_98() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_99() int {
+    total = 0;
+    for j = 0; j < 27; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_100() int {
+    total = 0;
+    k = 0;
+    while k < 21 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_101() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_102() int {
+    total = 0;
+    for j = 0; j < 22; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_103() int {
+    total = 0;
+    k = 0;
+    while k < 43 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_104() int {
+    total = 1;
+    for j = 1; j <= 12; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_105() int {
+    total = 0;
+    for j = 0; j < 22; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_106() int {
+    total = 0;
+    k = 0;
+    while k < 40 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn loopy_107() int {
+    total = 1;
+    for j = 1; j <= 5; j += 1 {
+        total = total * 2;
+    }
+    return total;
+}
+
+fn loopy_108() int {
+    total = 0;
+    for j = 0; j < 38; j += 1 {
+        total += j * j;
+    }
+    return total;
+}
+
+fn loopy_109() int {
+    total = 0;
+    k = 0;
+    while k < 17 {
+        if k - (k / 2) * 2 == 0 {
+            total += k;
+        } else {
+            total -= 1;
+        }
+        k += 1;
+    }
+    return total;
+}
+
+fn pad_0() null {
+    return null;
+}
+
+fn pad_1() null {
+    return null;
+}
+
+fn pad_2() null {
+    return null;
+}
+
+fn pad_3() null {
+    return null;
+}
+
+fn pad_4() null {
+    return null;
+}
+
+fn pad_5() null {
+    return null;
+}
+
+fn pad_6() null {
+    return null;
+}
+
+fn pad_7() null {
+    return null;
+}
+
+fn pad_8() null {
+    return null;
+}
+
+fn pad_9() null {
+    return null;
+}
+
+fn pad_10() null {
+    return null;
+}
+
+fn pad_11() null {
+    return null;
+}
+
+fn pad_12() null {
+    return null;
+}
+
+fn pad_13() null {
+    return null;
+}
+
+fn pad_14() null {
+    return null;
+}
+
+fn pad_15() null {
+    return null;
+}
+
+fn pad_16() null {
+    return null;
+}
+
+fn pad_17() null {
+    return null;
+}
+
+fn pad_18() null {
+    return null;
+}
+
+fn pad_19() null {
+    return null;
+}
+
+fn pad_20() null {
+    return null;
+}
+
+fn pad_21() null {
+    return null;
+}
+
+fn pad_22() null {
+    return null;
+}
+
+fn pad_23() null {
+    return null;
+}
+
+fn pad_24() null {
+    return null;
+}
+
+fn pad_25() null {
+    return null;
+}
+
+fn pad_26() null {
+    return null;
+}
+
+fn pad_27() null {
+    return null;
+}
+
+fn pad_28() null {
+    return null;
+}
+
+fn pad_29() null {
+    return null;
+}
+
+fn pad_30() null {
+    return null;
+}
+
+fn pad_31() null {
+    return null;
+}
+
+fn pad_32() null {
+    return null;
+}
+
+fn pad_33() null {
+    return null;
+}
+
+fn pad_34() null {
+    return null;
+}
+
+fn pad_35() null {
+    return null;
+}
+
+fn pad_36() null {
+    return null;
+}
+
+fn pad_37() null {
+    return null;
+}
+
+fn pad_38() null {
+    return null;
+}
+
+fn pad_39() null {
+    return null;
+}
+
+fn pad_40() null {
+    return null;
+}
+
+fn pad_41() null {
+    return null;
+}
+
+fn pad_42() null {
+    return null;
+}
+
+fn pad_43() null {
+    return null;
+}
+
+fn pad_44() null {
+    return null;
+}
+
+fn pad_45() null {
+    return null;
+}
+
+fn pad_46() null {
+    return null;
+}
+
+fn pad_47() null {
+    return null;
+}
+
+fn pad_48() null {
+    return null;
+}
+
+fn pad_49() null {
+    return null;
+}
+
+fn pad_50() null {
+    return null;
+}
+
+fn pad_51() null {
+    return null;
+}
+
+fn pad_52() null {
+    return null;
+}
+
+fn pad_53() null {
+    return null;
+}
+
+fn pad_54() null {
+    return null;
+}
+
+fn pad_55() null {
+    return null;
+}
+
+fn pad_56() null {
+    return null;
+}
+
+fn pad_57() null {
+    return null;
+}
+
+fn pad_58() null {
+    return null;
+}
+
+fn pad_59() null {
+    return null;
+}
+
+fn pad_60() null {
+    return null;
+}
+
+fn pad_61() null {
+    return null;
+}
+
+fn pad_62() null {
+    return null;
+}
+
+fn pad_63() null {
+    return null;
+}
+
+fn pad_64() null {
+    return null;
+}
+
+fn pad_65() null {
+    return null;
+}
+
+fn pad_66() null {
+    return null;
+}
+
+fn pad_67() null {
+    return null;
+}
+
+fn pad_68() null {
+    return null;
+}
+
+fn pad_69() null {
+    return null;
+}
+
+fn pad_70() null {
+    return null;
+}
+
+fn pad_71() null {
+    return null;
+}
+
+fn pad_72() null {
+    return null;
+}
+
+fn pad_73() null {
+    return null;
+}
+
+fn pad_74() null {
+    return null;
+}
+
+fn pad_75() null {
+    return null;
+}
+
+fn pad_76() null {
+    return null;
+}
+
+fn pad_77() null {
+    return null;
+}
+
+fn pad_78() null {
+    return null;
+}
+
+fn pad_79() null {
+    return null;
+}
+
+fn pad_80() null {
+    return null;
+}
+
+fn pad_81() null {
+    return null;
+}
+
+fn pad_82() null {
+    return null;
+}
+
+fn pad_83() null {
+    return null;
+}
+
+fn pad_84() null {
+    return null;
+}
+
+fn pad_85() null {
+    return null;
+}
+
+fn pad_86() null {
+    return null;
+}
+
+fn pad_87() null {
+    return null;
+}
+
+fn pad_88() null {
+    return null;
+}
+
+fn pad_89() null {
+    return null;
+}
+
+fn pad_90() null {
+    return null;
+}
+
+fn pad_91() null {
+    return null;
+}
+
+fn pad_92() null {
+    return null;
+}
+
+fn pad_93() null {
+    return null;
+}
+
+fn pad_94() null {
+    return null;
+}
+
+fn pad_95() null {
+    return null;
+}
+
+fn pad_96() null {
+    return null;
+}
+
+fn pad_97() null {
+    return null;
+}
+
+fn pad_98() null {
+    return null;
+}
+
+fn pad_99() null {
+    return null;
+}
+
+fn pad_100() null {
+    return null;
+}
+
+fn pad_101() null {
+    return null;
+}
+
+fn pad_102() null {
+    return null;
+}
+
+fn pad_103() null {
+    return null;
+}
+
+fn pad_104() null {
+    return null;
+}
+
+fn pad_105() null {
+    return null;
+}
+
+fn pad_106() null {
+    return null;
+}
+
+fn pad_107() null {
+    return null;
+}
+
+fn pad_108() null {
+    return null;
+}
+
+fn pad_109() null {
+    return null;
+}
+
+fn pad_110() null {
+    return null;
+}
+
+fn pad_111() null {
+    return null;
+}
+
+fn pad_112() null {
+    return null;
+}
+
+fn pad_113() null {
+    return null;
+}
+
+fn pad_114() null {
+    return null;
+}
+
+fn pad_115() null {
+    return null;
+}
+
+fn pad_116() null {
+    return null;
+}
+
+fn pad_117() null {
+    return null;
+}
+
+fn pad_118() null {
+    return null;
+}
+
+fn pad_119() null {
+    return null;
+}
+
+fn pad_120() null {
+    return null;
+}
+
+fn pad_121() null {
+    return null;
+}
+
+fn pad_122() null {
+    return null;
+}
+
+fn pad_123() null {
+    return null;
+}
+
+fn pad_124() null {
+    return null;
+}
+
+fn pad_125() null {
+    return null;
+}
+
+fn pad_126() null {
+    return null;
+}
+
+fn pad_127() null {
+    return null;
+}
+
+fn pad_128() null {
+    return null;
+}
+
+fn pad_129() null {
+    return null;
+}
+
+fn pad_130() null {
+    return null;
+}
+
+fn pad_131() null {
+    return null;
+}
+
+fn pad_132() null {
+    return null;
+}
+
+fn pad_133() null {
+    return null;
+}
+
+fn pad_134() null {
+    return null;
+}
+
+fn pad_135() null {
+    return null;
+}
+
+fn pad_136() null {
+    return null;
+}
+
+fn pad_137() null {
+    return null;
+}
+
+fn pad_138() null {
+    return null;
+}
+
+fn pad_139() null {
+    return null;
+}
+
+fn pad_140() null {
+    return null;
+}
+
+fn pad_141() null {
+    return null;
+}
+
+fn pad_142() null {
+    return null;
+}
+
+fn pad_143() null {
+    return null;
+}
+
+fn pad_144() null {
+    return null;
+}
+
+fn pad_145() null {
+    return null;
+}
+
+fn pad_146() null {
+    return null;
+}
+
+fn pad_147() null {
+    return null;
+}
+
+fn pad_148() null {
+    return null;
+}
+
+fn pad_149() null {
+    return null;
+}
+
+fn deep_0(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 31 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_1(a: int) int {
+    if a < 53 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 93 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_2(a: int) int {
+    if a < 63 {
+        if a - 31 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 72 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_3(a: int) int {
+    if a < 31 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_4(a: int) int {
+    if a < 61 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_5(a: int) int {
+    if a < 83 {
+        if a - 41 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 92 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_6(a: int) int {
+    if a < 58 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 63 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_7(a: int) int {
+    if a < 3 {
+        if a - 1 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 12 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_8(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 38 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_9(a: int) int {
+    if a < 52 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_10(a: int) int {
+    if a < 32 {
+        if a - 16 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 40 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_11(a: int) int {
+    if a < 75 {
+        if a - 37 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 85 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_12(a: int) int {
+    if a < 48 {
+        if a - 24 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 61 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_13(a: int) int {
+    if a < 68 {
+        if a - 34 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_14(a: int) int {
+    if a < 45 {
+        if a - 22 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 55 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_15(a: int) int {
+    if a < 71 {
+        if a - 35 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_16(a: int) int {
+    if a < 43 {
+        if a - 21 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 46 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_17(a: int) int {
+    if a < 59 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_18(a: int) int {
+    if a < 35 {
+        if a - 17 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 40 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_19(a: int) int {
+    if a < 30 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 33 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_20(a: int) int {
+    if a < 16 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 93 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_21(a: int) int {
+    if a < 25 {
+        if a - 12 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 41 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_22(a: int) int {
+    if a < 16 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 96 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_23(a: int) int {
+    if a < 69 {
+        if a - 34 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_24(a: int) int {
+    if a < 24 {
+        if a - 12 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_25(a: int) int {
+    if a < 25 {
+        if a - 12 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 28 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_26(a: int) int {
+    if a < 62 {
+        if a - 31 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 95 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_27(a: int) int {
+    if a < 36 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 93 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_28(a: int) int {
+    if a < 76 {
+        if a - 38 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_29(a: int) int {
+    if a < 68 {
+        if a - 34 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 77 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_30(a: int) int {
+    if a < 13 {
+        if a - 6 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 37 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_31(a: int) int {
+    if a < 25 {
+        if a - 12 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 38 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_32(a: int) int {
+    if a < 30 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 47 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_33(a: int) int {
+    if a < 23 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 39 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_34(a: int) int {
+    if a < 2 {
+        if a - 1 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 91 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_35(a: int) int {
+    if a < 17 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 69 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_36(a: int) int {
+    if a < 6 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 36 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_37(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_38(a: int) int {
+    if a < 38 {
+        if a - 19 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_39(a: int) int {
+    if a < 17 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 82 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_40(a: int) int {
+    if a < 63 {
+        if a - 31 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 97 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_41(a: int) int {
+    if a < 2 {
+        if a - 1 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 14 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_42(a: int) int {
+    if a < 37 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 74 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_43(a: int) int {
+    if a < 61 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 62 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_44(a: int) int {
+    if a < 44 {
+        if a - 22 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 57 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_45(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 24 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_46(a: int) int {
+    if a < 33 {
+        if a - 16 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 62 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_47(a: int) int {
+    if a < 9 {
+        if a - 4 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 15 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_48(a: int) int {
+    if a < 52 {
+        if a - 26 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 63 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_49(a: int) int {
+    if a < 10 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 74 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_50(a: int) int {
+    if a < 81 {
+        if a - 40 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 88 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_51(a: int) int {
+    if a < 7 {
+        if a - 3 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 20 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_52(a: int) int {
+    if a < 20 {
+        if a - 10 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 73 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_53(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 39 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_54(a: int) int {
+    if a < 16 {
+        if a - 8 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 32 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_55(a: int) int {
+    if a < 72 {
+        if a - 36 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_56(a: int) int {
+    if a < 54 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 78 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_57(a: int) int {
+    if a < 77 {
+        if a - 38 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 80 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_58(a: int) int {
+    if a < 29 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 67 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_59(a: int) int {
+    if a < 49 {
+        if a - 24 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 58 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_60(a: int) int {
+    if a < 39 {
+        if a - 19 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 57 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_61(a: int) int {
+    if a < 55 {
+        if a - 27 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 76 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_62(a: int) int {
+    if a < 40 {
+        if a - 20 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 73 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_63(a: int) int {
+    if a < 8 {
+        if a - 4 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 80 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_64(a: int) int {
+    if a < 79 {
+        if a - 39 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 95 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_65(a: int) int {
+    if a < 13 {
+        if a - 6 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 98 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_66(a: int) int {
+    if a < 27 {
+        if a - 13 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 81 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_67(a: int) int {
+    if a < 28 {
+        if a - 14 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 34 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_68(a: int) int {
+    if a < 11 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 85 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_69(a: int) int {
+    if a < 21 {
+        if a - 10 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 31 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_70(a: int) int {
+    if a < 23 {
+        if a - 11 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 71 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_71(a: int) int {
+    if a < 10 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 21 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_72(a: int) int {
+    if a < 1 {
+        if a - 0 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 53 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_73(a: int) int {
+    if a < 58 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 89 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_74(a: int) int {
+    if a < 61 {
+        if a - 30 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 77 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_75(a: int) int {
+    if a < 5 {
+        if a - 2 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 38 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_76(a: int) int {
+    if a < 30 {
+        if a - 15 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 37 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_77(a: int) int {
+    if a < 37 {
+        if a - 18 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 91 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_78(a: int) int {
+    if a < 59 {
+        if a - 29 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 90 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn deep_79(a: int) int {
+    if a < 10 {
+        if a - 5 > 3 {
+            return 1;
+        } else {
+            return 2;
+        }
+    } else if a < 88 {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+fn cond_0(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_1(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_2(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_3(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_4(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_5(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_6(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_7(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_8(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_9(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_10(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_11(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_12(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_13(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_14(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_15(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_16(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_17(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_18(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_19(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_20(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_21(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_22(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_23(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_24(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_25(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_26(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_27(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_28(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_29(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_30(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_31(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_32(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_33(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_34(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_35(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_36(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_37(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_38(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_39(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_40(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_41(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_42(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_43(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_44(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_45(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_46(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_47(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_48(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_49(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_50(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_51(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_52(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_53(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_54(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_55(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_56(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_57(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_58(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_59(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_60(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_61(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_62(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_63(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_64(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_65(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_66(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_67(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_68(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_69(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_70(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_71(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_72(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_73(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_74(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_75(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_76(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_77(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_78(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn cond_79(a: int, b: int, c: int) bool {
+    flag1 = a > b;
+    flag2 = b <= c;
+    flag3 = a == c;
+    return (flag1 && flag2) || (!flag3 && flag1);
+}
+
+fn long_chain(a: int, b: int, c: int, d: int) int {
+    x = a;
+    x = x + c + 0;
+    x = x * b + 1;
+    x = x - a + 2;
+    x = x * b + 3;
+    x = x * b + 4;
+    x = x - b + 5;
+    x = x + a + 6;
+    x = x + c + 0;
+    x = x * c + 1;
+    x = x - a + 2;
+    x = x - c + 3;
+    x = x * d + 4;
+    x = x - d + 5;
+    x = x - a + 6;
+    x = x * a + 0;
+    x = x - c + 1;
+    x = x * c + 2;
+    x = x + a + 3;
+    x = x + a + 4;
+    x = x * c + 5;
+    x = x * a + 6;
+    x = x + d + 0;
+    x = x * d + 1;
+    x = x - b + 2;
+    x = x * d + 3;
+    x = x * d + 4;
+    x = x + d + 5;
+    x = x - d + 6;
+    x = x - c + 0;
+    x = x * a + 1;
+    x = x + c + 2;
+    x = x - d + 3;
+    x = x - d + 4;
+    x = x * a + 5;
+    x = x - a + 6;
+    x = x - c + 0;
+    x = x - a + 1;
+    x = x - a + 2;
+    x = x * d + 3;
+    x = x - a + 4;
+    x = x + c + 5;
+    x = x * d + 6;
+    x = x * d + 0;
+    x = x + b + 1;
+    x = x - b + 2;
+    x = x - d + 3;
+    x = x * d + 4;
+    x = x + a + 5;
+    x = x * b + 6;
+    x = x * b + 0;
+    x = x - a + 1;
+    x = x * d + 2;
+    x = x + b + 3;
+    x = x + d + 4;
+    x = x + b + 5;
+    x = x - c + 6;
+    x = x * c + 0;
+    x = x - d + 1;
+    x = x - b + 2;
+    x = x - b + 3;
+    x = x - b + 4;
+    x = x * b + 5;
+    x = x + c + 6;
+    x = x - c + 0;
+    x = x * c + 1;
+    x = x + c + 2;
+    x = x * c + 3;
+    x = x * d + 4;
+    x = x + d + 5;
+    x = x * d + 6;
+    x = x - c + 0;
+    x = x * d + 1;
+    x = x - c + 2;
+    x = x + b + 3;
+    x = x * d + 4;
+    x = x + d + 5;
+    x = x + c + 6;
+    x = x * d + 0;
+    x = x * d + 1;
+    x = x - b + 2;
+    x = x - a + 3;
+    x = x + c + 4;
+    x = x + d + 5;
+    x = x + d + 6;
+    x = x + b + 0;
+    x = x - b + 1;
+    x = x + d + 2;
+    x = x - c + 3;
+    x = x * d + 4;
+    x = x * a + 5;
+    x = x - d + 6;
+    x = x - d + 0;
+    x = x * a + 1;
+    x = x * a + 2;
+    x = x + c + 3;
+    x = x + a + 4;
+    x = x - a + 5;
+    x = x * a + 6;
+    x = x - b + 0;
+    x = x * c + 1;
+    x = x + a + 2;
+    x = x - a + 3;
+    x = x - c + 4;
+    x = x - d + 5;
+    x = x + b + 6;
+    x = x * d + 0;
+    x = x * b + 1;
+    x = x + b + 2;
+    x = x + d + 3;
+    x = x * b + 4;
+    x = x - b + 5;
+    x = x + d + 6;
+    x = x * c + 0;
+    x = x - c + 1;
+    x = x * a + 2;
+    x = x - c + 3;
+    x = x * b + 4;
+    x = x + d + 5;
+    x = x - c + 6;
+    x = x * d + 0;
+    return x;
+}
+
+fn long_bool_chain(a: int, b: int, c: int) bool {
+    result = a > b;
+    result = result || (b >= 12);
+    result = result || (a >= 15);
+    result = result || (b == 36);
+    result = result || (b != 1);
+    result = result || (a <= 36);
+    result = result && (c == 31);
+    result = result || (c > 22);
+    result = result && (a != 39);
+    result = result || (c != 49);
+    result = result && (a != 40);
+    result = result && (b <= 2);
+    result = result || (a != 5);
+    result = result || (c <= 26);
+    result = result && (a > 50);
+    result = result || (c == 17);
+    result = result && (b <= 18);
+    result = result || (b < 4);
+    result = result && (c > 46);
+    result = result || (b == 5);
+    result = result || (b < 34);
+    result = result && (b >= 43);
+    result = result || (b == 40);
+    result = result || (c < 14);
+    result = result || (c < 35);
+    result = result || (a == 41);
+    result = result && (b != 44);
+    result = result || (b != 7);
+    result = result && (a < 19);
+    result = result || (a < 15);
+    result = result && (b >= 23);
+    result = result || (c == 46);
+    result = result && (c >= 6);
+    result = result || (b == 17);
+    result = result && (b != 13);
+    result = result || (a >= 23);
+    result = result && (b != 34);
+    result = result || (b < 17);
+    result = result && (b < 5);
+    result = result && (c != 38);
+    result = result && (b < 15);
+    result = result && (a == 4);
+    result = result && (a == 14);
+    result = result || (c > 0);
+    result = result || (a > 34);
+    result = result || (a > 42);
+    result = result && (a > 22);
+    result = result && (b == 1);
+    result = result && (a <= 8);
+    result = result || (a == 47);
+    result = result && (b >= 49);
+    result = result || (c == 6);
+    result = result || (a == 39);
+    result = result && (c != 33);
+    result = result || (c >= 1);
+    result = result && (b >= 27);
+    result = result && (c >= 28);
+    result = result && (b < 38);
+    result = result && (a < 17);
+    result = result || (c >= 33);
+    result = result || (c >= 38);
+    return result;
+}
+
+fn ring_x(i: float) float {
+    return i * 1.5 - 9.0;
+}
+
+fn ring_z(i: float) float {
+    return i * 1.5 - 9.0;
+}
+
+fn util_0() null {
+    return null;
+}
+
+fn util_1() null {
+    return null;
+}
+
+fn util_2() null {
+    return null;
+}
+
+fn util_3() null {
+    return null;
+}
+
+fn util_4() null {
+    return null;
+}
+
+fn util_5() null {
+    return null;
+}
+
+fn util_6() null {
+    return null;
+}
+
+fn util_7() null {
+    return null;
+}
+
+fn util_8() null {
+    return null;
+}
+
+fn util_9() null {
+    return null;
+}
+
+fn util_10() null {
+    return null;
+}
+
+fn util_11() null {
+    return null;
+}
+
+fn util_12() null {
+    return null;
+}
+
+fn util_13() null {
+    return null;
+}
+
+fn util_14() null {
+    return null;
+}
+
+fn util_15() null {
+    return null;
+}
+
+fn util_16() null {
+    return null;
+}
+
+fn util_17() null {
+    return null;
+}
+
+fn util_18() null {
+    return null;
+}
+
+fn util_19() null {
+    return null;
+}
+
+fn util_20() null {
+    return null;
+}
+
+fn util_21() null {
+    return null;
+}
+
+fn util_22() null {
+    return null;
+}
+
+fn util_23() null {
+    return null;
+}
+
+fn util_24() null {
+    return null;
+}
+
+fn util_25() null {
+    return null;
+}
+
+fn util_26() null {
+    return null;
+}
+
+fn util_27() null {
+    return null;
+}
+
+fn util_28() null {
+    return null;
+}
+
+fn util_29() null {
+    return null;
+}
+
+fn util_30() null {
+    return null;
+}
+
+fn util_31() null {
+    return null;
+}
+
+fn util_32() null {
+    return null;
+}
+
+fn util_33() null {
+    return null;
+}
+
+fn util_34() null {
+    return null;
+}
+
+fn util_35() null {
+    return null;
+}
+
+fn util_36() null {
+    return null;
+}
+
+fn util_37() null {
+    return null;
+}
+
+fn util_38() null {
+    return null;
+}
+
+fn util_39() null {
+    return null;
+}
+
+fn util_40() null {
+    return null;
+}
+
+fn util_41() null {
+    return null;
+}
+
+fn util_42() null {
+    return null;
+}
+
+fn util_43() null {
+    return null;
+}
+
+fn util_44() null {
+    return null;
+}
+
+fn util_45() null {
+    return null;
+}
+
+fn util_46() null {
+    return null;
+}
+
+fn util_47() null {
+    return null;
+}
+
+fn util_48() null {
+    return null;
+}
+
+fn util_49() null {
+    return null;
+}
+
+fn util_50() null {
+    return null;
+}
+
+fn util_51() null {
+    return null;
+}
+
+fn util_52() null {
+    return null;
+}
+
+fn util_53() null {
+    return null;
+}
+
+fn util_54() null {
+    return null;
+}
+
+fn util_55() null {
+    return null;
+}
+
+fn util_56() null {
+    return null;
+}
+
+fn util_57() null {
+    return null;
+}
+
+fn util_58() null {
+    return null;
+}
+
+fn util_59() null {
+    return null;
+}
+
+fn main() null {
+    ra_0 = arith_0(a: 4, b: 7, c: 2);
+    ra_3 = arith_3(a: 4, b: 7, c: 2);
+    ra_6 = arith_6(a: 4, b: 7, c: 2);
+    ra_9 = arith_9(a: 4, b: 7, c: 2);
+    ra_12 = arith_12(a: 4, b: 7, c: 2);
+    ra_15 = arith_15(a: 4, b: 7, c: 2);
+    ra_18 = arith_18(a: 4, b: 7, c: 2);
+    ra_21 = arith_21(a: 4, b: 7, c: 2);
+    ra_24 = arith_24(a: 4, b: 7, c: 2);
+    ra_27 = arith_27(a: 4, b: 7, c: 2);
+    ra_30 = arith_30(a: 4, b: 7, c: 2);
+    ra_33 = arith_33(a: 4, b: 7, c: 2);
+    ra_36 = arith_36(a: 4, b: 7, c: 2);
+    ra_39 = arith_39(a: 4, b: 7, c: 2);
+    ra_42 = arith_42(a: 4, b: 7, c: 2);
+    ra_45 = arith_45(a: 4, b: 7, c: 2);
+    ra_48 = arith_48(a: 4, b: 7, c: 2);
+    ra_51 = arith_51(a: 4, b: 7, c: 2);
+    ra_54 = arith_54(a: 4, b: 7, c: 2);
+    ra_57 = arith_57(a: 4, b: 7, c: 2);
+    ra_60 = arith_60(a: 4, b: 7, c: 2);
+    ra_63 = arith_63(a: 4, b: 7, c: 2);
+    ra_66 = arith_66(a: 4, b: 7, c: 2);
+    ra_69 = arith_69(a: 4, b: 7, c: 2);
+    ra_72 = arith_72(a: 4, b: 7, c: 2);
+    ra_75 = arith_75(a: 4, b: 7, c: 2);
+    ra_78 = arith_78(a: 4, b: 7, c: 2);
+    ra_81 = arith_81(a: 4, b: 7, c: 2);
+    ra_84 = arith_84(a: 4, b: 7, c: 2);
+    ra_87 = arith_87(a: 4, b: 7, c: 2);
+    rf_0 = flt_0(a: 1.5, b: 2.5);
+    rf_3 = flt_3(a: 1.5, b: 2.5);
+    rf_6 = flt_6(a: 1.5, b: 2.5);
+    rf_9 = flt_9(a: 1.5, b: 2.5);
+    rf_12 = flt_12(a: 1.5, b: 2.5);
+    rf_15 = flt_15(a: 1.5, b: 2.5);
+    rf_18 = flt_18(a: 1.5, b: 2.5);
+    rf_21 = flt_21(a: 1.5, b: 2.5);
+    rf_24 = flt_24(a: 1.5, b: 2.5);
+    rf_27 = flt_27(a: 1.5, b: 2.5);
+    rf_30 = flt_30(a: 1.5, b: 2.5);
+    rf_33 = flt_33(a: 1.5, b: 2.5);
+    rf_36 = flt_36(a: 1.5, b: 2.5);
+    rf_39 = flt_39(a: 1.5, b: 2.5);
+    rf_42 = flt_42(a: 1.5, b: 2.5);
+    rf_45 = flt_45(a: 1.5, b: 2.5);
+    rf_48 = flt_48(a: 1.5, b: 2.5);
+    rf_51 = flt_51(a: 1.5, b: 2.5);
+    rf_54 = flt_54(a: 1.5, b: 2.5);
+    rf_57 = flt_57(a: 1.5, b: 2.5);
+    rl_0 = logic_0(a: 3, b: 5, c: 9);
+    rl_3 = logic_3(a: 3, b: 5, c: 9);
+    rl_6 = logic_6(a: 3, b: 5, c: 9);
+    rl_9 = logic_9(a: 3, b: 5, c: 9);
+    rl_12 = logic_12(a: 3, b: 5, c: 9);
+    rl_15 = logic_15(a: 3, b: 5, c: 9);
+    rl_18 = logic_18(a: 3, b: 5, c: 9);
+    rl_21 = logic_21(a: 3, b: 5, c: 9);
+    rl_24 = logic_24(a: 3, b: 5, c: 9);
+    rl_27 = logic_27(a: 3, b: 5, c: 9);
+    rl_30 = logic_30(a: 3, b: 5, c: 9);
+    rl_33 = logic_33(a: 3, b: 5, c: 9);
+    rl_36 = logic_36(a: 3, b: 5, c: 9);
+    rl_39 = logic_39(a: 3, b: 5, c: 9);
+    rl_42 = logic_42(a: 3, b: 5, c: 9);
+    rl_45 = logic_45(a: 3, b: 5, c: 9);
+    rl_48 = logic_48(a: 3, b: 5, c: 9);
+    rl_51 = logic_51(a: 3, b: 5, c: 9);
+    rl_54 = logic_54(a: 3, b: 5, c: 9);
+    rl_57 = logic_57(a: 3, b: 5, c: 9);
+    rs_0 = str_0(name: "razz");
+    rs_3 = str_3(name: "razz");
+    rs_6 = str_6(name: "razz");
+    rs_9 = str_9(name: "razz");
+    rs_12 = str_12(name: "razz");
+    rs_15 = str_15(name: "razz");
+    rs_18 = str_18(name: "razz");
+    rs_21 = str_21(name: "razz");
+    rs_24 = str_24(name: "razz");
+    rs_27 = str_27(name: "razz");
+    rs_30 = str_30(name: "razz");
+    rs_33 = str_33(name: "razz");
+    rs_36 = str_36(name: "razz");
+    rs_39 = str_39(name: "razz");
+    rs_42 = str_42(name: "razz");
+    rs_45 = str_45(name: "razz");
+    rs_48 = str_48(name: "razz");
+    rs_51 = str_51(name: "razz");
+    rs_54 = str_54(name: "razz");
+    rs_57 = str_57(name: "razz");
+    noop_0();
+    noop_5();
+    noop_10();
+    noop_15();
+    noop_20();
+    noop_25();
+    noop_30();
+    noop_35();
+    noop_40();
+    noop_45();
+    noop_50();
+    noop_55();
+    noop_60();
+    noop_65();
+    noop_70();
+    noop_75();
+    noop_80();
+    noop_85();
+    noop_90();
+    noop_95();
+    noop_100();
+    noop_105();
+    noop_110();
+    noop_115();
+    p10 = is_prime(n: 97);
+    f10 = fib(n: 15);
+    fa = fact(n: 6);
+    g1 = gcd(a: 48, b: 18);
+    s1 = sum_to_n(n: 100);
+    m1 = max3(a: 5, b: 12, c: 9);
+    c1 = clamp(x: 150, lo: 0, hi: 100);
+    cl = collatz_len(n: 27);
+    total = f10 + fa + g1 + s1 + m1 + c1 + cl;
+    for n = 2; n < 50; n += 1 {
+        if is_prime(n: n) {
+            total += n;
+        }
+    }
+    b_0 = branch_0(a: 0);
+    b_4 = branch_4(a: 28);
+    b_8 = branch_8(a: 56);
+    b_12 = branch_12(a: 84);
+    b_16 = branch_16(a: 15);
+    b_20 = branch_20(a: 43);
+    b_24 = branch_24(a: 71);
+    b_28 = branch_28(a: 2);
+    b_32 = branch_32(a: 30);
+    b_36 = branch_36(a: 58);
+    b_40 = branch_40(a: 86);
+    b_44 = branch_44(a: 17);
+    b_48 = branch_48(a: 45);
+    b_52 = branch_52(a: 73);
+    b_56 = branch_56(a: 4);
+    b_60 = branch_60(a: 32);
+    b_64 = branch_64(a: 60);
+    b_68 = branch_68(a: 88);
+    b_72 = branch_72(a: 19);
+    b_76 = branch_76(a: 47);
+    b_80 = branch_80(a: 75);
+    b_84 = branch_84(a: 6);
+    b_88 = branch_88(a: 34);
+    b_92 = branch_92(a: 62);
+    b_96 = branch_96(a: 90);
+    b_100 = branch_100(a: 21);
+    b_104 = branch_104(a: 49);
+    b_108 = branch_108(a: 77);
+    l_0 = loopy_0();
+    l_4 = loopy_4();
+    l_8 = loopy_8();
+    l_12 = loopy_12();
+    l_16 = loopy_16();
+    l_20 = loopy_20();
+    l_24 = loopy_24();
+    l_28 = loopy_28();
+    l_32 = loopy_32();
+    l_36 = loopy_36();
+    l_40 = loopy_40();
+    l_44 = loopy_44();
+    l_48 = loopy_48();
+    l_52 = loopy_52();
+    l_56 = loopy_56();
+    l_60 = loopy_60();
+    l_64 = loopy_64();
+    l_68 = loopy_68();
+    l_72 = loopy_72();
+    l_76 = loopy_76();
+    l_80 = loopy_80();
+    l_84 = loopy_84();
+    l_88 = loopy_88();
+    l_92 = loopy_92();
+    l_96 = loopy_96();
+    l_100 = loopy_100();
+    l_104 = loopy_104();
+    l_108 = loopy_108();
+    lc = long_chain(a: 1, b: 2, c: 3, d: 4);
+    lb = long_bool_chain(a: 10, b: 20, c: 30);
+    pad_0();
+    pad_5();
+    pad_10();
+    pad_15();
+    pad_20();
+    pad_25();
+    pad_30();
+    pad_35();
+    pad_40();
+    pad_45();
+    pad_50();
+    pad_55();
+    pad_60();
+    pad_65();
+    pad_70();
+    pad_75();
+    pad_80();
+    pad_85();
+    pad_90();
+    pad_95();
+    pad_100();
+    pad_105();
+    pad_110();
+    pad_115();
+    pad_120();
+    pad_125();
+    pad_130();
+    pad_135();
+    pad_140();
+    pad_145();
+    d_0 = deep_0(a: 0);
+    d_4 = deep_4(a: 52);
+    d_8 = deep_8(a: 15);
+    d_12 = deep_12(a: 67);
+    d_16 = deep_16(a: 30);
+    d_20 = deep_20(a: 82);
+    d_24 = deep_24(a: 45);
+    d_28 = deep_28(a: 8);
+    d_32 = deep_32(a: 60);
+    d_36 = deep_36(a: 23);
+    d_40 = deep_40(a: 75);
+    d_44 = deep_44(a: 38);
+    d_48 = deep_48(a: 1);
+    d_52 = deep_52(a: 53);
+    d_56 = deep_56(a: 16);
+    d_60 = deep_60(a: 68);
+    d_64 = deep_64(a: 31);
+    d_68 = deep_68(a: 83);
+    d_72 = deep_72(a: 46);
+    d_76 = deep_76(a: 9);
+    c_0 = cond_0(a: 0, b: 3, c: 7);
+    c_4 = cond_4(a: 4, b: 7, c: 1);
+    c_8 = cond_8(a: 8, b: 1, c: 5);
+    c_12 = cond_12(a: 2, b: 5, c: 9);
+    c_16 = cond_16(a: 6, b: 9, c: 3);
+    c_20 = cond_20(a: 0, b: 3, c: 7);
+    c_24 = cond_24(a: 4, b: 7, c: 1);
+    c_28 = cond_28(a: 8, b: 1, c: 5);
+    c_32 = cond_32(a: 2, b: 5, c: 9);
+    c_36 = cond_36(a: 6, b: 9, c: 3);
+    c_40 = cond_40(a: 0, b: 3, c: 7);
+    c_44 = cond_44(a: 4, b: 7, c: 1);
+    c_48 = cond_48(a: 8, b: 1, c: 5);
+    c_52 = cond_52(a: 2, b: 5, c: 9);
+    c_56 = cond_56(a: 6, b: 9, c: 3);
+    c_60 = cond_60(a: 0, b: 3, c: 7);
+    c_64 = cond_64(a: 4, b: 7, c: 1);
+    c_68 = cond_68(a: 8, b: 1, c: 5);
+    c_72 = cond_72(a: 2, b: 5, c: 9);
+    c_76 = cond_76(a: 6, b: 9, c: 3);
+    cam = GET /camera;
+    cam->vfov = 20.0;
+    PATCH /camera Camera { vfov: cam->vfov };
+
+    bg = GET /background;
+    bg->top = Vec3 { x: 0.5, y: 0.7, z: 1.0 };
+    bg->bottom = Vec3 { x: 1.0, y: 1.0, z: 1.0 };
+    PUT /background Background {
+        top: bg->top,
+        bottom: bg->bottom
+    };
+
+    img = GET /image;
+    img->width = 400;
+    img->height = 225;
+    PUT /image Image {
+        width: img->width,
+        height: img->height
+    };
+
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.4, y: 1.63, z: -7.71 },
+        radius: 1.05,
+        material: Lambertian { albedo: Color { r: 110, g: 220, b: 231 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.76, y: 0.94, z: 6.55 },
+        radius: 0.72,
+        material: Metal { albedo: Color { r: 48, g: 160, b: 218 }, fuzz: 0.31 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.9, y: 1.92, z: 3.74 },
+        radius: 0.82,
+        material: Dielectric { refractionIdx: 1.65 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.89, y: 0.87, z: -7.4 },
+        radius: 0.28,
+        material: Lambertian { albedo: Color { r: 168, g: 62, b: 210 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.93, y: 1.4, z: 5.01 },
+        radius: 1.33,
+        material: Metal { albedo: Color { r: 26, g: 147, b: 159 }, fuzz: 0.35 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.56, y: 0.58, z: 3.13 },
+        radius: 0.49,
+        material: Dielectric { refractionIdx: 1.17 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.43, y: 0.61, z: -1.42 },
+        radius: 0.93,
+        material: Lambertian { albedo: Color { r: 13, g: 136, b: 14 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.39, y: 1.46, z: -3.82 },
+        radius: 0.64,
+        material: Metal { albedo: Color { r: 3, g: 92, b: 73 }, fuzz: 0.57 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.98, y: 0.46, z: 2.66 },
+        radius: 0.24,
+        material: Dielectric { refractionIdx: 1.68 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.85, y: 0.76, z: -3.51 },
+        radius: 1.42,
+        material: Lambertian { albedo: Color { r: 43, g: 26, b: 79 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.85, y: 1.31, z: 3.48 },
+        radius: 0.55,
+        material: Metal { albedo: Color { r: 217, g: 248, b: 226 }, fuzz: 0.41 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.69, y: 1.12, z: -3.1 },
+        radius: 0.34,
+        material: Dielectric { refractionIdx: 1.33 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.69, y: 0.3, z: -5.91 },
+        radius: 1.43,
+        material: Lambertian { albedo: Color { r: 70, g: 130, b: 148 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.44, y: 0.21, z: 4.94 },
+        radius: 0.43,
+        material: Metal { albedo: Color { r: 194, g: 117, b: 181 }, fuzz: 0.07 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.24, y: 0.28, z: -9.63 },
+        radius: 1.4,
+        material: Dielectric { refractionIdx: 2.06 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.65, y: 0.41, z: -9.58 },
+        radius: 0.62,
+        material: Lambertian { albedo: Color { r: 235, g: 185, b: 45 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.27, y: 0.39, z: -1.29 },
+        radius: 0.72,
+        material: Metal { albedo: Color { r: 40, g: 202, b: 158 }, fuzz: 0.75 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.57, y: 1.6, z: -8.47 },
+        radius: 1.02,
+        material: Dielectric { refractionIdx: 2.09 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.38, y: 1.67, z: -5.27 },
+        radius: 0.39,
+        material: Lambertian { albedo: Color { r: 101, g: 88, b: 78 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.2, y: 1.38, z: -6.46 },
+        radius: 1.2,
+        material: Metal { albedo: Color { r: 252, g: 237, b: 229 }, fuzz: 0.68 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.64, y: 1.36, z: 9.73 },
+        radius: 0.62,
+        material: Dielectric { refractionIdx: 1.1 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.16, y: 0.75, z: -4.51 },
+        radius: 0.27,
+        material: Lambertian { albedo: Color { r: 37, g: 158, b: 236 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.96, y: 0.3, z: 6.63 },
+        radius: 0.3,
+        material: Metal { albedo: Color { r: 46, g: 196, b: 236 }, fuzz: 0.58 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.08, y: 1.53, z: -9.18 },
+        radius: 1.38,
+        material: Dielectric { refractionIdx: 1.75 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.15, y: 1.01, z: 6.22 },
+        radius: 1.29,
+        material: Lambertian { albedo: Color { r: 43, g: 88, b: 20 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.05, y: 0.99, z: -1.21 },
+        radius: 0.88,
+        material: Metal { albedo: Color { r: 81, g: 186, b: 190 }, fuzz: 0.92 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.25, y: 1.59, z: 3.58 },
+        radius: 0.27,
+        material: Dielectric { refractionIdx: 1.14 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.57, y: 0.71, z: 4.47 },
+        radius: 1.05,
+        material: Lambertian { albedo: Color { r: 76, g: 170, b: 41 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.65, y: 0.45, z: -3.0 },
+        radius: 1.46,
+        material: Metal { albedo: Color { r: 200, g: 66, b: 43 }, fuzz: 0.31 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.47, y: 1.62, z: 6.26 },
+        radius: 1.07,
+        material: Dielectric { refractionIdx: 1.03 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.82, y: 1.91, z: -3.17 },
+        radius: 1.2,
+        material: Lambertian { albedo: Color { r: 98, g: 115, b: 70 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.9, y: 0.73, z: 5.76 },
+        radius: 0.86,
+        material: Metal { albedo: Color { r: 19, g: 172, b: 67 }, fuzz: 0.6 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.91, y: 0.53, z: 3.86 },
+        radius: 1.01,
+        material: Dielectric { refractionIdx: 1.62 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.53, y: 0.63, z: -1.12 },
+        radius: 0.57,
+        material: Lambertian { albedo: Color { r: 229, g: 119, b: 122 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.81, y: 1.66, z: -0.62 },
+        radius: 1.29,
+        material: Metal { albedo: Color { r: 188, g: 225, b: 236 }, fuzz: 0.77 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.56, y: 1.11, z: -1.63 },
+        radius: 0.41,
+        material: Dielectric { refractionIdx: 1.08 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.39, y: 0.87, z: 8.69 },
+        radius: 1.12,
+        material: Lambertian { albedo: Color { r: 63, g: 145, b: 42 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.26, y: 0.69, z: 8.11 },
+        radius: 0.39,
+        material: Metal { albedo: Color { r: 223, g: 46, b: 113 }, fuzz: 0.82 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.69, y: 1.87, z: -1.7 },
+        radius: 0.72,
+        material: Dielectric { refractionIdx: 2.49 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.5, y: 0.25, z: 8.62 },
+        radius: 1.29,
+        material: Lambertian { albedo: Color { r: 171, g: 74, b: 70 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.23, y: 1.85, z: -0.55 },
+        radius: 1.28,
+        material: Metal { albedo: Color { r: 240, g: 229, b: 2 }, fuzz: 0.91 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.62, y: 0.59, z: -7.01 },
+        radius: 1.42,
+        material: Dielectric { refractionIdx: 1.36 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.56, y: 0.63, z: 2.78 },
+        radius: 1.01,
+        material: Lambertian { albedo: Color { r: 32, g: 56, b: 255 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.93, y: 0.23, z: 0.31 },
+        radius: 0.51,
+        material: Metal { albedo: Color { r: 73, g: 149, b: 219 }, fuzz: 0.0 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.94, y: 1.23, z: -6.25 },
+        radius: 1.07,
+        material: Dielectric { refractionIdx: 1.59 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.6, y: 1.34, z: 9.62 },
+        radius: 0.53,
+        material: Lambertian { albedo: Color { r: 8, g: 182, b: 34 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.1, y: 1.52, z: 2.57 },
+        radius: 1.2,
+        material: Metal { albedo: Color { r: 170, g: 68, b: 22 }, fuzz: 0.35 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.23, y: 1.36, z: 6.61 },
+        radius: 1.09,
+        material: Dielectric { refractionIdx: 1.09 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.52, y: 1.02, z: -4.13 },
+        radius: 0.26,
+        material: Lambertian { albedo: Color { r: 102, g: 21, b: 161 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.67, y: 1.13, z: 9.78 },
+        radius: 0.91,
+        material: Metal { albedo: Color { r: 129, g: 18, b: 97 }, fuzz: 0.29 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.24, y: 0.29, z: 3.11 },
+        radius: 0.56,
+        material: Dielectric { refractionIdx: 2.11 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.89, y: 0.9, z: 9.47 },
+        radius: 0.85,
+        material: Lambertian { albedo: Color { r: 254, g: 188, b: 136 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.02, y: 1.51, z: -8.42 },
+        radius: 0.98,
+        material: Metal { albedo: Color { r: 92, g: 150, b: 164 }, fuzz: 0.1 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.44, y: 0.73, z: -1.08 },
+        radius: 1.13,
+        material: Dielectric { refractionIdx: 1.67 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.54, y: 1.84, z: 2.3 },
+        radius: 0.77,
+        material: Lambertian { albedo: Color { r: 29, g: 38, b: 207 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.73, y: 1.64, z: 3.59 },
+        radius: 1.44,
+        material: Metal { albedo: Color { r: 73, g: 224, b: 17 }, fuzz: 0.13 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.28, y: 1.36, z: -2.76 },
+        radius: 1.43,
+        material: Dielectric { refractionIdx: 2.42 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.56, y: 1.57, z: 1.48 },
+        radius: 0.89,
+        material: Lambertian { albedo: Color { r: 203, g: 160, b: 142 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.01, y: 0.4, z: 4.71 },
+        radius: 0.85,
+        material: Metal { albedo: Color { r: 198, g: 60, b: 134 }, fuzz: 0.77 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.08, y: 0.59, z: 2.24 },
+        radius: 1.1,
+        material: Dielectric { refractionIdx: 1.2 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.52, y: 0.51, z: 4.27 },
+        radius: 1.5,
+        material: Lambertian { albedo: Color { r: 163, g: 177, b: 33 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.0, y: 0.72, z: -4.0 },
+        radius: 0.4,
+        material: Metal { albedo: Color { r: 89, g: 185, b: 114 }, fuzz: 0.12 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.98, y: 0.45, z: 5.81 },
+        radius: 0.23,
+        material: Dielectric { refractionIdx: 1.92 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.28, y: 0.76, z: 9.99 },
+        radius: 1.13,
+        material: Lambertian { albedo: Color { r: 210, g: 209, b: 37 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.49, y: 0.77, z: -8.52 },
+        radius: 0.81,
+        material: Metal { albedo: Color { r: 176, g: 65, b: 93 }, fuzz: 0.77 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.42, y: 1.11, z: 7.36 },
+        radius: 1.28,
+        material: Dielectric { refractionIdx: 1.24 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.69, y: 0.61, z: 8.95 },
+        radius: 0.87,
+        material: Lambertian { albedo: Color { r: 145, g: 40, b: 128 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.07, y: 1.92, z: -4.51 },
+        radius: 1.01,
+        material: Metal { albedo: Color { r: 47, g: 86, b: 78 }, fuzz: 0.17 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.49, y: 1.82, z: -3.25 },
+        radius: 1.4,
+        material: Dielectric { refractionIdx: 1.07 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.83, y: 1.24, z: 3.02 },
+        radius: 1.2,
+        material: Lambertian { albedo: Color { r: 213, g: 15, b: 254 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.78, y: 1.18, z: 2.84 },
+        radius: 0.59,
+        material: Metal { albedo: Color { r: 125, g: 207, b: 152 }, fuzz: 0.45 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.77, y: 0.48, z: -1.69 },
+        radius: 0.8,
+        material: Dielectric { refractionIdx: 2.29 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.61, y: 1.98, z: -3.09 },
+        radius: 0.72,
+        material: Lambertian { albedo: Color { r: 189, g: 54, b: 163 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.17, y: 0.42, z: -1.01 },
+        radius: 0.38,
+        material: Metal { albedo: Color { r: 25, g: 148, b: 196 }, fuzz: 0.86 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.64, y: 1.93, z: 8.05 },
+        radius: 1.26,
+        material: Dielectric { refractionIdx: 1.75 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.29, y: 1.1, z: -3.83 },
+        radius: 0.23,
+        material: Lambertian { albedo: Color { r: 201, g: 234, b: 123 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.7, y: 0.84, z: -8.99 },
+        radius: 0.84,
+        material: Metal { albedo: Color { r: 240, g: 146, b: 4 }, fuzz: 0.85 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.38, y: 1.79, z: 4.55 },
+        radius: 1.19,
+        material: Dielectric { refractionIdx: 1.08 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.24, y: 0.85, z: -4.23 },
+        radius: 0.7,
+        material: Lambertian { albedo: Color { r: 230, g: 143, b: 60 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.43, y: 0.37, z: -2.54 },
+        radius: 1.48,
+        material: Metal { albedo: Color { r: 187, g: 73, b: 101 }, fuzz: 0.6 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.97, y: 0.27, z: -9.22 },
+        radius: 1.13,
+        material: Dielectric { refractionIdx: 1.91 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.31, y: 0.79, z: 2.26 },
+        radius: 0.41,
+        material: Lambertian { albedo: Color { r: 153, g: 172, b: 250 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.17, y: 0.74, z: 6.31 },
+        radius: 0.68,
+        material: Metal { albedo: Color { r: 56, g: 213, b: 157 }, fuzz: 0.8 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.51, y: 1.44, z: -9.47 },
+        radius: 0.82,
+        material: Dielectric { refractionIdx: 1.26 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.58, y: 1.32, z: 6.82 },
+        radius: 0.39,
+        material: Lambertian { albedo: Color { r: 124, g: 16, b: 56 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.18, y: 0.99, z: -1.62 },
+        radius: 0.74,
+        material: Metal { albedo: Color { r: 104, g: 210, b: 241 }, fuzz: 0.87 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.72, y: 0.31, z: -7.24 },
+        radius: 0.47,
+        material: Dielectric { refractionIdx: 1.47 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.54, y: 1.84, z: -3.15 },
+        radius: 0.66,
+        material: Lambertian { albedo: Color { r: 135, g: 247, b: 98 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.15, y: 0.7, z: -4.03 },
+        radius: 1.42,
+        material: Metal { albedo: Color { r: 152, g: 147, b: 106 }, fuzz: 0.69 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.22, y: 1.06, z: 1.21 },
+        radius: 1.41,
+        material: Dielectric { refractionIdx: 1.86 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.86, y: 1.81, z: -2.11 },
+        radius: 0.65,
+        material: Lambertian { albedo: Color { r: 74, g: 148, b: 21 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.25, y: 1.49, z: -3.07 },
+        radius: 0.78,
+        material: Metal { albedo: Color { r: 131, g: 245, b: 109 }, fuzz: 0.2 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.77, y: 1.88, z: 3.92 },
+        radius: 0.38,
+        material: Dielectric { refractionIdx: 2.0 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.62, y: 1.35, z: -8.95 },
+        radius: 0.74,
+        material: Lambertian { albedo: Color { r: 241, g: 51, b: 70 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.9, y: 1.19, z: 8.58 },
+        radius: 0.73,
+        material: Metal { albedo: Color { r: 243, g: 244, b: 102 }, fuzz: 0.76 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.26, y: 0.71, z: -8.82 },
+        radius: 1.2,
+        material: Dielectric { refractionIdx: 1.63 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.75, y: 1.88, z: -9.27 },
+        radius: 1.29,
+        material: Lambertian { albedo: Color { r: 253, g: 95, b: 148 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.53, y: 0.22, z: 1.36 },
+        radius: 0.34,
+        material: Metal { albedo: Color { r: 171, g: 145, b: 232 }, fuzz: 0.99 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.87, y: 1.09, z: 8.77 },
+        radius: 1.31,
+        material: Dielectric { refractionIdx: 2.21 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.39, y: 1.52, z: 2.97 },
+        radius: 1.13,
+        material: Lambertian { albedo: Color { r: 7, g: 172, b: 151 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.36, y: 1.56, z: -6.49 },
+        radius: 1.31,
+        material: Metal { albedo: Color { r: 207, g: 218, b: 167 }, fuzz: 0.09 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.39, y: 0.53, z: -7.19 },
+        radius: 0.62,
+        material: Dielectric { refractionIdx: 1.58 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.07, y: 0.68, z: -3.41 },
+        radius: 0.96,
+        material: Lambertian { albedo: Color { r: 5, g: 133, b: 184 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.86, y: 0.31, z: -7.64 },
+        radius: 0.6,
+        material: Metal { albedo: Color { r: 207, g: 159, b: 60 }, fuzz: 0.64 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.81, y: 0.86, z: -5.58 },
+        radius: 1.44,
+        material: Dielectric { refractionIdx: 2.12 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.11, y: 0.95, z: 0.98 },
+        radius: 0.81,
+        material: Lambertian { albedo: Color { r: 111, g: 126, b: 41 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.51, y: 1.15, z: -2.76 },
+        radius: 1.39,
+        material: Metal { albedo: Color { r: 57, g: 31, b: 103 }, fuzz: 0.57 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.0, y: 0.79, z: 0.41 },
+        radius: 0.35,
+        material: Dielectric { refractionIdx: 2.35 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.09, y: 0.3, z: -7.36 },
+        radius: 0.74,
+        material: Lambertian { albedo: Color { r: 29, g: 236, b: 157 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.47, y: 0.91, z: 6.33 },
+        radius: 1.17,
+        material: Metal { albedo: Color { r: 37, g: 23, b: 216 }, fuzz: 0.34 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.72, y: 1.99, z: 8.69 },
+        radius: 0.29,
+        material: Dielectric { refractionIdx: 1.61 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.38, y: 1.58, z: 9.57 },
+        radius: 1.04,
+        material: Lambertian { albedo: Color { r: 215, g: 191, b: 195 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.03, y: 1.85, z: -2.45 },
+        radius: 0.3,
+        material: Metal { albedo: Color { r: 68, g: 178, b: 60 }, fuzz: 0.18 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.75, y: 1.15, z: 4.56 },
+        radius: 0.49,
+        material: Dielectric { refractionIdx: 1.69 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.38, y: 0.96, z: -2.41 },
+        radius: 0.5,
+        material: Lambertian { albedo: Color { r: 235, g: 177, b: 79 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.49, y: 1.89, z: 4.5 },
+        radius: 0.35,
+        material: Metal { albedo: Color { r: 214, g: 8, b: 123 }, fuzz: 0.21 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.98, y: 0.26, z: 1.96 },
+        radius: 1.11,
+        material: Dielectric { refractionIdx: 1.6 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.31, y: 0.59, z: 7.27 },
+        radius: 0.27,
+        material: Lambertian { albedo: Color { r: 148, g: 119, b: 163 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.55, y: 1.59, z: 6.37 },
+        radius: 0.51,
+        material: Metal { albedo: Color { r: 73, g: 113, b: 211 }, fuzz: 0.3 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.78, y: 1.91, z: 7.59 },
+        radius: 1.39,
+        material: Dielectric { refractionIdx: 2.46 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.83, y: 1.41, z: 5.72 },
+        radius: 0.61,
+        material: Lambertian { albedo: Color { r: 213, g: 209, b: 76 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.0, y: 0.53, z: 0.76 },
+        radius: 0.51,
+        material: Metal { albedo: Color { r: 115, g: 153, b: 73 }, fuzz: 0.81 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.29, y: 1.21, z: 9.36 },
+        radius: 0.92,
+        material: Dielectric { refractionIdx: 1.38 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.39, y: 0.34, z: -1.0 },
+        radius: 0.68,
+        material: Lambertian { albedo: Color { r: 97, g: 26, b: 137 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.46, y: 1.29, z: -9.21 },
+        radius: 0.29,
+        material: Metal { albedo: Color { r: 111, g: 245, b: 106 }, fuzz: 0.87 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.34, y: 1.92, z: -9.69 },
+        radius: 1.42,
+        material: Dielectric { refractionIdx: 2.04 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.08, y: 0.91, z: -5.21 },
+        radius: 0.62,
+        material: Lambertian { albedo: Color { r: 144, g: 194, b: 238 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.67, y: 0.85, z: -4.77 },
+        radius: 0.87,
+        material: Metal { albedo: Color { r: 254, g: 238, b: 50 }, fuzz: 0.8 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.45, y: 1.57, z: -3.6 },
+        radius: 0.46,
+        material: Dielectric { refractionIdx: 1.84 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.57, y: 0.46, z: -4.78 },
+        radius: 1.42,
+        material: Lambertian { albedo: Color { r: 213, g: 151, b: 78 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.08, y: 0.61, z: 1.4 },
+        radius: 0.52,
+        material: Metal { albedo: Color { r: 172, g: 131, b: 250 }, fuzz: 0.97 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.83, y: 1.08, z: -6.64 },
+        radius: 1.23,
+        material: Dielectric { refractionIdx: 1.28 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.79, y: 1.98, z: 9.14 },
+        radius: 0.88,
+        material: Lambertian { albedo: Color { r: 38, g: 24, b: 3 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.75, y: 1.72, z: -5.37 },
+        radius: 1.12,
+        material: Metal { albedo: Color { r: 4, g: 111, b: 233 }, fuzz: 0.37 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.36, y: 1.4, z: 2.33 },
+        radius: 0.83,
+        material: Dielectric { refractionIdx: 1.8 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.77, y: 0.23, z: 4.44 },
+        radius: 0.9,
+        material: Lambertian { albedo: Color { r: 146, g: 8, b: 220 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.12, y: 1.84, z: -7.86 },
+        radius: 0.33,
+        material: Metal { albedo: Color { r: 76, g: 123, b: 98 }, fuzz: 0.62 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.95, y: 0.84, z: 5.9 },
+        radius: 0.3,
+        material: Dielectric { refractionIdx: 2.49 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.48, y: 1.43, z: 6.96 },
+        radius: 1.05,
+        material: Lambertian { albedo: Color { r: 16, g: 47, b: 207 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.41, y: 1.19, z: -8.88 },
+        radius: 0.21,
+        material: Metal { albedo: Color { r: 87, g: 42, b: 255 }, fuzz: 0.85 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.9, y: 0.8, z: 9.55 },
+        radius: 1.47,
+        material: Dielectric { refractionIdx: 2.35 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.85, y: 1.22, z: -4.58 },
+        radius: 1.4,
+        material: Lambertian { albedo: Color { r: 143, g: 16, b: 91 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.58, y: 0.77, z: 9.23 },
+        radius: 0.96,
+        material: Metal { albedo: Color { r: 203, g: 39, b: 153 }, fuzz: 0.16 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.19, y: 1.7, z: -2.22 },
+        radius: 1.37,
+        material: Dielectric { refractionIdx: 2.19 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.79, y: 0.34, z: 4.91 },
+        radius: 0.65,
+        material: Lambertian { albedo: Color { r: 50, g: 223, b: 118 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.77, y: 0.81, z: 5.38 },
+        radius: 1.44,
+        material: Metal { albedo: Color { r: 203, g: 167, b: 15 }, fuzz: 0.63 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.67, y: 1.01, z: -5.44 },
+        radius: 0.92,
+        material: Dielectric { refractionIdx: 2.02 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 3.21, y: 0.35, z: 2.37 },
+        radius: 1.24,
+        material: Lambertian { albedo: Color { r: 37, g: 42, b: 137 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.92, y: 1.48, z: 2.68 },
+        radius: 1.16,
+        material: Metal { albedo: Color { r: 162, g: 184, b: 54 }, fuzz: 0.09 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.86, y: 1.0, z: 5.23 },
+        radius: 0.33,
+        material: Dielectric { refractionIdx: 1.67 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.09, y: 0.93, z: -9.47 },
+        radius: 0.66,
+        material: Lambertian { albedo: Color { r: 47, g: 166, b: 197 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.75, y: 0.94, z: 5.58 },
+        radius: 1.14,
+        material: Metal { albedo: Color { r: 124, g: 86, b: 194 }, fuzz: 0.17 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.62, y: 0.68, z: -7.08 },
+        radius: 0.42,
+        material: Dielectric { refractionIdx: 1.73 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.46, y: 0.65, z: -5.07 },
+        radius: 1.01,
+        material: Lambertian { albedo: Color { r: 100, g: 234, b: 54 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.29, y: 0.21, z: -2.09 },
+        radius: 1.29,
+        material: Metal { albedo: Color { r: 194, g: 168, b: 225 }, fuzz: 0.33 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.31, y: 1.75, z: 9.48 },
+        radius: 0.38,
+        material: Dielectric { refractionIdx: 1.47 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.29, y: 1.94, z: -4.17 },
+        radius: 1.1,
+        material: Lambertian { albedo: Color { r: 251, g: 124, b: 166 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.48, y: 1.67, z: -2.14 },
+        radius: 0.35,
+        material: Metal { albedo: Color { r: 102, g: 92, b: 13 }, fuzz: 0.95 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.77, y: 1.48, z: -1.23 },
+        radius: 0.58,
+        material: Dielectric { refractionIdx: 1.21 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.94, y: 0.65, z: -6.92 },
+        radius: 0.75,
+        material: Lambertian { albedo: Color { r: 193, g: 37, b: 229 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.81, y: 1.06, z: -1.98 },
+        radius: 0.86,
+        material: Metal { albedo: Color { r: 214, g: 18, b: 184 }, fuzz: 0.7 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.25, y: 1.27, z: 8.29 },
+        radius: 0.34,
+        material: Dielectric { refractionIdx: 1.97 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.11, y: 1.97, z: 3.55 },
+        radius: 0.72,
+        material: Lambertian { albedo: Color { r: 169, g: 220, b: 54 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.79, y: 0.67, z: 0.21 },
+        radius: 0.87,
+        material: Metal { albedo: Color { r: 113, g: 228, b: 191 }, fuzz: 0.39 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.45, y: 1.26, z: 0.01 },
+        radius: 0.65,
+        material: Dielectric { refractionIdx: 1.44 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 8.41, y: 0.35, z: 6.63 },
+        radius: 1.15,
+        material: Lambertian { albedo: Color { r: 178, g: 159, b: 175 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.89, y: 0.57, z: -0.34 },
+        radius: 0.82,
+        material: Metal { albedo: Color { r: 224, g: 231, b: 163 }, fuzz: 0.07 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.11, y: 1.48, z: -9.55 },
+        radius: 0.65,
+        material: Dielectric { refractionIdx: 1.77 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.04, y: 0.8, z: -1.47 },
+        radius: 0.8,
+        material: Lambertian { albedo: Color { r: 207, g: 94, b: 95 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.81, y: 0.98, z: -9.42 },
+        radius: 1.0,
+        material: Metal { albedo: Color { r: 101, g: 230, b: 219 }, fuzz: 0.39 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.09, y: 0.57, z: 5.05 },
+        radius: 1.25,
+        material: Dielectric { refractionIdx: 1.55 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.06, y: 0.41, z: 3.41 },
+        radius: 0.84,
+        material: Lambertian { albedo: Color { r: 160, g: 198, b: 200 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.74, y: 0.83, z: 6.91 },
+        radius: 1.0,
+        material: Metal { albedo: Color { r: 152, g: 43, b: 68 }, fuzz: 0.31 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.23, y: 0.41, z: -2.53 },
+        radius: 0.38,
+        material: Dielectric { refractionIdx: 1.86 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.54, y: 1.08, z: 0.75 },
+        radius: 1.39,
+        material: Lambertian { albedo: Color { r: 88, g: 85, b: 250 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -4.22, y: 0.54, z: 6.84 },
+        radius: 1.01,
+        material: Metal { albedo: Color { r: 183, g: 4, b: 248 }, fuzz: 0.14 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.3, y: 1.93, z: 0.11 },
+        radius: 0.84,
+        material: Dielectric { refractionIdx: 1.73 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.35, y: 0.26, z: 5.22 },
+        radius: 0.58,
+        material: Lambertian { albedo: Color { r: 140, g: 115, b: 147 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.64, y: 1.02, z: 4.85 },
+        radius: 1.2,
+        material: Metal { albedo: Color { r: 57, g: 58, b: 137 }, fuzz: 0.78 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.47, y: 0.86, z: 6.45 },
+        radius: 0.25,
+        material: Dielectric { refractionIdx: 1.15 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.6, y: 1.55, z: -4.05 },
+        radius: 1.5,
+        material: Lambertian { albedo: Color { r: 230, g: 134, b: 178 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.24, y: 0.36, z: 7.31 },
+        radius: 0.35,
+        material: Metal { albedo: Color { r: 121, g: 107, b: 179 }, fuzz: 0.86 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.21, y: 0.97, z: 2.32 },
+        radius: 1.22,
+        material: Dielectric { refractionIdx: 1.8 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.94, y: 0.5, z: 9.58 },
+        radius: 0.58,
+        material: Lambertian { albedo: Color { r: 136, g: 48, b: 69 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.26, y: 1.61, z: 8.38 },
+        radius: 1.49,
+        material: Metal { albedo: Color { r: 64, g: 67, b: 127 }, fuzz: 0.15 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.56, y: 0.65, z: 6.87 },
+        radius: 0.71,
+        material: Dielectric { refractionIdx: 1.56 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.49, y: 1.63, z: 5.38 },
+        radius: 0.72,
+        material: Lambertian { albedo: Color { r: 142, g: 188, b: 232 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.01, y: 0.79, z: -9.95 },
+        radius: 1.21,
+        material: Metal { albedo: Color { r: 47, g: 234, b: 183 }, fuzz: 0.85 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.91, y: 0.92, z: 9.36 },
+        radius: 1.27,
+        material: Dielectric { refractionIdx: 2.24 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.24, y: 1.24, z: 1.32 },
+        radius: 0.83,
+        material: Lambertian { albedo: Color { r: 175, g: 24, b: 23 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.01, y: 1.61, z: -0.81 },
+        radius: 0.36,
+        material: Metal { albedo: Color { r: 80, g: 225, b: 233 }, fuzz: 0.0 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.16, y: 0.56, z: 3.77 },
+        radius: 0.37,
+        material: Dielectric { refractionIdx: 1.14 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.79, y: 0.35, z: 3.29 },
+        radius: 1.04,
+        material: Lambertian { albedo: Color { r: 26, g: 202, b: 156 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.52, y: 1.56, z: -1.42 },
+        radius: 0.32,
+        material: Metal { albedo: Color { r: 48, g: 0, b: 109 }, fuzz: 0.48 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -7.35, y: 0.61, z: 3.6 },
+        radius: 0.21,
+        material: Dielectric { refractionIdx: 2.04 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.45, y: 0.61, z: -8.21 },
+        radius: 1.25,
+        material: Lambertian { albedo: Color { r: 52, g: 160, b: 188 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 7.62, y: 0.45, z: 5.47 },
+        radius: 1.18,
+        material: Metal { albedo: Color { r: 68, g: 73, b: 35 }, fuzz: 0.53 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.83, y: 1.37, z: -1.2 },
+        radius: 1.14,
+        material: Dielectric { refractionIdx: 2.29 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.27, y: 0.38, z: 5.05 },
+        radius: 0.97,
+        material: Lambertian { albedo: Color { r: 196, g: 179, b: 219 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -3.71, y: 0.45, z: -4.46 },
+        radius: 0.31,
+        material: Metal { albedo: Color { r: 145, g: 13, b: 154 }, fuzz: 0.21 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 2.14, y: 0.54, z: -2.16 },
+        radius: 1.04,
+        material: Dielectric { refractionIdx: 1.17 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.01, y: 1.27, z: 0.57 },
+        radius: 1.47,
+        material: Lambertian { albedo: Color { r: 184, g: 162, b: 67 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.26, y: 1.71, z: -1.58 },
+        radius: 0.91,
+        material: Metal { albedo: Color { r: 88, g: 241, b: 37 }, fuzz: 0.02 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.65, y: 0.67, z: -9.2 },
+        radius: 0.28,
+        material: Dielectric { refractionIdx: 1.64 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -1.95, y: 1.35, z: 0.75 },
+        radius: 0.4,
+        material: Lambertian { albedo: Color { r: 42, g: 158, b: 40 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 0.23, y: 0.57, z: 6.16 },
+        radius: 0.9,
+        material: Metal { albedo: Color { r: 200, g: 33, b: 158 }, fuzz: 0.7 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 4.6, y: 1.72, z: -8.84 },
+        radius: 0.31,
+        material: Dielectric { refractionIdx: 1.92 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.9, y: 1.4, z: 3.16 },
+        radius: 0.43,
+        material: Lambertian { albedo: Color { r: 6, g: 70, b: 5 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -6.72, y: 1.92, z: 0.46 },
+        radius: 1.22,
+        material: Metal { albedo: Color { r: 132, g: 85, b: 190 }, fuzz: 0.13 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 5.62, y: 0.68, z: 7.73 },
+        radius: 1.2,
+        material: Dielectric { refractionIdx: 1.41 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -8.72, y: 1.48, z: 1.53 },
+        radius: 0.3,
+        material: Lambertian { albedo: Color { r: 233, g: 184, b: 28 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -0.01, y: 1.22, z: -2.65 },
+        radius: 0.53,
+        material: Metal { albedo: Color { r: 52, g: 59, b: 116 }, fuzz: 0.74 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.95, y: 1.75, z: -9.75 },
+        radius: 0.26,
+        material: Dielectric { refractionIdx: 1.27 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 9.21, y: 0.26, z: 6.06 },
+        radius: 1.13,
+        material: Lambertian { albedo: Color { r: 214, g: 114, b: 164 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -5.03, y: 1.85, z: -3.6 },
+        radius: 1.27,
+        material: Metal { albedo: Color { r: 190, g: 61, b: 26 }, fuzz: 0.18 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 6.09, y: 1.97, z: 9.08 },
+        radius: 0.29,
+        material: Dielectric { refractionIdx: 1.49 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: 1.06, y: 0.21, z: -5.99 },
+        radius: 0.93,
+        material: Lambertian { albedo: Color { r: 155, g: 124, b: 237 } }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.63, y: 1.95, z: 9.96 },
+        radius: 1.21,
+        material: Metal { albedo: Color { r: 125, g: 77, b: 3 }, fuzz: 0.93 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -9.52, y: 1.17, z: 2.72 },
+        radius: 1.1,
+        material: Dielectric { refractionIdx: 2.14 }
+    };
+    POST /hittable Sphere {
+        coord: Vec3 { x: -2.47, y: 1.53, z: -3.85 },
+        radius: 0.47,
+        material: Lambertian { albedo: Color { r: 121, g: 214, b: 251 } }
+    };
+
+    PATCH /output Output {
+        file: "bench_scene.ppm"
+    };
+    util_0();
+    util_5();
+    util_10();
+    util_15();
+    util_20();
+    util_25();
+    util_30();
+    util_35();
+    util_40();
+    util_45();
+    util_50();
+    util_55();
+    check = is_prime(n: 211);
+    return null;
+}
+
