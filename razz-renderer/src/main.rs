@@ -10,8 +10,8 @@ use dotenvy::dotenv;*/
 
 #[tokio::main]
 async fn main()  {
-    //let cli = Cli::parse();
-    //cli.run();
+    let cli = Cli::parse();
+    cli.run();
     /*let mqttoptions = MqttOptions::new("rumqtt-async", "127.0.0.1", 1883);
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe("razz/pico", QoS::AtMostOnce)

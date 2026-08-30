@@ -131,7 +131,7 @@ fn ray_trace(cli: &Cli) -> Image {
     world.push(Box::new(sph));
     // Render the image, store result in img
     let renderer = Renderer::new(cli.spp);
-    renderer.cpu_render(&mut img, &cam, &world);
+    renderer.cpu_render_parallel(&mut img, &cam, &world);
 
     img
 }

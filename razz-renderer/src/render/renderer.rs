@@ -17,6 +17,41 @@ impl Renderer {
     }
 
     pub fn cpu_render(&self, img: &mut Image, cam: &Camera, world: &World) {
+        for pixel_index in 0..img.width * img.height {
+            let row = pixel_index / img.width; // row
+            let col = pixel_index % img.width; // column
+
+            let mut color = Vec3::zeros();
+
+            // Sampling pixel
+            for _ in 0..self.samples_per_pxl {
+                let r = cam.ray(row, col);
+                color = ray_color(&r, world, MAX_DEPTH, &world.bg) + color;
+            }
+
+            // Color vector
+            let v = color * 1. / (self.samples_per_pxl as f64);
+
+            // Apply gamma
+            let intensity = Interval::new_with_val(0., 0.999);
+            let r = linear_to_gamma(v.x());
+            let g = linear_to_gamma(v.y());
+            let b = linear_to_gamma(v.z());
+
+            let ir = (intensity.clamp(r) * 256.) as u8;
+            let ig = (intensity.clamp(g) * 256.) as u8;
+            let ib = (intensity.clamp(b) * 256.) as u8;
+
+            let start_index = (pixel_index * img.n) as usize;
+
+            // Write color to matrix
+            img.matrix[start_index] = ir;
+            img.matrix[start_index + 1] = ig;
+            img.matrix[start_index + 2] = ib;
+        }
+    }
+
+    pub fn cpu_render_parallel(&self, img: &mut Image, cam: &Camera, world: &World) {
         let width = img.width;
         img.matrix
             .par_chunks_mut(3)
